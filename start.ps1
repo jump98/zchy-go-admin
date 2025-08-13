@@ -1,0 +1,1 @@
+  go run main.go  migrate -c config\settings.dev.yml
