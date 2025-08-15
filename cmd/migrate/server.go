@@ -30,6 +30,7 @@ var (
 		Use:     "migrate",
 		Short:   "Initialize the database",
 		Example: "go-admin migrate -c config/settings.yml",
+
 		Run: func(cmd *cobra.Command, args []string) {
 			run()
 		},

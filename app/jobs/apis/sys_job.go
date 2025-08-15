@@ -19,6 +19,7 @@ type SysJob struct {
 func (e SysJob) RemoveJobForService(c *gin.Context) {
 	v := dto.GeneralDelDto{}
 	s := service.SysJob{}
+
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&v).
