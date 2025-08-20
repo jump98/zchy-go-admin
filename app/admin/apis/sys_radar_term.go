@@ -53,6 +53,8 @@ func (e *SysRadar) GetTokenRadarId(c *gin.Context) (int64, error) {
 		return 0, errors.New("authorization header missing")
 	}
 
+	//
+
 	var err error
 	var tokenClaims *TokenClaims
 	if tokenClaims, err = e.GetParseClaimsToken(authHeader); err != nil {
