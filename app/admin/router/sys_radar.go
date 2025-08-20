@@ -11,6 +11,7 @@ import (
 
 func init() {
 	routerCheckRole = append(routerCheckRole, registerSysRadarRouter)
+	routerNoCheckRole = append(routerNoCheckRole, registerSysRadarNotAuthRouter)
 }
 
 // registerSysRadarRouter
@@ -32,6 +33,33 @@ func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 		r.POST("/get_alarms_before", api.GetAlarmsBefore)
 	}
 
+	// // 雷达设备认证路由
+	// noAuth := v1.Group("/radar")
+	// {
+	// 	noAuth.POST("/authenticate", api.Authenticate)
+	// }
+
+	// // 雷达设备告警信息路由（需要认证）
+	// radarAuth := v1.Group("/radar")
+	// // radarAuth := v1.Group("/radar").Use(authMiddleware.MiddlewareFunc()) //.Use(middleware.AuthCheckRole())
+	// // radarAuth := v1.Group("/radar").Use(authMiddleware.MiddlewareFunc()) //.Use(middleware.AuthCheckRole())
+	// {
+	// 	radarAuth.POST("/put_alarm", api.PutAlarm)
+	// 	radarAuth.POST("/put_deformation", api.PutDeformation)
+	// 	radarAuth.POST("/get_commands", api.GetCommands)
+	// 	radarAuth.POST("/raw_data", api.PutRawData)
+	// 	//radarAuth.POST("/put_rebootcommand", api.PutRebootCommand)
+	// 	radarAuth.POST("/puttestcommand", api.PutTestCommand)
+	// 	radarAuth.POST("/dev_reboot", api.PutRebootCommand)
+	// 	radarAuth.POST("/status", api.PutStatus)
+	// 	// 在radarAuth路由组中添加
+	// 	radarAuth.POST("/dev_info", api.PutDevInfo)
+	// }
+}
+
+// registerSysRadarRouter
+func registerSysRadarNotAuthRouter(v1 *gin.RouterGroup) {
+	api := apis.SysRadar{}
 	// 雷达设备认证路由
 	noAuth := v1.Group("/radar")
 	{
@@ -39,7 +67,7 @@ func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 	}
 
 	// 雷达设备告警信息路由（需要认证）
-	radarAuth := v1.Group("/radar").Use(authMiddleware.MiddlewareFunc()) //.Use(middleware.AuthCheckRole())
+	radarAuth := v1.Group("/radar")
 	{
 		radarAuth.POST("/put_alarm", api.PutAlarm)
 		radarAuth.POST("/put_deformation", api.PutDeformation)

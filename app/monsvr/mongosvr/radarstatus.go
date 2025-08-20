@@ -21,19 +21,19 @@ type RadarStatus struct {
 }
 
 type RadarStatusRequest struct {
-	RadarKey    string  `json:"radarkey"`
-	Timestamp   int64   `json:"timestamp"`
-	CommandCode int     `json:"command_code"`
-	DiskTotal   uint64  `json:"disk_total"`
-	DiskFree    uint64  `json:"disk_free"`
-	RamTotal    uint64  `json:"ram_total"`
-	RamFree     uint64  `json:"ram_free"`
-	SimState    int     `json:"sim_state"`
-	SimRSSI     int     `json:"sim_RSSI"`
-	Battery     int     `json:"battery"`
-	Voltage     float32 `json:"voltage"`
-	Current     float32 `json:"current"`
-	Temperature float32 `json:"temperature"`
+	RadarKey    string `json:"radarkey"`
+	Timestamp   int64  `json:"timestamp"`
+	CommandCode int    `json:"command_code"`
+	DiskTotal   uint64 `json:"disk_total"`
+	DiskFree    uint64 `json:"disk_free"`
+	RamTotal    uint64 `json:"ram_total"`
+	RamFree     uint64 `json:"ram_free"`
+	SimState    int    `json:"sim_state"`
+	SimRSSI     int    `json:"sim_RSSI"`
+	Battery     int    `json:"battery"`
+	Voltage     string `json:"voltage"`
+	Current     string `json:"current"`
+	Temperature string `json:"temperature"`
 }
 
 func InitRadarStatus() error {

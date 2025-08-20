@@ -17,12 +17,12 @@ import (
 const mongoCollectionCommand = "commands"
 
 const (
-	CMD_RD_REBOOT       = 100
-	CMD_RD_GETSTATEINFO = 101
-	CMD_RD_GETDEVINFO   = 102
-	CMD_RD_GETRAWDATA   = 300
-	CMD_RD_ADDPOINT     = 400
-	CMD_RD_DELETEPOINT  = 401
+	CMD_RD_REBOOT       = 100 // 重启设备
+	CMD_RD_GETSTATEINFO = 101 // 获得雷达状态信息
+	CMD_RD_GETDEVINFO   = 102 // 获取设备信息
+	CMD_RD_GETRAWDATA   = 300 // 获取距离像数据
+	CMD_RD_ADDPOINT     = 400 // 添加监测点
+	CMD_RD_DELETEPOINT  = 401 // 删除检测点
 )
 
 type CommandData struct {

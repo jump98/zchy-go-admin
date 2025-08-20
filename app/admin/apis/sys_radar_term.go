@@ -1,22 +1,22 @@
 package apis
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-admin-team/go-admin-core/sdk/config"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
 
 	"go-admin/app/admin/models"
 	"go-admin/app/admin/service"
 	"go-admin/app/admin/service/dto"
-	"go-admin/app/admin/utils"
 	"go-admin/app/monsvr/mongosvr"
 
 	mongodto "go-admin/app/monsvr/mongosvr/dto"
 
-	"github.com/go-admin-team/go-admin-core/sdk/config"
-	jwtauth "github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -46,6 +46,52 @@ type RadarAlarmRequest struct {
 	RadarData   int   `json:"radar_data"`
 }
 
+// 获得token中的radarId
+func (e *SysRadar) GetTokenRadarId(c *gin.Context) (int64, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		return 0, errors.New("authorization header missing")
+	}
+
+	var err error
+	var tokenClaims *TokenClaims
+	if tokenClaims, err = e.GetParseClaimsToken(authHeader); err != nil {
+		fmt.Println("请求解析token出错:", err)
+		return 0, fmt.Errorf("请求解析token出错: %v", err)
+	}
+	// nowTime := time.Now().Unix()
+	// if tokenClaims.Exp < nowTime {
+	// 	e.Logger.Error("token已过期")
+	// 	return 0, errors.New("token已过期")
+	// }
+	return tokenClaims.RadarId, nil
+}
+
+type TokenClaims struct {
+	jwt.RegisteredClaims
+	RadarId int64 `json:"radarId"`
+	Exp     int64
+}
+
+// 解密token
+func (e *SysRadar) GetParseClaimsToken(tokenStr string) (*TokenClaims, error) {
+	tokenStr2 := strings.TrimPrefix(tokenStr, "Bearer ")
+	token, err := jwt.ParseWithClaims(tokenStr2, &TokenClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.JwtConfig.Secret), nil
+	})
+	if err != nil {
+		e.Logger.Error("解析token出错:", err)
+		return nil, err
+	}
+	// 获取claims
+	claims, ok := token.Claims.(*TokenClaims)
+	if !ok {
+		e.Logger.Error("解析token.claims出错:", err)
+		return nil, err
+	}
+	return claims, nil
+}
+
 // Authenticate 雷达设备认证
 // @Summary 雷达设备认证
 // @Description 雷达设备登录认证
@@ -60,7 +106,7 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 	s := service.SysRadar{}
 	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Errors; err != nil {
 		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
+		e.Error(400, err, err.Error())
 		return
 	}
 
@@ -71,7 +117,7 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 	}
 
 	if req.RadarKey == "" || req.Vender == "" || req.Secret == "" {
-		e.Error(401, nil, "认证失败: 无效的雷达ID、厂商或密钥")
+		e.Error(400, nil, "认证失败: 无效的雷达ID、厂商或密钥")
 		return
 	}
 
@@ -97,7 +143,7 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 		reqNew.Secret = req.Secret
 		err = s.Insert(&reqNew)
 		if err != nil {
-			e.Error(500, err, fmt.Sprintf("创建雷达管理失败，\r\n失败信息 %s", err.Error()))
+			e.Error(500, err, err.Error())
 			return
 		}
 		radarId = reqNew.GetId().(int64)
@@ -141,39 +187,10 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 func (e SysRadar) PutAlarm(c *gin.Context) {
 	e.MakeContext(c)
 
-	// // 从JWT token中获取radarId
-	// tokenString := c.GetHeader("Authorization")
-	// if tokenString == "" {
-	// 	e.Error(401, nil, "未提供认证令牌")
-	// 	return
-	// }
-	// tokenString = tokenString[len("Bearer "):] // 移除 "Bearer " 前缀
-	// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-	// 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	// 		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-	// 	}
-	// 	return []byte(config.JwtConfig.Secret), nil
-	// })
-	// if err != nil {
-	// 	e.Error(401, err, "令牌解析失败")
-	// 	return
-	// }
-	// var claims jwt.MapClaims
-	// if claimst, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-	// 	claims = claimst
-	// } else {
-	// 	e.Error(401, nil, "无效的令牌")
-	// 	return
-	// }
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
@@ -225,15 +242,10 @@ func (e SysRadar) PutAlarm(c *gin.Context) {
 func (e SysRadar) PutRebootCommand(c *gin.Context) {
 	e.MakeContext(c)
 
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
@@ -261,21 +273,16 @@ func (e SysRadar) PutRebootCommand(c *gin.Context) {
 // @Security Bearer
 func (e SysRadar) PutTestCommand(c *gin.Context) {
 	e.MakeContext(c)
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
+		return
+	}
 
 	var req RadarTestCommandRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		e.Error(400, err, "请求参数错误")
-		return
-	}
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
 		return
 	}
 
@@ -350,16 +357,10 @@ type GetCommandsResponse struct {
 // @Security Bearer
 func (e SysRadar) GetCommands(c *gin.Context) {
 	e.MakeContext(c)
-	// 从JWT token中获取radarId
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
@@ -380,6 +381,7 @@ func (e SysRadar) GetCommands(c *gin.Context) {
 		Commands: cmds,
 	}
 
+	fmt.Println("获得到命令：", len(cmds))
 	e.OK(response, "获取命令成功")
 }
 
@@ -403,16 +405,10 @@ type RawDataRequest struct {
 // @Security Bearer
 func (e SysRadar) PutRawData(c *gin.Context) {
 	e.MakeContext(c)
-	// 从JWT token中获取radarId
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
@@ -450,16 +446,11 @@ func (e SysRadar) PutRawData(c *gin.Context) {
 // @Security Bearer
 func (e SysRadar) PutDeformation(c *gin.Context) {
 	e.MakeContext(c)
-	// 从JWT token中获取radarId
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
@@ -497,21 +488,17 @@ func (e SysRadar) PutDeformation(c *gin.Context) {
 // @Security Bearer
 func (e SysRadar) PutStatus(c *gin.Context) {
 	e.MakeContext(c)
-
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+	fmt.Println("雷达设备状态上报")
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
 	var req mongosvr.RadarStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		e.Logger.Error("终端状态信息上报参数错误：", err)
 		e.Error(400, err, "请求参数错误")
 		return
 	}
@@ -544,15 +531,10 @@ func (e SysRadar) PutStatus(c *gin.Context) {
 func (e SysRadar) PutDevInfo(c *gin.Context) {
 	e.MakeContext(c)
 
-	claims := jwtauth.ExtractClaims(c)
-	iradarId, ok := claims["radarId"]
-	if !ok {
-		e.Error(401, nil, "无效的雷达ID")
-		return
-	}
-	radarId, err := utils.GetInterfaceInt64Value(iradarId)
-	if err != nil {
-		e.Error(401, nil, "无效的雷达ID")
+	var radarId int64
+	var err error
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
 		return
 	}
 
