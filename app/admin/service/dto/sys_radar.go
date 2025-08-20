@@ -131,7 +131,7 @@ type SysRadarKeyGetReq struct {
 	RadarKey string `uri:"radarkey"`
 }
 
-func (s *SysRadarKeyGetReq) GetKey() interface{} {
+func (s *SysRadarKeyGetReq) GetRadarKey() interface{} {
 	return s.RadarKey
 }
 

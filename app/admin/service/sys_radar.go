@@ -18,8 +18,8 @@ type SysRadar struct {
 	service.Service
 }
 
-// GetPage 获取SysRadar列表
-func (e *SysRadar) GetPage(c *dto.SysRadarGetPageReq, p *actions.DataPermission, list *[]models.SysRadar, count *int64) error {
+// GetList 获取SysRadar列表
+func (e *SysRadar) GetList(c *dto.SysRadarGetPageReq, p *actions.DataPermission, list *[]models.SysRadar, count *int64) error {
 	var err error
 	var data models.SysRadar
 
@@ -29,8 +29,8 @@ func (e *SysRadar) GetPage(c *dto.SysRadarGetPageReq, p *actions.DataPermission,
 			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
 			actions.Permission(data.TableName(), p),
 		).
-		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
+		Find(list).Limit(-1).Offset(-1).Count(count).Error
+
 	if err != nil {
 		e.Log.Errorf("SysRadarService GetPage error:%s \r\n", err)
 		return err
@@ -64,21 +64,18 @@ func (e *SysRadar) Get(d *dto.SysRadarGetReq, p *actions.DataPermission, model *
 // Get 获取SysRadar对象
 func (e *SysRadar) GetByKey(d *dto.SysRadarKeyGetReq, p *actions.DataPermission, model *models.SysRadar) error {
 	var data models.SysRadar
-
-	o := e.Orm.Model(&data)
+	var err error
+	db := e.Orm.Model(&data)
 	if p != nil {
-		o = o.Scopes(
+		db = db.Scopes(
 			actions.Permission(data.TableName(), p),
 		)
 	}
-	err := o.Where("radar_key = ?", d.GetKey()).First(model).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		err = errors.New("查看对象不存在或无权查看")
-		e.Log.Errorf("Service GetSysRadar error:%s \r\n", err)
-		return err
-	}
-	if err != nil {
+	if err = db.Where("radar_key = ?", d.GetRadarKey()).First(model).Error; err != nil {
 		e.Log.Errorf("db error:%s", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			e.Log.Errorf("Service GetSysRadar error:%s \n", errors.New("查看对象不存在或无权查看"))
+		}
 		return err
 	}
 	return nil
@@ -138,19 +135,19 @@ func (e *SysRadar) Remove(d *dto.SysRadarDeleteReq, p *actions.DataPermission) e
 
 // Get 获取SysDept对象
 func (e *SysRadar) GetById(id int, model *models.SysRadar) error {
-	if e.Orm == nil {
-		e.Orm = getFirstOrm()
-	}
+	// if e.Orm == nil {
+	// 	e.Orm = getFirstOrm()
+	// }
 	d := dto.SysRadarGetReq{}
 	d.RadarId = int64(id)
 	return e.Get(&d, nil, model)
 }
 
-// Get 获取SysDept对象
+// Get 获取SysRadar对象
 func (e *SysRadar) GetByRadarKey(key string, model *models.SysRadar) error {
-	if e.Orm == nil {
-		e.Orm = getFirstOrm()
-	}
+	// if e.Orm == nil {
+	// 	e.Orm = getFirstOrm()
+	// }
 	d := dto.SysRadarKeyGetReq{}
 	d.RadarKey = key
 	return e.GetByKey(&d, nil, model)

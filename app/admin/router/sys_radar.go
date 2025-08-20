@@ -18,7 +18,7 @@ func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 	api := apis.SysRadar{}
 	r := v1.Group("/sys-radar").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		r.GET("", actions.PermissionAction(), api.GetPage)
+		r.GET("", actions.PermissionAction(), api.GetList)
 		r.GET("/:radarId", actions.PermissionAction(), api.Get)
 		r.GET("/radarimage/:radarId", actions.PermissionAction(), api.GetRadarImage)
 		r.POST("", api.Insert)

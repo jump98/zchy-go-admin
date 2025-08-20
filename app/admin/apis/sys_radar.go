@@ -21,7 +21,7 @@ type SysRadar struct {
 	api.Api
 }
 
-// GetPage 获取雷达管理列表
+// GetList 获取雷达管理列表
 // @Summary 获取雷达管理列表
 // @Description 获取雷达管理列表
 // @Tags 雷达管理
@@ -35,14 +35,10 @@ type SysRadar struct {
 // @Success 200 {object} response.Response{data=response.Page{list=[]models.SysRadar}} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar [get]
 // @Security Bearer
-func (e SysRadar) GetPage(c *gin.Context) {
+func (e SysRadar) GetList(c *gin.Context) {
 	req := dto.SysRadarGetPageReq{}
 	s := service.SysRadar{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
+	err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
@@ -65,7 +61,7 @@ func (e SysRadar) GetPage(c *gin.Context) {
 	if parentID != 0 && req.DeptJoin.DeptId == "" {
 		req.DeptJoin.DeptId = strconv.FormatInt(int64(parentID), 10)
 	}
-	err = s.GetPage(&req, p, &list, &count)
+	err = s.GetList(&req, p, &list, &count)
 	if err != nil {
 		e.Error(500, err, fmt.Sprintf("获取雷达管理失败，\r\n失败信息 %s", err.Error()))
 		return
@@ -358,7 +354,7 @@ func (e SysRadar) GetAlarms(c *gin.Context) {
 	}
 	req.PageIndex = 1
 	req.PageSize = 1000
-	err = s.GetPage(&req, p, &list, &count)
+	err = s.GetList(&req, p, &list, &count)
 	if err != nil {
 		e.Error(500, err, fmt.Sprintf("获取雷达失败，\r\n失败信息 %s", err.Error()))
 		return

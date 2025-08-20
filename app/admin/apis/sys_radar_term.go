@@ -56,13 +56,9 @@ type RadarAlarmRequest struct {
 // @Success 200 {object} RadarAuthenticateResponse "{\"code\": 0, \"message\": \"Status received\", \"token\": \"...\", \"expires_in\": 3600}"
 // @Router /api/v1/radar/authenticate [post]
 func (e SysRadar) Authenticate(c *gin.Context) {
-
+	var err error
 	s := service.SysRadar{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
+	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Errors; err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
@@ -79,12 +75,13 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("请求登录的雷达信息:%+v \n", req)
+
 	radarId := int64(0)
 	// 生成JWT token
 	// 需要先导入 jwt 包，此处假设使用的是 github.com/golang-jwt/jwt/v5
 	radar := &models.SysRadar{}
-	err = s.GetByRadarKey(req.RadarKey, radar)
-	if err != nil {
+	if err = s.GetByRadarKey(req.RadarKey, radar); err != nil {
 		//没有找到雷达，则新建
 		reqNew := dto.SysRadarInsertReq{}
 		reqNew.RadarName = req.RadarKey
