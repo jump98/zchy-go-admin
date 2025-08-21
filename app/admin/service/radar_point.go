@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
@@ -82,6 +83,8 @@ func (e *RadarPoint) Insert(c *dto.RadarPointInsertReq) error {
 	var err error
 	var data models.RadarPoint
 	c.Generate(&data)
+	fmt.Printf("data:%+v \n", data)
+	fmt.Println("data.Lat", data.Lat)
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("RadarPointService Insert error:%s \r\n", err)

@@ -167,12 +167,8 @@ func (e RadarPoint) Get(c *gin.Context) {
 func (e RadarPoint) Insert(c *gin.Context) {
 	req := dto.RadarPointInsertReq{}
 	s := service.RadarPoint{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
+	var err error
+	if err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors; err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
@@ -180,15 +176,16 @@ func (e RadarPoint) Insert(c *gin.Context) {
 	// 设置创建人
 	req.SetCreateBy(user.GetUserId(c))
 
+	fmt.Printf("创建监测点管理参数：%+v \n", req)
 	err = s.Insert(&req)
 	if err != nil {
-		e.Error(500, err, fmt.Sprintf("创建监测点管理失败，\r\n失败信息 %s", err.Error()))
+		e.Error(500, err, "创建监测点管理失败")
 		return
 	}
 	p := actions.GetPermissionFromContext(c)
 	points, err := s.GetPointByRadarId(req.RadarId, p)
 	if err != nil {
-		e.Error(500, err, fmt.Sprintf("创建监测点管理失败，\r\n失败信息 %s", err.Error()))
+		e.Error(500, err, "创建监测点管理失败")
 		return
 	}
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
@@ -199,7 +196,7 @@ func (e RadarPoint) Insert(c *gin.Context) {
 		Parameters:  map[string]interface{}{"polygon": e.convertToMapSlice(points)},
 	})
 	if err != nil {
-		e.Error(500, err, fmt.Sprintf("创建监测点管理失败，\r\n失败信息 %s", err.Error()))
+		e.Error(500, err, "创建监测点管理失败")
 		return
 	}
 

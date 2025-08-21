@@ -264,12 +264,8 @@ func (e SysRadar) Delete(c *gin.Context) {
 func (e SysRadar) GetRadarImage(c *gin.Context) {
 	req := dto.SysRadarGetImageReq{}
 	s := service.SysRadar{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
+	var err error
+	if err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors; err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
@@ -302,8 +298,6 @@ func (e SysRadar) GetRadarImage(c *gin.Context) {
 	}
 
 	//直接获取是上次的，如果想获取即时的，应当sleep一下
-	//time.Sleep(1 * time.Second)
-
 	//p := actions.GetPermissionFromContext(c)
 	image, err := s.GetImageV2(&req)
 	if err != nil {

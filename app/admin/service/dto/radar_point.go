@@ -62,8 +62,7 @@ type RadarPointInsertReq struct {
 
 func (s *RadarPointInsertReq) Generate(model *models.RadarPoint) {
 	if s.Id == 0 {
-		//model.Model = common.Model{ Id: s.Id }
-		model.Model = common.Model{Id: s.Id}
+		model.Id = s.Id
 	}
 	model.PointName = s.PointName
 	model.PointKey = s.PointKey
@@ -83,7 +82,6 @@ func (s *RadarPointInsertReq) Generate(model *models.RadarPoint) {
 
 func (s *RadarPointInsertReq) GetId() interface{} {
 	return s.Id
-	//return s.id
 }
 
 type RadarPointUpdateReq struct {
@@ -104,10 +102,28 @@ type RadarPointUpdateReq struct {
 	common.ControlBy
 }
 
+// aStatus
+// :
+// "0"
+// lat
+// :
+// "60"
+// lng
+// :
+// "50"
+// pointIndex
+// :
+// 4760
+// pointKey
+// :
+// "005"
+// pointName
+// :
+// "005"
+
 func (s *RadarPointUpdateReq) Generate(model *models.RadarPoint) {
 	if s.Id == 0 {
-		//model.Model = common.Model{ Id: s.Id }
-		model.Model = common.Model{Id: s.Id}
+		model.Id = s.Id
 	}
 	model.PointName = s.PointName
 	model.PointKey = s.PointKey
