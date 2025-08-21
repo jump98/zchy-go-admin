@@ -6,7 +6,6 @@ import (
 
 	"go-admin/app/admin/apis"
 	"go-admin/common/actions"
-	"go-admin/common/middleware"
 )
 
 func init() {
@@ -17,7 +16,8 @@ func init() {
 // registerSysRadarRouter
 func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
 	api := apis.SysRadar{}
-	r := v1.Group("/sys-radar").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
+	r := v1.Group("/sys-radar").Use(authMiddleware.MiddlewareFunc())
+	// r := v1.Group("/sys-radar").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
 		r.GET("", actions.PermissionAction(), api.GetList)
 		r.GET("/:radarId", actions.PermissionAction(), api.Get)
