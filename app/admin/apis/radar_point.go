@@ -340,6 +340,9 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("查询开始时间:", req.StartTime)
+	fmt.Println("查询结束时间:", req.EndTime)
+
 	// 调用 QueryDeformationPointData 获取数据
 	data, err := mongosvr.QueryDeformationPointData(req.Devid, req.Index, req.StartTime, req.EndTime)
 	if err != nil {

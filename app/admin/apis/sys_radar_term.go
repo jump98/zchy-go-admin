@@ -392,7 +392,7 @@ type RawDataRequest struct {
 	RadarKey    string    `json:"radarkey"` // 从token中获取
 	Timestamp   int64     `json:"timestamp"`
 	CommandCode int       `json:"command_code"`
-	Data        []float32 `json:"data"`
+	Data        []float32 `json:"data"` //距离像数据 ：下标就是点位，参数就是信号的强度
 }
 
 // PutRawData 雷达设备上传距离像数据

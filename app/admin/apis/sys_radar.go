@@ -50,8 +50,9 @@ func (e SysRadar) GetList(c *gin.Context) {
 	var count int64
 	sc := SysCommon{}
 	parentID := 0
-	admin, u, err := sc.IsSuperAdmin(c)
-	if err != nil {
+	var admin bool
+	var u *models.SysUser
+	if admin, u, err = sc.IsSuperAdmin(c); err != nil {
 		e.Error(500, err, "查询失败")
 		return
 	}
@@ -61,8 +62,7 @@ func (e SysRadar) GetList(c *gin.Context) {
 	if parentID != 0 && req.DeptJoin.DeptId == "" {
 		req.DeptJoin.DeptId = strconv.FormatInt(int64(parentID), 10)
 	}
-	err = s.GetList(&req, p, &list, &count)
-	if err != nil {
+	if err = s.GetList(&req, p, &list, &count); err != nil {
 		e.Error(500, err, fmt.Sprintf("获取雷达管理失败，\r\n失败信息 %s", err.Error()))
 		return
 	}

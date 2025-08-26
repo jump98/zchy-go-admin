@@ -22,19 +22,30 @@ type RadarStatus struct {
 
 type RadarStatusRequest struct {
 	RadarKey    string `json:"radarkey"`
-	Timestamp   int64  `json:"timestamp"`
-	CommandCode int    `json:"command_code"`
-	DiskTotal   uint64 `json:"disk_total"`
-	DiskFree    uint64 `json:"disk_free"`
-	RamTotal    uint64 `json:"ram_total"`
-	RamFree     uint64 `json:"ram_free"`
-	SimState    int    `json:"sim_state"`
-	SimRSSI     int    `json:"sim_RSSI"`
-	Battery     int    `json:"battery"`
-	Voltage     string `json:"voltage"`
-	Current     string `json:"current"`
-	Temperature string `json:"temperature"`
+	Timestamp   int64  `json:"timestamp"`    //时间戳
+	CommandCode int    `json:"command_code"` //命令码
+	DiskTotal   uint64 `json:"disk_total"`   //磁盘总容量
+	DiskFree    uint64 `json:"disk_free"`    //磁盘剩余容量
+	RamTotal    uint64 `json:"ram_total"`    //内存总容量
+	RamFree     uint64 `json:"ram_free"`     //内存剩余容量
+	SimState    int    `json:"sim_state"`    //SIM卡状态 :0=正常 1异常
+	SimRSSI     int    `json:"sim_RSSI"`     //SIM接收信号强度 单位（dBm）
+	Battery     int    `json:"battery"`      //电池状态 0 充电中 1 放电中
+	Voltage     string `json:"voltage"`      //电压：   {"12V":11.686076, "5V3":5.285750, "2V1":2.123250}V
+	Current     string `json:"current"`      //供电电流：    {\"12V\":0.888750}"  {电流名：电流值(单位安)}
+	Temperature string `json:"temperature"`  //设备温度：    {\"local\":44.625000,\"PCB\":44.375000,\"ZYNQ\":49.500000}" //设备温度，可有多个值 键 温度名 值 温度值(单位摄氏度)
 }
+
+// 12V电流：:0.888750A
+
+// 12V电压: 11.686076V
+// 5.3V电压: 11.686076V
+// 2.1V电压: 11.686076V
+
+// 设备温度
+// 主板温度：xxx
+// 设备外壳温度：xxx
+// 处理器温度：xxx
 
 func InitRadarStatus() error {
 	// 确保连接有效

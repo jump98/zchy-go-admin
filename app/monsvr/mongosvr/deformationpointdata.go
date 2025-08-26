@@ -151,7 +151,7 @@ func QueryDeformationPointData(devid int64, index int, startTimeStr, endTimeStr 
 	}
 
 	// 按时间字段排序
-	opts := options.Find().SetSort(bson.M{"svrtime": 1}) // 1表示升序，-1表示降序
+	opts := options.Find().SetSort(bson.M{"svrtime": -1}) // 1表示升序，-1表示降序
 
 	collection := client.Database(mongoRadarDBName).Collection(mongoCollectionDeformationPoint)
 	// 执行查询
