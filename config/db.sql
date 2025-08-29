@@ -127,7 +127,7 @@ INSERT INTO sys_config VALUES (3, '侧栏主题', 'sys_index_sideTheme', 'theme-
 INSERT INTO sys_config VALUES (4, '系统名称', 'sys_app_name', 'go-admin管理系统', 'Y', '1', '', 1, 0, '2021-03-17 08:52:06.067', '2021-05-28 10:08:25.248', NULL);
 INSERT INTO sys_config VALUES (5, '系统logo', 'sys_app_logo', 'https://doc-image.zhangwj.com/img/go-admin.png', 'Y', '1', '', 1, 0, '2021-03-17 08:53:19.462', '2021-03-17 08:53:19.462', NULL);
 
-INSERT INTO sys_dept VALUES (1, 0, '/0/1/', '爱拓科技', 0, 'aituo', '13782218188', 'atuo@aituo.com', '2', 1, 1, '2021-05-13 19:56:37.913', '2021-06-05 17:06:44.960', NULL);
+INSERT INTO sys_dept VALUES (1, 0, '/0/1/', '智存合壹', 0, 'aituo', '13782218188', 'atuo@aituo.com', '2', 1, 1, '2021-05-13 19:56:37.913', '2021-06-05 17:06:44.960', NULL);
 INSERT INTO sys_dept VALUES (7, 1, '/0/1/7/', '研发部', 1, 'aituo', '13782218188', 'atuo@aituo.com', '2', 1, 1, '2021-05-13 19:56:37.913', '2021-06-16 21:35:00.109', NULL);
 INSERT INTO sys_dept VALUES (8, 1, '/0/1/8/', '运维部', 0, 'aituo', '13782218188', 'atuo@aituo.com', '2', 1, 1, '2021-05-13 19:56:37.913', '2021-06-16 21:41:39.747', NULL);
 INSERT INTO sys_dept VALUES (9, 1, '/0/1/9/', '客服部', 0, 'aituo', '13782218188', 'atuo@aituo.com', '2', 1, 1, '2021-05-13 19:56:37.913', '2021-06-05 17:07:05.993', NULL);

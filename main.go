@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"go-admin/app/monsvr"
 	"go-admin/cmd"
 	"os"
 
@@ -37,7 +36,6 @@ func main() {
 		}()
 	}
 
-	monsvr.InitMonSvr()
 	cmd.Execute()
 
 }

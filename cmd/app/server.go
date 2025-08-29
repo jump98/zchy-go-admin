@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"text/template"
+
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/utils"
 	"github.com/spf13/cobra"
-	"text/template"
 )
 
 var (
@@ -29,10 +30,8 @@ func init() {
 
 func run() {
 
-	fmt.Println(`start init`)
+	fmt.Println("app server 初始化")
 	//1. 读取配置
-
-	fmt.Println(`generate migration file`)
 	_ = genFile()
 
 }

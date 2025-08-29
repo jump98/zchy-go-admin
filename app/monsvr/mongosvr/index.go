@@ -3,6 +3,7 @@ package mongosvr
 import (
 	"context"
 	"fmt"
+	"go-admin/config"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,10 +14,13 @@ var (
 	client *mongo.Client
 )
 
-const mongoUri = "mongodb://localhost:27017"
-const mongoRadarDBName = "radardata"
+var mongoUri string         //mongoDB URL
+var mongoRadarDBName string //雷达数据库DB name
 
 func Init() {
+	config := config.ExtConfig
+	mongoUri = config.MongoDB.Source
+	mongoRadarDBName = config.MongoDB.RadarDBName
 	// 连接到MongoDB
 	err := initMongoDB(mongoUri)
 	for err != nil {

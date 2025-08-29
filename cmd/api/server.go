@@ -22,6 +22,7 @@ import (
 	"go-admin/app/admin/models"
 	"go-admin/app/admin/router"
 	"go-admin/app/jobs"
+	"go-admin/app/monsvr"
 	"go-admin/common/database"
 	"go-admin/common/global"
 	common "go-admin/common/middleware"
@@ -75,8 +76,10 @@ func setup() {
 	queue.Register(global.ApiCheck, models.SaveSysApi)
 	go queue.Run()
 
-	usageStr := `starting api server...`
-	log.Println(usageStr)
+	//启动mangoDB
+	monsvr.InitMonSvr()
+
+	fmt.Println("starting api server...")
 }
 
 func run() error {

@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  go-admin:
+    build:
+      context: .. # 构建上下文：项目根目录
+      dockerfile: docker/Dockerfile # Dockerfile 文件在 docker/ 目录
+    image: ${IMAGE_NAME}
+    ports:
+      - "8888"
+    # volumes:
+    # - ../config:/app/config # 挂载宿主机的 config 文件夹
+    # command: ["server", "-c", "/app/config/settings.prod.yml"] #初次启动执行
+    # command: ["server", "-c", "/app/config/settings.prod.yml"] #正常启动后执行
+    networks:
+      - go_network
+networks:
+  go_network:
+    driver: bridge
