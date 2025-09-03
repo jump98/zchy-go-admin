@@ -331,8 +331,8 @@ func (e SysRadar) InitDeformationData(dd *mongosvr.DeformationData, dr *Deformat
 	for _, dp := range dr.Data {
 		dd.DefData = append(dd.DefData, mongosvr.DeformationDefData{
 			Index:       dp.Index,
-			Deformation: dp.Deformation,
-			Distance:    dp.Distance,
+			Deformation: int(dp.Deformation * 100),
+			Distance:    int(dp.Distance * 100),
 		})
 	}
 }
