@@ -32,29 +32,6 @@ func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 		r.POST("/get_state_info", api.GetStateInfo)
 		r.POST("/get_alarms_before", api.GetAlarmsBefore)
 	}
-
-	// // 雷达设备认证路由
-	// noAuth := v1.Group("/radar")
-	// {
-	// 	noAuth.POST("/authenticate", api.Authenticate)
-	// }
-
-	// // 雷达设备告警信息路由（需要认证）
-	// radarAuth := v1.Group("/radar")
-	// // radarAuth := v1.Group("/radar").Use(authMiddleware.MiddlewareFunc()) //.Use(middleware.AuthCheckRole())
-	// // radarAuth := v1.Group("/radar").Use(authMiddleware.MiddlewareFunc()) //.Use(middleware.AuthCheckRole())
-	// {
-	// 	radarAuth.POST("/put_alarm", api.PutAlarm)
-	// 	radarAuth.POST("/put_deformation", api.PutDeformation)
-	// 	radarAuth.POST("/get_commands", api.GetCommands)
-	// 	radarAuth.POST("/raw_data", api.PutRawData)
-	// 	//radarAuth.POST("/put_rebootcommand", api.PutRebootCommand)
-	// 	radarAuth.POST("/puttestcommand", api.PutTestCommand)
-	// 	radarAuth.POST("/dev_reboot", api.PutRebootCommand)
-	// 	radarAuth.POST("/status", api.PutStatus)
-	// 	// 在radarAuth路由组中添加
-	// 	radarAuth.POST("/dev_info", api.PutDevInfo)
-	// }
 }
 
 // registerSysRadarRouter
@@ -63,21 +40,20 @@ func registerSysRadarNotAuthRouter(v1 *gin.RouterGroup) {
 	// 雷达设备认证路由
 	noAuth := v1.Group("/radar")
 	{
-		noAuth.POST("/authenticate", api.Authenticate)
+		noAuth.POST("/authenticate", api.Authenticate) // 雷达设备认证
 	}
-
 	// 雷达设备告警信息路由（需要认证）
 	radarAuth := v1.Group("/radar")
 	{
-		radarAuth.POST("/put_alarm", api.PutAlarm)
-		radarAuth.POST("/put_deformation", api.PutDeformation)
-		radarAuth.POST("/get_commands", api.GetCommands)
-		radarAuth.POST("/raw_data", api.PutRawData)
-		//radarAuth.POST("/put_rebootcommand", api.PutRebootCommand)
-		radarAuth.POST("/puttestcommand", api.PutTestCommand)
-		radarAuth.POST("/dev_reboot", api.PutRebootCommand)
-		radarAuth.POST("/status", api.PutStatus)
-		// 在radarAuth路由组中添加
-		radarAuth.POST("/dev_info", api.PutDevInfo)
+		radarAuth.POST("/put_alarm", api.PutAlarm)             //雷达设备上传告警信息
+		radarAuth.POST("/put_deformation", api.PutDeformation) //雷达设备上传形变数据
+		radarAuth.POST("/get_commands", api.GetCommands)       //雷达设备获取下发命令
+		radarAuth.POST("/raw_data", api.PutRawData)            //雷达设备上传距离像数据
+		radarAuth.POST("/puttestcommand", api.PutTestCommand)  //测试新增一个雷达设备测试指令
+		radarAuth.POST("/dev_reboot", api.PutRebootCommand)    //雷达设备重启指令
+		radarAuth.POST("/status", api.PutStatus)               //雷达设备状态上报
+		radarAuth.POST("/dev_info", api.PutDevInfo)            //雷达设备信息上报
+		radarAuth.GET("/get_radar_points", api.GetRadarPoints) //获取指定雷达的监测点列表
+		radarAuth.POST("/put_commands", api.PutCommands)       //发送命令到服务器
 	}
 }

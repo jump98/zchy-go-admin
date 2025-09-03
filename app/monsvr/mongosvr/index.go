@@ -10,8 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+//mongoDB文档：https://www.mongodb.com/zh-cn/docs/drivers/go/current/crud/insert/
+
 var (
 	client *mongo.Client
+	MDB    *mongo.Database //mongoDB 客户端
 )
 
 var mongoUri string         //mongoDB URL
@@ -22,12 +25,11 @@ func Init() {
 	mongoUri = config.MongoDB.Source
 	mongoRadarDBName = config.MongoDB.RadarDBName
 	// 连接到MongoDB
-	err := initMongoDB(mongoUri)
-	for err != nil {
-		fmt.Println("mongodb reconnect after 10 seconds...")
-		time.Sleep(time.Second * 10)
-		err = initMongoDB(mongoUri)
+	if err := initMongoDB(mongoUri); err != nil {
+		fmt.Println("连接mangoDB出错：", err)
+		panic(err)
 	}
+
 	// dis := DistanceData{}
 	// dis.DevType = 0x00000100
 	// dis.DevID = 0x00000001
@@ -57,12 +59,26 @@ func Init() {
 
 // 初始化MongoDB连接
 func initMongoDB(uri string) error {
-	clientOptions := options.Client().ApplyURI(uri)
+
+	// loggerOptions := options.
+	// 	Logger().
+	// 	SetComponentLevel(options.LogComponentCommand, options.LogLevelDebug)
+
+	// 设置客户端连接配置
+	clientOpts := options.Client().
+		ApplyURI(uri).
+		// SetLoggerOptions(loggerOptions).     // 设置日志级别
+		SetMaxPoolSize(100).                 // 最大连接数
+		SetMinPoolSize(10).                  // 最小保持连接数
+		SetMaxConnIdleTime(30 * time.Second) // 连接最大空闲时间
+
 	var err error
-	client, err = mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		return fmt.Errorf("failed to connect to MongoDB: %v", err)
+	// 连接 MongoDB
+	if client, err = mongo.Connect(context.Background(), clientOpts); err != nil {
+		fmt.Println("创建mongoDB连接出错:", err)
+		return err
 	}
+	MDB = client.Database(mongoRadarDBName)
 
 	// 检查连接
 	err = client.Ping(context.TODO(), nil)
@@ -70,7 +86,7 @@ func initMongoDB(uri string) error {
 		return fmt.Errorf("failed to ping MongoDB: %v", err)
 	}
 
-	InitDistance()
+	// InitDistance()
 	InitDistanceV2()
 	InitCommand()
 	InitRadarStatus()

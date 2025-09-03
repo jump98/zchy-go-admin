@@ -10,10 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-//形变数据（心跳）
-
+// 形变数据（心跳）
 const mongoCollectionDeformation = "deformation"
 
+// 形变数据
 type DeformationData struct {
 	SvrTime   time.Time
 	RadarKey  string
@@ -23,12 +23,14 @@ type DeformationData struct {
 	DefData   []DeformationDefData
 }
 
+// 形变数据 详细
 type DeformationDefData struct {
 	Index       int     //下标
 	Deformation float32 //形变值(毫米)
 	Distance    float32 //距离值(毫米)
 }
 
+// 插入形变数据
 func InsertDeformationData(data *DeformationData) error {
 	data.SvrTime = time.Now()
 	e := insertDocumentData(mongoUri, mongoRadarDBName, mongoCollectionDeformation, data)
@@ -36,7 +38,7 @@ func InsertDeformationData(data *DeformationData) error {
 	for _, v := range data.DefData {
 		ds = append(ds, DeformationPointData{
 			SvrTime:     time.Now(),
-			RadarID:     data.RadarId,
+			RadarId:     data.RadarId,
 			TimeStamp:   data.TimeStamp,
 			Index:       v.Index,
 			Deformation: v.Deformation,

@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const mongoCollectionDevInfo = "radardevinfo"
+const mongoCollectionDevInfo = "radar_dev_info"
 
 // RadarStatus 设备状态请求
 type RadarDevInfo struct {

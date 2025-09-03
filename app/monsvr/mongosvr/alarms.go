@@ -53,7 +53,6 @@ func InsertAlarmData(data *AlarmData) error {
 
 func QueryAlarmsDataTimeBefore(radarID int64, startTime time.Time, num int) ([]AlarmData, error) {
 	// 查询某个时间段的数据
-
 	filter := bson.M{
 		"radarid": radarID,
 		"svrtime": bson.M{

@@ -189,10 +189,10 @@ func (e *SysRadar) ConfirmProjetInfo(proId uint32, devId uint32, lng float64, la
 }
 
 // Get 获取SysRadar对象
-func (e *SysRadar) GetImage(d *dto.SysRadarGetImageReq) (*mongosvr.DistanceData, error) {
+// func (e *SysRadar) GetImage(d *dto.SysRadarGetImageReq) (*mongosvr.DistanceData, error) {
 
-	return mongosvr.GetLatestDistanceData(d.RadarId)
-}
+// 	return mongosvr.GetLatestDistanceData(d.RadarId)
+// }
 
 // Get 获取SysRadar对象
 func (e *SysRadar) GetImageV2(d *dto.SysRadarGetImageReq) (*mongosvr.DistanceDataV2, error) {

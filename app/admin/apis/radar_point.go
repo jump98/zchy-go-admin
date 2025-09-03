@@ -182,18 +182,20 @@ func (e RadarPoint) Insert(c *gin.Context) {
 		e.Error(500, err, "创建监测点管理失败")
 		return
 	}
-	p := actions.GetPermissionFromContext(c)
-	points, err := s.GetPointByRadarId(req.RadarId, p)
-	if err != nil {
-		e.Error(500, err, "创建监测点管理失败")
-		return
-	}
+	// var points []int64
+	// if points, err = s.GetPointsByRadarId(req.RadarId); err != nil {
+	// 	e.Error(500, err, "获得监测点列表出错")
+	// 	return
+	// }
+	// param := []dto.RadarPointIndex{}
+
+	param := []dto.RadarPointIndex{{Index: req.PointIndex}}
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     req.RadarId,
 		CommandCode: mongosvr.CMD_RD_ADDPOINT,
 		Message:     "add monitor point",
 		TimeStamp:   time.Now().Unix(),
-		Parameters:  map[string]interface{}{"polygon": e.convertToMapSlice(points)},
+		Parameters:  map[string]interface{}{"polygon": param},
 	})
 	if err != nil {
 		e.Error(500, err, "创建监测点管理失败")
@@ -324,11 +326,8 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 // @Security Bearer
 func (e RadarPoint) GetDeformationData(c *gin.Context) {
 	req := dto.DeformationPointQueryReq{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		Errors
-	if err != nil {
+	var err error
+	if err = e.MakeContext(c).MakeOrm().Bind(&req).Errors; err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
@@ -339,17 +338,23 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 		e.Error(400, nil, "参数不完整")
 		return
 	}
+	hours := req.Hours
+	if hours < 0 {
+		hours = 0
+	}
 
-	fmt.Println("查询开始时间:", req.StartTime)
-	fmt.Println("查询结束时间:", req.EndTime)
-
-	// 调用 QueryDeformationPointData 获取数据
-	data, err := mongosvr.QueryDeformationPointData(req.Devid, req.Index, req.StartTime, req.EndTime)
-	if err != nil {
+	// 获取数据
+	var lastTime time.Time
+	var data []mongosvr.DeformationPointData
+	if data, lastTime, err = mongosvr.QueryDeformationPointData(req.Devid, req.Index, req.StartTime, req.EndTime, hours); err != nil {
 		e.Error(500, err, fmt.Sprintf("获取变形点数据失败: %s", err.Error()))
 		return
 	}
 
+	resp := dto.DeformationPointQueryResp{}
+	resp.LastTime = lastTime
+	resp.List = data
+
 	// 返回采样后的数据
-	e.OK(data, "查询成功")
+	e.OK(resp, "查询成功")
 }

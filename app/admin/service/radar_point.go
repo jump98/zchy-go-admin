@@ -182,3 +182,14 @@ func (e *RadarPoint) GetRadarIdByPointId(pointId int, p *actions.DataPermission)
 	}
 	return radarId, nil
 }
+
+// 获得指定雷达是所有监测点
+func (e *RadarPoint) GetPointsByRadarId(radarId int64) ([]int64, error) {
+	pointIndexs := make([]int64, 0)
+	var err error
+	if err = e.Orm.Model(&models.RadarPoint{}).Select("point_index").Where("radar_id = ?", radarId).Scan(&pointIndexs).Error; err != nil {
+		e.Log.Errorf("Service GetPointsByRadarId error:%s \r\n", err)
+	}
+	e.Log.Info("查询雷达点位列表:", pointIndexs)
+	return pointIndexs, err
+}

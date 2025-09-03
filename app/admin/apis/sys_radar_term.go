@@ -46,14 +46,16 @@ type RadarAlarmRequest struct {
 	RadarData   int   `json:"radar_data"`
 }
 
+type PutCommandsReq struct {
+	Command int `json:"command"`
+}
+
 // 获得token中的radarId
 func (e *SysRadar) GetTokenRadarId(c *gin.Context) (int64, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		return 0, errors.New("authorization header missing")
 	}
-
-	//
 
 	var err error
 	var tokenClaims *TokenClaims
@@ -347,6 +349,12 @@ type GetCommandsResponse struct {
 	Commands []mongodto.CommandDataDto `json:"commands"`
 }
 
+// GetRadarPointsResp 获取雷达点位列表
+type GetRadarPointsResp struct {
+	Code  int     `json:"code"`
+	Index []int64 `json:"index"`
+}
+
 // GetCommands 雷达设备获取下发命令
 // @Summary 雷达设备获取下发命令
 // @Description 雷达设备获取下发命令
@@ -465,7 +473,7 @@ func (e SysRadar) PutDeformation(c *gin.Context) {
 	defData := mongosvr.DeformationData{}
 	// 设置雷达ID
 	defData.RadarId = radarId
-	e.InitDeformationData(&defData, &req)
+	e.InitDeformationData(&defData, &req) //转换数据类型
 	// 调用mongosvr插入形变数据
 	if err := mongosvr.InsertDeformationData(&defData); err != nil {
 		e.Logger.Errorf("插入形变数据失败: %v", err)
@@ -559,4 +567,69 @@ func (e SysRadar) PutDevInfo(c *gin.Context) {
 	e.Logger.Infof("接收到雷达 %s 的设备信息: %+v", req.RadarKey, req)
 
 	e.OK(nil, "设备信息接收成功")
+}
+
+// GetRadarPoints 获取指定雷达的监测点列表
+// @Summary 获取指定雷达的监测点列表
+// @Description 获取指定雷达的监测点列表
+// @Tags 雷达管理-终端接口
+// @Accept application/json
+// @Product application/json
+// @Param data body  true "设备信息数据"
+// @Success 200 {object} GetRadarPointsResp "{\"code\": 0, \"message\": \"设备信息接收成功\"}"
+// @Router /api/v1/radar/get_radar_points [get]
+// @Security Bearer
+func (e SysRadar) GetRadarPoints(c *gin.Context) {
+	var err error
+	s := service.RadarPoint{}
+	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Errors; err != nil {
+		e.Error(400, err, err.Error())
+		return
+	}
+
+	var radarId int64
+	if radarId, err = e.GetTokenRadarId(c); err != nil {
+		e.Error(400, err, err.Error())
+		return
+	}
+	var points []int64
+	if points, err = s.GetPointsByRadarId(radarId); err != nil {
+		e.Error(500, err, "获得监测点列表出错")
+		return
+	}
+	resp := &GetRadarPointsResp{
+		Code:  0,
+		Index: points,
+	}
+	e.OK(resp, "获取所有点位信息成功")
+}
+
+// GetRadarPoints 上传指令到服务器
+// @Summary 上传指令到服务器
+// @Description 上传指令到服务器
+// @Tags 雷达管理-终端接口
+// @Accept application/json
+// @Product application/json
+// @Param data body  true "设备信息数据"
+// @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"succesd\"}"
+// @Router /api/v1/radar/put_commands [post]
+// @Security Bearer
+func (e SysRadar) PutCommands(c *gin.Context) {
+	e.MakeContext(c)
+	fmt.Println("PutCommands")
+	// var err error
+	// s := service.RadarPoint{}
+	// if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Errors; err != nil {
+	// 	e.Error(400, err, err.Error())
+	// 	return
+	// }
+	var req PutCommandsReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		e.Logger.Error("PutCommands error", err)
+		e.Error(400, err, "请求参数错误")
+		return
+	}
+	e.Logger.Info("PutCommands参数：", req)
+
+	e.OK("ok", "succesd")
 }
