@@ -339,6 +339,11 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 		return
 	}
 	hours := req.Hours
+	radarId := req.Devid
+	pointIndex := req.Index
+	startTime := req.StartTime
+	endTime := req.EndTime
+	timeType := req.TimeType
 	if hours < 0 {
 		hours = 0
 	}
@@ -346,7 +351,7 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 	// 获取数据
 	var lastTime time.Time
 	var data []mongosvr.DeformationPointData
-	if data, lastTime, err = mongosvr.QueryDeformationPointData(req.Devid, req.Index, req.StartTime, req.EndTime, hours); err != nil {
+	if data, lastTime, err = mongosvr.QueryDeformationPointData(radarId, pointIndex, startTime, endTime, hours, timeType); err != nil {
 		e.Error(500, err, fmt.Sprintf("获取变形点数据失败: %s", err.Error()))
 		return
 	}

@@ -5,7 +5,7 @@
 ```sh
   # 根据端口号启动不同的服务
   docker run -d -p 8888:8888 --name zchy-api-a 03a
-  docker run -d -p 8889:8888 --name zchy-api-b 03a
+  docker run -d -p 8889:8888 --name zchy-api-b 7e6
 
 ```
 

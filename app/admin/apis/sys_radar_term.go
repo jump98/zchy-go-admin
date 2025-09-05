@@ -379,6 +379,7 @@ func (e SysRadar) GetCommands(c *gin.Context) {
 		e.Error(400, err, "请求参数错误")
 		return
 	}
+	fmt.Println("获取命令:radarId：", radarId)
 
 	cmds, err := mongosvr.QueryRadarComandData(radarId)
 	if err != nil {
@@ -467,6 +468,12 @@ func (e SysRadar) PutDeformation(c *gin.Context) {
 	var req DeformationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		e.Error(400, err, "请求参数错误")
+		return
+	}
+
+	if len(req.Data) == 0 {
+		e.Logger.Info("当前雷达没有形变数据")
+		e.OK(nil, "当前雷达没有形变数据")
 		return
 	}
 

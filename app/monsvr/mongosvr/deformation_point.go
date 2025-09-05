@@ -3,6 +3,7 @@ package mongosvr
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,7 +32,7 @@ func InsertArrayDeformationPointData(data []interface{}) error {
 }
 
 // 根据时间范围查询距离像形变数据列表
-func QueryDeformationPointData(devid int64, index int, startTimeStr, endTimeStr string, hours int64) ([]DeformationPointData, time.Time, error) {
+func QueryDeformationPointData(radarId int64, index int, startTimeStr, endTimeStr string, hours int64, timeType string) ([]DeformationPointData, time.Time, error) {
 	var err error
 	var startTime, endTime time.Time
 	var lastTime time.Time // 最后一条数据的时间
@@ -42,7 +43,6 @@ func QueryDeformationPointData(devid int64, index int, startTimeStr, endTimeStr 
 	if err != nil {
 		return nil, lastTime, fmt.Errorf("开始时间格式错误: %v", err)
 	}
-
 	endTime, err = time.ParseInLocation("2006-01-02 15:04:05", endTimeStr, loc)
 	if err != nil {
 		return nil, lastTime, fmt.Errorf("结束时间格式错误: %v", err)
@@ -54,7 +54,7 @@ func QueryDeformationPointData(devid int64, index int, startTimeStr, endTimeStr 
 
 	// 构建查询条件，MongoDB 内部存储 UTC 时间
 	filter := bson.M{
-		"radarid": devid,
+		"radarid": radarId,
 		"index":   index,
 		"svrtime": bson.M{
 			"$gt":  startTime.UTC(), //大于
@@ -83,14 +83,18 @@ func QueryDeformationPointData(devid int64, index int, startTimeStr, endTimeStr 
 		lastTime = data[len(data)-1].SvrTime.Local()
 	}
 
+	// 根据时间范围计算最大采样点数
 	maxPoints := getMaxPointsForRange(hours)
 	// 采样
 	sampledData := sampleDeformationData(data, maxPoints)
+	// 根据颗粒度聚合
+	aggregatedData := aggregateByTimeType(sampledData, timeType)
 
 	fmt.Printf("原始数据条数: %d\n", len(data))
 	fmt.Printf("采样后数据条数: %d\n", len(sampledData))
+	fmt.Printf("aggregatedData: %d\n", len(aggregatedData))
 
-	return sampledData, lastTime, nil
+	return aggregatedData, lastTime, nil
 }
 
 // 采样函数：保留极值 + 均匀抽样
@@ -166,5 +170,74 @@ func getMaxPointsForRange(hours int64) int {
 		return val
 	}
 	return 500 // 默认值
+}
 
+// 获得时间格式转化
+func getTimeFormatByType(t time.Time, timeType string) (string, time.Time) {
+	var key string
+	var bucket time.Time
+	switch timeType {
+	case "seconds":
+		bucket = t.Truncate(time.Second)
+		key = bucket.Format("2006-01-02 15:04:05")
+	case "minutes":
+		bucket = t.Truncate(time.Minute)
+		key = bucket.Format("2006-01-02 15:04")
+	case "hours":
+		bucket = t.Truncate(time.Hour)
+		key = bucket.Format("2006-01-02 15")
+	case "days":
+		bucket = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+		key = bucket.Format("2006-01-02")
+	default:
+		bucket = t.Truncate(time.Second)
+		key = bucket.Format("2006-01-02 15:04:05")
+	}
+	fmt.Println("key:", key)
+	fmt.Println("bucket:", bucket.String())
+	return key, bucket
+}
+
+// 按颗粒度聚合
+func aggregateByTimeType(data []DeformationPointData, granularity string) []DeformationPointData {
+	if len(data) == 0 {
+		return nil
+	}
+
+	group := make(map[string][]DeformationPointData)
+	timeMap := make(map[string]time.Time)
+
+	for _, d := range data {
+		var bucket time.Time
+		key, bucket := getTimeFormatByType(d.SvrTime, granularity)
+
+		group[key] = append(group[key], d)
+		timeMap[key] = bucket
+	}
+
+	results := make([]DeformationPointData, 0, len(group))
+	for k, vals := range group {
+		sumDeform := 0
+		sumDist := 0
+		for _, v := range vals {
+			sumDeform += v.Deformation
+			sumDist += v.Distance
+		}
+
+		count := len(vals)
+		results = append(results, DeformationPointData{
+			SvrTime:     timeMap[k],
+			RadarId:     vals[0].RadarId,
+			Index:       vals[0].Index,
+			Deformation: sumDeform / count, // 平均
+			Distance:    sumDist / count,   // 平均
+		})
+	}
+
+	// 按时间排序
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].SvrTime.Before(results[j].SvrTime)
+	})
+
+	return results
 }

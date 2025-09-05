@@ -12,6 +12,8 @@ type DeformationPointQueryReq struct {
 	StartTime string `json:"startTime" validate:"required"` // 开始时间 (格式: 2006-01-02 15:04:05)
 	EndTime   string `json:"endTime" validate:"required"`   // 结束时间 (格式: 2006-01-02 15:04:05)
 	Hours     int64  `json:"hours"`                         // 查询最近几小时（单位：小时）
+	TimeType  string `json:"timeType"`                      // 时间类型（seconds,minutes,hours,days）
+	// LastTime  string `json:"lastTime"`                      // 追加查询时，需要最后的一个
 }
 
 // 变形点数据查询结果
