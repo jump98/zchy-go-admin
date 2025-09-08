@@ -394,41 +394,25 @@ func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
 // @Router /api/v1/radar_point/deformation_data [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationAcceleration(c *gin.Context) {
-	// req := dto.GetDeformationAccelerationReq{}
-	// var err error
-	// if err = e.MakeContext(c).MakeOrm().Bind(&req).Errors; err != nil {
-	// 	e.Logger.Error(err)
-	// 	e.Error(500, err, err.Error())
-	// 	return
-	// }
+	req := dto.GetDeformationDataReq{}
+	var err error
+	var s = service.DeformationPoint{}
+	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Bind(&req).Errors; err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	// 参数验证
+	if req.RadarId <= 0 || req.Index < 0 || req.StartTime == "" || req.EndTime == "" {
+		e.Error(400, nil, "参数不完整")
+		return
+	}
 
-	// // 参数验证
-	// if req.RadarId <= 0 || req.Index < 0 || req.StartTime == "" || req.EndTime == "" {
-	// 	e.Error(400, nil, "参数不完整")
-	// 	return
-	// }
-	// hours := req.Hours
-	// radarId := req.RadarId
-	// pointIndex := req.Index
-	// startTime := req.StartTime
-	// endTime := req.EndTime
-	// timeType := req.TimeType
-	// if hours < 0 {
-	// 	hours = 0
-	// }
-
-	// // 获取数据
-	// var lastTime time.Time
-	// var data []mongosvr.DeformationPointModel
-	// if data, lastTime, err = mongosvr.DeformationPointService.QueryDeformationPointData(radarId, pointIndex, startTime, endTime, hours, timeType); err != nil {
-	// 	e.Error(500, err, fmt.Sprintf("获取形变点数据失败: %s", err.Error()))
-	// 	return
-	// }
-
-	// resp := dto.GetDeformationDataResp{}
-	// resp.LastTime = lastTime
-	// resp.List = data
-
-	// // 返回采样后的数据
-	// e.OK(resp, "查询成功")
+	// 获取数据
+	var resp *dto.GetDeformationAccelerationResp
+	if resp, err = s.GetDeformationAcceleration(c, req); err != nil {
+		e.Error(500, err, fmt.Sprintf("获取形变加速度统计失败: %s", err.Error()))
+		return
+	}
+	e.OK(resp, "查询成功")
 }

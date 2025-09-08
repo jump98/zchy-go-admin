@@ -3,7 +3,6 @@ package mongosvr
 import (
 	"context"
 	"fmt"
-	"go-admin/app/admin/service/dto"
 	"go-admin/app/monsvr/mongosvr/collections"
 	"time"
 
@@ -28,11 +27,7 @@ func (s deformationPointService) InsertArrayDeformationPointData(data []interfac
 }
 
 // 根据时间范围查询距离像形变数据列表
-func (s deformationPointService) QueryDeformationPointData(ctx context.Context, req dto.GetDeformationDataReq) ([]collections.DeformationPointModel, error) {
-	radarId := req.RadarId
-	index := req.Index
-	startTimeStr := req.StartTime
-	endTimeStr := req.EndTime
+func (s deformationPointService) QueryDeformationPointData(ctx context.Context, radarId int64, pointIndex int, startTimeStr, endTimeStr string) ([]collections.DeformationPointModel, error) {
 	var err error
 	var startTime, endTime time.Time
 
@@ -54,7 +49,7 @@ func (s deformationPointService) QueryDeformationPointData(ctx context.Context, 
 	// 构建查询条件，MongoDB 内部存储 UTC 时间
 	filter := bson.M{
 		"radarid": radarId,
-		"index":   index,
+		"index":   pointIndex,
 		"svrtime": bson.M{
 			"$gt":  startTime.UTC(), //大于
 			"$lte": endTime.UTC(),   //小于等于
