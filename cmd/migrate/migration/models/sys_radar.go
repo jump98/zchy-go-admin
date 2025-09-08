@@ -1,13 +1,13 @@
 package models
 
 import (
-	m "go-admin/app/admin/models"
+	m "go-admin/app/radar/models"
 )
 
 type SysRadar struct {
-	m.SysRadar
+	m.Radar
 }
 
 func (mm *SysRadar) TableName() string {
-	return m.SysRadar{}.TableName()
+	return m.Radar{}.TableName()
 }

@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"go-admin/app/admin/models"
+	"go-admin/app/radar/models"
 	"go-admin/common/dto"
 	common "go-admin/common/models"
 )

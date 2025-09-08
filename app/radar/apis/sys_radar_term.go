@@ -10,10 +10,10 @@ import (
 	"github.com/go-admin-team/go-admin-core/sdk/config"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
 
-	"go-admin/app/admin/models"
-	"go-admin/app/admin/service"
-	"go-admin/app/admin/service/dto"
 	"go-admin/app/monsvr/mongosvr"
+	"go-admin/app/radar/models"
+	"go-admin/app/radar/service"
+	"go-admin/app/radar/service/dto"
 
 	mongodto "go-admin/app/monsvr/mongosvr/dto"
 
@@ -51,7 +51,7 @@ type PutCommandsReq struct {
 }
 
 // 获得token中的radarId
-func (e *SysRadar) GetTokenRadarId(c *gin.Context) (int64, error) {
+func (e *Radar) GetTokenRadarId(c *gin.Context) (int64, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		return 0, errors.New("authorization header missing")
@@ -78,7 +78,7 @@ type TokenClaims struct {
 }
 
 // 解密token
-func (e *SysRadar) GetParseClaimsToken(tokenStr string) (*TokenClaims, error) {
+func (e *Radar) GetParseClaimsToken(tokenStr string) (*TokenClaims, error) {
 	tokenStr2 := strings.TrimPrefix(tokenStr, "Bearer ")
 	token, err := jwt.ParseWithClaims(tokenStr2, &TokenClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(config.JwtConfig.Secret), nil
@@ -105,9 +105,9 @@ func (e *SysRadar) GetParseClaimsToken(tokenStr string) (*TokenClaims, error) {
 // @Param data body RadarAuthenticateRequest true "认证信息"
 // @Success 200 {object} RadarAuthenticateResponse "{\"code\": 0, \"message\": \"Status received\", \"token\": \"...\", \"expires_in\": 3600}"
 // @Router /api/v1/radar/authenticate [post]
-func (e SysRadar) Authenticate(c *gin.Context) {
+func (e Radar) Authenticate(c *gin.Context) {
 	var err error
-	s := service.SysRadar{}
+	s := service.Radar{}
 	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Errors; err != nil {
 		e.Logger.Error(err)
 		e.Error(400, err, err.Error())
@@ -130,10 +130,10 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 	radarId := int64(0)
 	// 生成JWT token
 	// 需要先导入 jwt 包，此处假设使用的是 github.com/golang-jwt/jwt/v5
-	radar := &models.SysRadar{}
+	radar := &models.Radar{}
 	if err = s.GetByRadarKey(req.RadarKey, radar); err != nil {
 		//没有找到雷达，则新建
-		reqNew := dto.SysRadarInsertReq{}
+		reqNew := dto.RadarInsertReq{}
 		reqNew.RadarName = req.RadarKey
 		reqNew.RadarKey = req.RadarKey
 		reqNew.SpecialKey = ""
@@ -188,7 +188,7 @@ func (e SysRadar) Authenticate(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"告警信息接收成功\"}"
 // @Router /api/v1/radar/put_alarm [post]
 // @Security Bearer
-func (e SysRadar) PutAlarm(c *gin.Context) {
+func (e Radar) PutAlarm(c *gin.Context) {
 	e.MakeContext(c)
 
 	var radarId int64
@@ -210,7 +210,7 @@ func (e SysRadar) PutAlarm(c *gin.Context) {
 	req.RadarId = radarId
 
 	// 处理告警信息逻辑
-	e.Logger.Infof("接收到雷达 %s 的告警信息: %+v", radarId, req)
+	e.Logger.Infof("接收到雷达 %d 的告警信息: %+v", radarId, req)
 
 	// 存储告警信息到MongoDB
 	alarmData := &mongosvr.AlarmData{
@@ -243,7 +243,7 @@ func (e SysRadar) PutAlarm(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"信息接收成功\"}"
 // @Router /api/v1/radar/dev_reboot [post]
 // @Security Bearer
-func (e SysRadar) PutRebootCommand(c *gin.Context) {
+func (e Radar) PutRebootCommand(c *gin.Context) {
 	e.MakeContext(c)
 
 	var radarId int64
@@ -275,7 +275,7 @@ func (e SysRadar) PutRebootCommand(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"信息接收成功\"}"
 // @Router /api/v1/radar/put_testcommand [post]
 // @Security Bearer
-func (e SysRadar) PutTestCommand(c *gin.Context) {
+func (e Radar) PutTestCommand(c *gin.Context) {
 	e.MakeContext(c)
 	var radarId int64
 	var err error
@@ -324,7 +324,7 @@ type DeformationRequest struct {
 	Data      []DeformationDataPoint `json:"data"`
 }
 
-func (e SysRadar) InitDeformationData(dd *mongosvr.DeformationData, dr *DeformationRequest) {
+func (e Radar) InitDeformationData(dd *mongosvr.DeformationData, dr *DeformationRequest) {
 	dd.RadarKey = dr.RadarKey
 	dd.TimeStamp = time.Unix(dr.Timestamp, 0)
 	dd.Interval = dr.Interval
@@ -365,7 +365,7 @@ type GetRadarPointsResp struct {
 // @Success 200 {object} GetCommandsResponse "{\"code\": 0, \"commands\": [{\"command_code\": 100, \"message\": \"reboot\", \"parameters\": {}}]}"
 // @Router /api/v1/radar/get_commands [post]
 // @Security Bearer
-func (e SysRadar) GetCommands(c *gin.Context) {
+func (e Radar) GetCommands(c *gin.Context) {
 	e.MakeContext(c)
 	var radarId int64
 	var err error
@@ -414,7 +414,7 @@ type RawDataRequest struct {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"距离像数据接收成功\"}"
 // @Router /api/v1/radar/raw_data [post]
 // @Security Bearer
-func (e SysRadar) PutRawData(c *gin.Context) {
+func (e Radar) PutRawData(c *gin.Context) {
 	e.MakeContext(c)
 	var radarId int64
 	var err error
@@ -430,7 +430,7 @@ func (e SysRadar) PutRawData(c *gin.Context) {
 	}
 
 	// 处理距离像数据逻辑
-	e.Logger.Infof("接收到雷达 %s 的距离像数据: %+v", radarId, req)
+	e.Logger.Infof("接收到雷达 %d 的距离像数据: %+v", radarId, req)
 	d := mongosvr.DistanceDataV2{}
 	d.RadarID = radarId
 	d.CommandCode = req.CommandCode
@@ -455,7 +455,7 @@ func (e SysRadar) PutRawData(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"形变数据接收成功\"}"
 // @Router /api/v1/radar/put_deformation [post]
 // @Security Bearer
-func (e SysRadar) PutDeformation(c *gin.Context) {
+func (e Radar) PutDeformation(c *gin.Context) {
 	e.MakeContext(c)
 
 	var radarId int64
@@ -488,7 +488,7 @@ func (e SysRadar) PutDeformation(c *gin.Context) {
 		return
 	}
 
-	e.Logger.Infof("接收到雷达 %s 的形变数据: %+v", radarId, req)
+	e.Logger.Infof("接收到雷达 %d 的形变数据: %+v", radarId, req)
 
 	e.OK(nil, "形变数据接收成功")
 }
@@ -503,7 +503,7 @@ func (e SysRadar) PutDeformation(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"状态接收成功\"}"
 // @Router /api/v1/radar/status [post]
 // @Security Bearer
-func (e SysRadar) PutStatus(c *gin.Context) {
+func (e Radar) PutStatus(c *gin.Context) {
 	e.MakeContext(c)
 	fmt.Println("雷达设备状态上报")
 	var radarId int64
@@ -530,7 +530,7 @@ func (e SysRadar) PutStatus(c *gin.Context) {
 		return
 	}
 	// 处理状态信息逻辑
-	e.Logger.Infof("接收到雷达 %s 的状态信息: %+v", req.RadarKey, req)
+	e.Logger.Infof("接收到雷达 %d 的状态信息: %+v", req.RadarKey, req)
 
 	e.OK(nil, "状态接收成功")
 }
@@ -545,7 +545,7 @@ func (e SysRadar) PutStatus(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"设备信息接收成功\"}"
 // @Router /api/v1/radar/dev_info [post]
 // @Security Bearer
-func (e SysRadar) PutDevInfo(c *gin.Context) {
+func (e Radar) PutDevInfo(c *gin.Context) {
 	e.MakeContext(c)
 
 	var radarId int64
@@ -571,7 +571,7 @@ func (e SysRadar) PutDevInfo(c *gin.Context) {
 		return
 	}
 	// 处理设备信息逻辑
-	e.Logger.Infof("接收到雷达 %s 的设备信息: %+v", req.RadarKey, req)
+	e.Logger.Infof("接收到雷达 %d 的设备信息: %+v", req.RadarKey, req)
 
 	e.OK(nil, "设备信息接收成功")
 }
@@ -586,7 +586,7 @@ func (e SysRadar) PutDevInfo(c *gin.Context) {
 // @Success 200 {object} GetRadarPointsResp "{\"code\": 0, \"message\": \"设备信息接收成功\"}"
 // @Router /api/v1/radar/get_radar_points [get]
 // @Security Bearer
-func (e SysRadar) GetRadarPoints(c *gin.Context) {
+func (e Radar) GetRadarPoints(c *gin.Context) {
 	var err error
 	s := service.RadarPoint{}
 	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Errors; err != nil {
@@ -621,7 +621,7 @@ func (e SysRadar) GetRadarPoints(c *gin.Context) {
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"succesd\"}"
 // @Router /api/v1/radar/put_commands [post]
 // @Security Bearer
-func (e SysRadar) PutCommands(c *gin.Context) {
+func (e Radar) PutCommands(c *gin.Context) {
 	e.MakeContext(c)
 	fmt.Println("PutCommands")
 	// var err error

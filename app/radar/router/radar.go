@@ -4,19 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	jwt "github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth"
 
-	"go-admin/app/admin/apis"
+	"go-admin/app/radar/apis"
 	"go-admin/common/actions"
 )
 
 func init() {
-	routerCheckRole = append(routerCheckRole, registerSysRadarRouter)
-	routerNoCheckRole = append(routerNoCheckRole, registerSysRadarNotAuthRouter)
+	routerCheckRole = append(routerCheckRole, registerRadarRouter)
+	routerNoCheckRole = append(routerNoCheckRole, registerRadarNotAuthRouter)
 }
 
-// registerSysRadarRouter
-func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
-	api := apis.SysRadar{}
-	r := v1.Group("/sys-radar").Use(authMiddleware.MiddlewareFunc())
+// registerRadarRouter
+func registerRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
+	api := apis.Radar{}
+	r := v1.Group("/radar_info").Use(authMiddleware.MiddlewareFunc())
 	// r := v1.Group("/sys-radar").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
 		r.GET("", actions.PermissionAction(), api.GetList)
@@ -25,7 +25,8 @@ func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 		r.POST("", api.Insert)
 		r.PUT("/:radarId", actions.PermissionAction(), api.Update)
 		r.DELETE("", api.Delete)
-		//r.PUT("/confirm/:radarId", actions.PermissionAction(), api.Confirm)
+
+		//TODO:需要删除
 		r.POST("/get_alarms", api.GetAlarms)
 		r.POST("/get_alarmsofids", api.GetAlarmsOfIds)
 		r.POST("/get_dev_info", api.GetDevInfo)
@@ -34,9 +35,9 @@ func registerSysRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 	}
 }
 
-// registerSysRadarRouter
-func registerSysRadarNotAuthRouter(v1 *gin.RouterGroup) {
-	api := apis.SysRadar{}
+// registerRadarRouter
+func registerRadarNotAuthRouter(v1 *gin.RouterGroup) {
+	api := apis.Radar{}
 	// 雷达设备认证路由
 	noAuth := v1.Group("/radar")
 	{

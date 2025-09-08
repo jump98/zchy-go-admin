@@ -1,12 +1,12 @@
 package dto
 
 import (
-	"go-admin/app/admin/models"
+	"go-admin/app/radar/models"
 	"go-admin/common/dto"
 	common "go-admin/common/models"
 )
 
-type SysRadarGetPageReq struct {
+type RadarGetPageReq struct {
 	dto.Pagination `search:"-"`
 	RadarId        int64  `form:"radarId"  search:"type:exact;column:radar_id;table:sys_radar" comment:"RadarID"`
 	RadarName      string `form:"radarName"  search:"type:exact;column:radar_name;table:sys_radar" comment:"雷达名称"`
@@ -14,10 +14,14 @@ type SysRadarGetPageReq struct {
 	SpecialKey     string `form:"specialKey"  search:"type:exact;column:special_key;table:sys_radar" comment:"雷达特殊编号"`
 	//DeptId         int64  `form:"deptId"  search:"type:exact;column:dept_id;table:sys_radar" comment:"部门"`
 	DeptJoin `search:"type:left;on:dept_id:dept_id;table:sys_radar;join:sys_dept"`
-	SysRadarOrder
+	RadarOrder
 }
 
-type SysRadarOrder struct {
+type DeptJoin struct {
+	DeptId string `search:"type:contains;column:dept_path;table:sys_dept" form:"deptId"`
+}
+
+type RadarOrder struct {
 	RadarId    string `form:"radarIdOrder"  search:"type:order;column:radar_id;table:sys_radar"`
 	RadarName  string `form:"radarNameOrder"  search:"type:order;column:radar_name;table:sys_radar"`
 	RadarKey   string `form:"radarKeyOrder"  search:"type:order;column:radar_key;table:sys_radar"`
@@ -35,11 +39,11 @@ type SysRadarOrder struct {
 	DeletedAt  string `form:"deletedAtOrder"  search:"type:order;column:deleted_at;table:sys_radar"`
 }
 
-func (m *SysRadarGetPageReq) GetNeedSearch() interface{} {
+func (m *RadarGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
 
-type SysRadarInsertReq struct {
+type RadarInsertReq struct {
 	RadarId     int64  `json:"-" comment:"RadarID"` // RadarID
 	RadarName   string `json:"radarName" comment:"雷达名称"`
 	RadarKey    string `json:"radarKey" comment:"雷达编号"`
@@ -56,7 +60,7 @@ type SysRadarInsertReq struct {
 	common.ControlBy
 }
 
-func (s *SysRadarInsertReq) Generate(model *models.SysRadar) {
+func (s *RadarInsertReq) Generate(model *models.Radar) {
 	if s.RadarId == 0 {
 		//model.Model = common.Model{Id: s.RadarId}
 		model.RadarId = s.RadarId
@@ -76,11 +80,11 @@ func (s *SysRadarInsertReq) Generate(model *models.SysRadar) {
 	model.Secret = s.Secret
 }
 
-func (s *SysRadarInsertReq) GetId() interface{} {
+func (s *RadarInsertReq) GetId() interface{} {
 	return s.RadarId
 }
 
-type SysRadarUpdateReq struct {
+type RadarUpdateReq struct {
 	RadarId     int64  `uri:"radarId" comment:"RadarID"` // RadarID
 	RadarName   string `json:"radarName" comment:"雷达名称"`
 	RadarKey    string `json:"radarKey" comment:"雷达编号"`
@@ -95,7 +99,7 @@ type SysRadarUpdateReq struct {
 	common.ControlBy
 }
 
-func (s *SysRadarUpdateReq) Generate(model *models.SysRadar) {
+func (s *RadarUpdateReq) Generate(model *models.Radar) {
 	if s.RadarId == 0 {
 		//model.Model = common.Model{Id: s.RadarId}
 		model.RadarId = s.RadarId
@@ -113,79 +117,79 @@ func (s *SysRadarUpdateReq) Generate(model *models.SysRadar) {
 	model.FromProject = s.FromProject
 }
 
-func (s *SysRadarUpdateReq) GetId() interface{} {
+func (s *RadarUpdateReq) GetId() interface{} {
 	return s.RadarId
 }
 
-// SysRadarGetReq 功能获取请求参数
-type SysRadarGetReq struct {
+// RadarGetReq 功能获取请求参数
+type RadarGetReq struct {
 	RadarId int64 `uri:"radarId"`
 }
 
-func (s *SysRadarGetReq) GetId() interface{} {
+func (s *RadarGetReq) GetId() interface{} {
 	return s.RadarId
 }
 
-// SysRadarGetReq 功能获取请求参数
-type SysRadarKeyGetReq struct {
+// RadarGetReq 功能获取请求参数
+type RadarKeyGetReq struct {
 	RadarKey string `uri:"radarkey"`
 }
 
-func (s *SysRadarKeyGetReq) GetRadarKey() interface{} {
+func (s *RadarKeyGetReq) GetRadarKey() interface{} {
 	return s.RadarKey
 }
 
-// SysRadarGetAlarmsOfIdsReq 获取告警列表请求参数
-type SysRadarGetAlarmsOfIdsReq struct {
+// RadarGetAlarmsOfIdsReq 获取告警列表请求参数
+type RadarGetAlarmsOfIdsReq struct {
 	Ids []int64 `json:"ids"`
 }
 
-func (s *SysRadarGetAlarmsOfIdsReq) GetIds() []int64 {
+func (s *RadarGetAlarmsOfIdsReq) GetIds() []int64 {
 	return s.Ids
 }
 
-// SysRadarGetImageReq 功能获取请求参数
-type SysRadarGetImageReq struct {
+// RadarGetImageReq 功能获取请求参数
+type RadarGetImageReq struct {
 	RadarId int64 `uri:"radarId"`
 }
 
-func (s *SysRadarGetImageReq) GetId() interface{} {
+func (s *RadarGetImageReq) GetId() interface{} {
 	return s.RadarId
 }
 
-// SysRadarDeleteReq 功能删除请求参数
-type SysRadarDeleteReq struct {
+// RadarDeleteReq 功能删除请求参数
+type RadarDeleteReq struct {
 	Ids []int `json:"ids"`
 }
 
-func (s *SysRadarDeleteReq) GetId() interface{} {
+func (s *RadarDeleteReq) GetId() interface{} {
 	return s.Ids
 }
 
-// SysRadarGetAlarmsBeforeReq 获取指定时间之前的告警列表请求参数
-type SysRadarGetAlarmsBeforeReq struct {
+// RadarGetAlarmsBeforeReq 获取指定时间之前的告警列表请求参数
+type RadarGetAlarmsBeforeReq struct {
 	RadarId int64  `json:"radarId"`
 	Time    string `json:"time"`
 	Num     int    `json:"num"`
 }
 
-func (s *SysRadarGetAlarmsBeforeReq) GetRadarId() int64 {
+func (s *RadarGetAlarmsBeforeReq) GetRadarId() int64 {
 	return s.RadarId
 }
 
-func (s *SysRadarGetAlarmsBeforeReq) GetTime() string {
+func (s *RadarGetAlarmsBeforeReq) GetTime() string {
 	return s.Time
 }
 
-func (s *SysRadarGetAlarmsBeforeReq) GetNum() int {
+func (s *RadarGetAlarmsBeforeReq) GetNum() int {
 	return s.Num
 }
 
-// // SysRadarConfirmReq 功能删除请求参数
-// type SysRadarConfirmReq struct {
+// // RadarConfirmReq 功能删除请求参数
+// type RadarConfirmReq struct {
 // 	RadarId int64 `uri:"radarId" comment:"RadarID"` // RadarID
 // }
 
-// func (s *SysRadarConfirmReq) GetId() interface{} {
+// func (s *RadarConfirmReq) GetId() interface{} {
 // 	return s.RadarId
 // }

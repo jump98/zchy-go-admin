@@ -10,14 +10,16 @@ import (
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
 
-	"go-admin/app/admin/models"
-	"go-admin/app/admin/service"
-	"go-admin/app/admin/service/dto"
+	adminApi "go-admin/app/admin/apis"
+	adminModel "go-admin/app/admin/models"
 	"go-admin/app/monsvr/mongosvr"
+	"go-admin/app/radar/models"
+	"go-admin/app/radar/service"
+	"go-admin/app/radar/service/dto"
 	"go-admin/common/actions"
 )
 
-type SysRadar struct {
+type Radar struct {
 	api.Api
 }
 
@@ -32,12 +34,12 @@ type SysRadar struct {
 // @Param deptId query int64 false "部门"
 // @Param pageSize query int false "页条数"
 // @Param pageIndex query int false "页码"
-// @Success 200 {object} response.Response{data=response.Page{list=[]models.SysRadar}} "{"code": 200, "data": [...]}"
+// @Success 200 {object} response.Response{data=response.Page{list=[]models.Radar}} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar [get]
 // @Security Bearer
-func (e SysRadar) GetList(c *gin.Context) {
-	req := dto.SysRadarGetPageReq{}
-	s := service.SysRadar{}
+func (e Radar) GetList(c *gin.Context) {
+	req := dto.RadarGetPageReq{}
+	s := service.Radar{}
 	err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors
 	if err != nil {
 		e.Logger.Error(err)
@@ -46,12 +48,12 @@ func (e SysRadar) GetList(c *gin.Context) {
 	}
 
 	p := actions.GetPermissionFromContext(c)
-	list := make([]models.SysRadar, 0)
+	list := make([]models.Radar, 0)
 	var count int64
-	sc := SysCommon{}
+	sc := adminApi.SysCommon{}
 	parentID := 0
 	var admin bool
-	var u *models.SysUser
+	var u *adminModel.SysUser
 	if admin, u, err = sc.IsSuperAdmin(c); err != nil {
 		e.Error(500, err, "查询失败")
 		return
@@ -75,12 +77,12 @@ func (e SysRadar) GetList(c *gin.Context) {
 // @Description 获取雷达管理
 // @Tags 雷达管理
 // @Param id path int false "id"
-// @Success 200 {object} response.Response{data=models.SysRadar} "{"code": 200, "data": [...]}"
+// @Success 200 {object} response.Response{data=models.Radar} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar/{id} [get]
 // @Security Bearer
-func (e SysRadar) Get(c *gin.Context) {
-	req := dto.SysRadarGetReq{}
-	s := service.SysRadar{}
+func (e Radar) Get(c *gin.Context) {
+	req := dto.RadarGetReq{}
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -91,7 +93,7 @@ func (e SysRadar) Get(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	var object models.SysRadar
+	var object models.Radar
 
 	p := actions.GetPermissionFromContext(c)
 	err = s.Get(&req, p, &object)
@@ -109,13 +111,13 @@ func (e SysRadar) Get(c *gin.Context) {
 // @Tags 雷达管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.SysRadarInsertReq true "data"
+// @Param data body dto.RadarInsertReq true "data"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "添加成功"}"
 // @Router /api/v1/sys-radar [post]
 // @Security Bearer
-func (e SysRadar) Insert(c *gin.Context) {
-	req := dto.SysRadarInsertReq{}
-	s := service.SysRadar{}
+func (e Radar) Insert(c *gin.Context) {
+	req := dto.RadarInsertReq{}
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -145,13 +147,13 @@ func (e SysRadar) Insert(c *gin.Context) {
 // @Accept application/json
 // @Product application/json
 // @Param id path int true "id"
-// @Param data body dto.SysRadarUpdateReq true "body"
+// @Param data body dto.RadarUpdateReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "修改成功"}"
 // @Router /api/v1/sys-radar/{id} [put]
 // @Security Bearer
-func (e SysRadar) Update(c *gin.Context) {
-	req := dto.SysRadarUpdateReq{}
-	s := service.SysRadar{}
+func (e Radar) Update(c *gin.Context) {
+	req := dto.RadarUpdateReq{}
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -177,13 +179,13 @@ func (e SysRadar) Update(c *gin.Context) {
 // @Summary 删除雷达管理
 // @Description 删除雷达管理
 // @Tags 雷达管理
-// @Param data body dto.SysRadarDeleteReq true "body"
+// @Param data body dto.RadarDeleteReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "删除成功"}"
 // @Router /api/v1/sys-radar [delete]
 // @Security Bearer
-func (e SysRadar) Delete(c *gin.Context) {
-	s := service.SysRadar{}
-	req := dto.SysRadarDeleteReq{}
+func (e Radar) Delete(c *gin.Context) {
+	s := service.Radar{}
+	req := dto.RadarDeleteReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -226,13 +228,13 @@ func (e SysRadar) Delete(c *gin.Context) {
 // // @Accept application/json
 // // @Product application/json
 // // @Param id path int true "id"
-// // @Param data body dto.SysRadarConfirmReq true "body"
+// // @Param data body dto.RadarConfirmReq true "body"
 // // @Success 200 {object} response.Response	"{"code": 200, "message": "确认成功"}"
 // // @Router /api/v1/sys-radar/confirm/{id} [put]
 // // @Security Bearer
-// func (e SysRadar) Confirm(c *gin.Context) {
-// 	req := dto.SysRadarConfirmReq{}
-// 	s := service.SysRadar{}
+// func (e Radar) Confirm(c *gin.Context) {
+// 	req := dto.RadarConfirmReq{}
+// 	s := service.Radar{}
 // 	err := e.MakeContext(c).
 // 		MakeOrm().
 // 		Bind(&req).
@@ -258,12 +260,12 @@ func (e SysRadar) Delete(c *gin.Context) {
 // @Description 获取雷达影像
 // @Tags 雷达管理
 // @Param id path int false "id"
-// @Success 200 {object} response.Response{data=models.SysRadar} "{"code": 200, "data": [...]}"
+// @Success 200 {object} response.Response{data=models.Radar} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar/radarimage/{id} [get]
 // @Security Bearer
-func (e SysRadar) GetRadarImage(c *gin.Context) {
-	req := dto.SysRadarGetImageReq{}
-	s := service.SysRadar{}
+func (e Radar) GetRadarImage(c *gin.Context) {
+	req := dto.RadarGetImageReq{}
+	s := service.Radar{}
 	var err error
 	if err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors; err != nil {
 		e.Logger.Error(err)
@@ -316,9 +318,9 @@ func (e SysRadar) GetRadarImage(c *gin.Context) {
 // @Success 200 {object} response.Response{data=[]mongosvr.AlarmData} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar/get_alarms [post]
 // @Security Bearer
-func (e SysRadar) GetAlarms(c *gin.Context) {
-	req := dto.SysRadarGetPageReq{}
-	s := service.SysRadar{}
+func (e Radar) GetAlarms(c *gin.Context) {
+	req := dto.RadarGetPageReq{}
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -331,9 +333,9 @@ func (e SysRadar) GetAlarms(c *gin.Context) {
 	}
 
 	p := actions.GetPermissionFromContext(c)
-	list := make([]models.SysRadar, 0)
+	list := make([]models.Radar, 0)
 	var count int64
-	sc := SysCommon{}
+	sc := adminApi.SysCommon{}
 	parentID := 0
 	admin, u, err := sc.IsSuperAdmin(c)
 	if err != nil {
@@ -375,13 +377,13 @@ func (e SysRadar) GetAlarms(c *gin.Context) {
 // @Tags 雷达管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.SysRadarGetAlarmsOfIdsReq true "雷达ID列表"
+// @Param data body dto.RadarGetAlarmsOfIdsReq true "雷达ID列表"
 // @Success 200 {object} response.Response{data=[]mongosvr.AlarmData} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar/get_alarmsofids [post]
 // @Security Bearer
-func (e SysRadar) GetAlarmsOfIds(c *gin.Context) {
-	req := dto.SysRadarGetAlarmsOfIdsReq{}
-	s := service.SysRadar{}
+func (e Radar) GetAlarmsOfIds(c *gin.Context) {
+	req := dto.RadarGetAlarmsOfIdsReq{}
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&s.Service).
@@ -418,12 +420,12 @@ func (e SysRadar) GetAlarmsOfIds(c *gin.Context) {
 // @Tags 雷达管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.SysRadarGetReq true "data"
+// @Param data body dto.RadarGetReq true "data"
 // @Success 200 {object} response.Response{data=mongosvr.RadarDevInfo} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar/get_dev_info [post]
 // @Security Bearer
-func (e SysRadar) GetDevInfo(c *gin.Context) {
-	s := service.SysRadar{}
+func (e Radar) GetDevInfo(c *gin.Context) {
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&s.Service).
@@ -433,14 +435,14 @@ func (e SysRadar) GetDevInfo(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	req := dto.SysRadarGetReq{}
+	req := dto.RadarGetReq{}
 	if err = c.ShouldBindJSON(&req); err != nil {
 		e.Error(400, err, "请求参数错误")
 		return
 	}
 
 	p := actions.GetPermissionFromContext(c)
-	var object models.SysRadar
+	var object models.Radar
 
 	err = s.Get(&req, p, &object)
 	if err != nil {
@@ -464,12 +466,12 @@ func (e SysRadar) GetDevInfo(c *gin.Context) {
 // @Tags 雷达管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.SysRadarGetReq true "data"
+// @Param data body dto.RadarGetReq true "data"
 // @Success 200 {object} response.Response{data=mongosvr.RadarStatus} "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-radar/get_state_info [post]
 // @Security Bearer
-func (e SysRadar) GetStateInfo(c *gin.Context) {
-	s := service.SysRadar{}
+func (e Radar) GetStateInfo(c *gin.Context) {
+	s := service.Radar{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&s.Service).
@@ -479,14 +481,14 @@ func (e SysRadar) GetStateInfo(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	req := dto.SysRadarGetReq{}
+	req := dto.RadarGetReq{}
 	if err = c.ShouldBindJSON(&req); err != nil {
 		e.Error(400, err, "请求参数错误")
 		return
 	}
 
 	p := actions.GetPermissionFromContext(c)
-	var object models.SysRadar
+	var object models.Radar
 
 	err = s.Get(&req, p, &object)
 	if err != nil {
@@ -510,12 +512,12 @@ func (e SysRadar) GetStateInfo(c *gin.Context) {
 // @Tags 雷达管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.SysRadarGetAlarmsBeforeReq true "雷达ID、时间和数量"
+// @Param data body dto.RadarGetAlarmsBeforeReq true "雷达ID、时间和数量"
 // @Success 200 {object} response.Response{data=[]mongosvr.AlarmData} "成功"
 // @Router /api/v1/sys-radar/get_alarms_before [post]
 // @Security Bearer
-func (e SysRadar) GetAlarmsBefore(c *gin.Context) {
-	req := dto.SysRadarGetAlarmsBeforeReq{}
+func (e Radar) GetAlarmsBefore(c *gin.Context) {
+	req := dto.RadarGetAlarmsBeforeReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).

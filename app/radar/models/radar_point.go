@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// 雷达检测点表
 type RadarPoint struct {
 	Id         int    `json:"id"          gorm:"primaryKey;autoIncrement;comment:主键编码"`
 	PointName  string `json:"pointName"   gorm:"type:varchar(64);  comment:监测点名称"`

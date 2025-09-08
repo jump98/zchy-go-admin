@@ -1,7 +1,7 @@
 package models
 
 import (
-	m "go-admin/app/admin/models"
+	m "go-admin/app/radar/models"
 )
 
 type RadarPoint struct {

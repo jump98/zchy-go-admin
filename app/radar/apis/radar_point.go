@@ -9,10 +9,11 @@ import (
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
 
-	"go-admin/app/admin/models"
-	"go-admin/app/admin/service"
-	"go-admin/app/admin/service/dto"
+	adminApi "go-admin/app/admin/apis"
 	"go-admin/app/monsvr/mongosvr"
+	"go-admin/app/radar/models"
+	"go-admin/app/radar/service"
+	"go-admin/app/radar/service/dto"
 	"go-admin/common/actions"
 )
 
@@ -93,7 +94,7 @@ func (e RadarPoint) GetRadarPointListDeptId(c *gin.Context) {
 	list := make([]models.RadarPoint, 0)
 	var count int64
 
-	sc := SysCommon{}
+	sc := adminApi.SysCommon{}
 	admin, _, err := sc.IsSuperAdmin(c)
 	if err != nil {
 		e.Error(500, err, "查询失败")
