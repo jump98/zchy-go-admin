@@ -14,7 +14,7 @@ import (
 func CustomError(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
-
+			fmt.Println("CustomError：", err)
 			if c.IsAborted() {
 				c.Status(200)
 			}

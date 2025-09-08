@@ -68,8 +68,6 @@ func (s DeformationPoint) GetDeformationVelocity(ctx context.Context, req dto.Ge
 	if deformData, err = mongosvr.DeformationPointService.QueryDeformationPointData(ctx, radarId, index, startTime, endTime); err != nil {
 		return nil, err
 	}
-	lastTime := deformData[len(deformData)-1].SvrTime.Local()
-
 	if len(deformData) < 2 {
 		s.Log.Info("数据量太少，无法计算形变速度")
 		return resp, nil
@@ -89,7 +87,7 @@ func (s DeformationPoint) GetDeformationVelocity(ctx context.Context, req dto.Ge
 	fmt.Printf("采样后数据条数: %d\n", len(sampledData))
 	fmt.Printf("groupData: %d\n", len(groupData))
 
-	resp.LastTime = lastTime
+	resp.LastTime = deformData[len(deformData)-1].SvrTime.Local()
 	resp.List = groupData
 	return resp, nil
 }
@@ -253,7 +251,7 @@ func (s DeformationPoint) getMaxPointsForRange(hours int64) int {
 	// 用 map 定义时间范围对应的最大采样点数
 	var maxPointsMap = map[int64]int{
 		1:       3600, //原始数据
-		3:       20,
+		3:       200,
 		6:       250,
 		12:      300,
 		24:      400,

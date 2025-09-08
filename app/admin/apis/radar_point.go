@@ -324,6 +324,12 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 // @Router /api/v1/radar_point/deformation_data [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationData(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			e.Logger.Error("GetDeformationData panic:", r)
+		}
+	}()
+
 	req := dto.GetDeformationDataReq{}
 	var err error
 	var s = service.DeformationPoint{}
@@ -359,6 +365,12 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 // @Router /api/v1/radar_point/deformation_data [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			e.Logger.Error("GetDeformationData panic:", r)
+		}
+	}()
+
 	req := dto.GetDeformationDataReq{}
 	var err error
 	var s = service.DeformationPoint{}
@@ -394,6 +406,12 @@ func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
 // @Router /api/v1/radar_point/deformation_data [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationAcceleration(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			e.Logger.Error("GetDeformationData panic:", r)
+		}
+	}()
+
 	req := dto.GetDeformationDataReq{}
 	var err error
 	var s = service.DeformationPoint{}
