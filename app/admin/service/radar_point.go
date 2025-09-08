@@ -18,7 +18,7 @@ type RadarPoint struct {
 }
 
 // GetPage 获取RadarPoint列表
-func (e *RadarPoint) GetPage(c *dto.RadarPointGetPageReq, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
+func (e *RadarPoint) GetPage(c *dto.GetRadarPointListDeptIdReq, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
 	var err error
 	var data models.RadarPoint
 
@@ -38,7 +38,7 @@ func (e *RadarPoint) GetPage(c *dto.RadarPointGetPageReq, p *actions.DataPermiss
 }
 
 // GetPage 获取RadarPoint列表
-func (e *RadarPoint) GetDeptPage(c *dto.RadarPointGetPageReq, deptid int, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
+func (e *RadarPoint) GetDeptPage(c *dto.GetRadarPointListDeptIdReq, deptid int, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
 	var err error
 	var data models.RadarPoint
 
@@ -58,7 +58,7 @@ func (e *RadarPoint) GetDeptPage(c *dto.RadarPointGetPageReq, deptid int, p *act
 }
 
 // Get 获取RadarPoint对象
-func (e *RadarPoint) Get(d *dto.RadarPointGetReq, p *actions.DataPermission, model *models.RadarPoint) error {
+func (e *RadarPoint) Get(d *dto.GetRadarPointByIdReq, p *actions.DataPermission, model *models.RadarPoint) error {
 	var data models.RadarPoint
 
 	err := e.Orm.Model(&data).
@@ -79,7 +79,7 @@ func (e *RadarPoint) Get(d *dto.RadarPointGetReq, p *actions.DataPermission, mod
 }
 
 // Insert 创建RadarPoint对象
-func (e *RadarPoint) Insert(c *dto.RadarPointInsertReq) error {
+func (e *RadarPoint) Insert(c *dto.InsertRadarPointReq) error {
 	var err error
 	var data models.RadarPoint
 	c.Generate(&data)
@@ -94,7 +94,7 @@ func (e *RadarPoint) Insert(c *dto.RadarPointInsertReq) error {
 }
 
 // Update 修改RadarPoint对象
-func (e *RadarPoint) Update(c *dto.RadarPointUpdateReq, p *actions.DataPermission) error {
+func (e *RadarPoint) Update(c *dto.UpdateRadarPointReq, p *actions.DataPermission) error {
 	var err error
 	var data = models.RadarPoint{}
 	e.Orm.Scopes(
@@ -114,7 +114,7 @@ func (e *RadarPoint) Update(c *dto.RadarPointUpdateReq, p *actions.DataPermissio
 }
 
 // Remove 删除RadarPoint
-func (e *RadarPoint) Remove(d *dto.RadarPointDeleteReq, p *actions.DataPermission) error {
+func (e *RadarPoint) Remove(d *dto.DeleteRadarPointReq, p *actions.DataPermission) error {
 	var data models.RadarPoint
 
 	db := e.Orm.Model(&data).
@@ -173,11 +173,7 @@ func (e *RadarPoint) GetPointByRadarId(radarId int64, p *actions.DataPermission)
 // GetRadarIdByPointId 根据监测点ID获取对应的雷达ID
 func (e *RadarPoint) GetRadarIdByPointId(pointId int, p *actions.DataPermission) (int64, error) {
 	var radarId int64
-	err := e.Orm.Model(&models.RadarPoint{}).
-		Select("radar_id").
-		Where("id = ?", pointId).
-		First(&radarId).Error
-	if err != nil {
+	if err := e.Orm.Model(&models.RadarPoint{}).Select("radar_id").Where("id = ?", pointId).First(&radarId).Error; err != nil {
 		return 0, err
 	}
 	return radarId, nil

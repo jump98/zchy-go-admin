@@ -8,6 +8,6 @@ type RadarPoint struct {
 	m.RadarPoint
 }
 
-func (*RadarPoint) TableName() string {
-	return "radar_point"
+func (mm RadarPoint) TableName() string {
+	return m.RadarPoint{}.TableName()
 }

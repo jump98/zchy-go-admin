@@ -20,7 +20,7 @@ type RadarPoint struct {
 	api.Api
 }
 
-// GetPage 获取监测点管理列表
+// GetRadarPointList 获取监测点管理列表
 // @Summary 获取监测点管理列表
 // @Description 获取监测点管理列表
 // @Tags 监测点管理
@@ -32,10 +32,10 @@ type RadarPoint struct {
 // @Param pageSize query int false "页条数"
 // @Param pageIndex query int false "页码"
 // @Success 200 {object} response.Response{data=response.Page{list=[]models.RadarPoint}} "{"code": 200, "data": [...]}"
-// @Router /api/v1/radar-point [get]
+// @Router /api/v1/radar_point [get]
 // @Security Bearer
-func (e RadarPoint) GetPage(c *gin.Context) {
-	req := dto.RadarPointGetPageReq{}
+func (e RadarPoint) GetRadarPointList(c *gin.Context) {
+	req := dto.GetRadarPointListDeptIdReq{}
 	s := service.RadarPoint{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -61,7 +61,7 @@ func (e RadarPoint) GetPage(c *gin.Context) {
 	e.PageOK(list, int(count), req.GetPageIndex(), req.GetPageSize(), "查询成功")
 }
 
-// GetDeptPage 获取某个部门下的所有监测点列表
+// GetRadarPointListDeptId 获取某个部门下的所有监测点列表
 // @Summary 获取某个部门下的所有监测点列表
 // @Description 获取某个部门下的所有监测点列表
 // @Tags 获取某个部门下的所有监测点列表
@@ -73,10 +73,10 @@ func (e RadarPoint) GetPage(c *gin.Context) {
 // @Param pageSize query int false "页条数"
 // @Param pageIndex query int false "页码"
 // @Success 200 {object} response.Response{data=response.Page{list=[]models.RadarPoint}} "{"code": 200, "data": [...]}"
-// @Router /api/v1/radar-point/dept [get]
+// @Router /api/v1/radar_point/dept [get]
 // @Security Bearer
-func (e RadarPoint) GetDeptPage(c *gin.Context) {
-	req := dto.RadarPointGetPageReq{}
+func (e RadarPoint) GetRadarPointListDeptId(c *gin.Context) {
+	req := dto.GetRadarPointListDeptIdReq{}
 	s := service.RadarPoint{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -121,16 +121,16 @@ func (e RadarPoint) GetDeptPage(c *gin.Context) {
 	e.PageOK(list, int(count), req.GetPageIndex(), req.GetPageSize(), "查询成功")
 }
 
-// Get 获取监测点管理
+// GetRadarPointById 获取监测点管理
 // @Summary 获取监测点管理
 // @Description 获取监测点管理
 // @Tags 监测点管理
 // @Param id path int false "id"
 // @Success 200 {object} response.Response{data=models.RadarPoint} "{"code": 200, "data": [...]}"
-// @Router /api/v1/radar-point/{id} [get]
+// @Router /api/v1/radar_point/{id} [get]
 // @Security Bearer
-func (e RadarPoint) Get(c *gin.Context) {
-	req := dto.RadarPointGetReq{}
+func (e RadarPoint) GetRadarPointById(c *gin.Context) {
+	req := dto.GetRadarPointByIdReq{}
 	s := service.RadarPoint{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -142,30 +142,29 @@ func (e RadarPoint) Get(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	var object models.RadarPoint
-
+	var radarPointItem models.RadarPoint
 	p := actions.GetPermissionFromContext(c)
-	err = s.Get(&req, p, &object)
+	err = s.Get(&req, p, &radarPointItem)
 	if err != nil {
 		e.Error(500, err, fmt.Sprintf("获取监测点管理失败，\r\n失败信息 %s", err.Error()))
 		return
 	}
 
-	e.OK(object, "查询成功")
+	e.OK(radarPointItem, "查询成功")
 }
 
-// Insert 创建监测点管理
+// InsertRadarPoint 创建监测点管理
 // @Summary 创建监测点管理
 // @Description 创建监测点管理
 // @Tags 监测点管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.RadarPointInsertReq true "data"
+// @Param data body dto.InsertRadarPoint true "data"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "添加成功"}"
-// @Router /api/v1/radar-point [post]
+// @Router /api/v1/radar_point [post]
 // @Security Bearer
-func (e RadarPoint) Insert(c *gin.Context) {
-	req := dto.RadarPointInsertReq{}
+func (e RadarPoint) InsertRadarPoint(c *gin.Context) {
+	req := dto.InsertRadarPointReq{}
 	s := service.RadarPoint{}
 	var err error
 	if err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors; err != nil {
@@ -215,19 +214,19 @@ func (e RadarPoint) convertToMapSlice(points []models.RadarPoint) []dto.RadarPoi
 	return mapSlice
 }
 
-// Update 修改监测点管理
+// UpdateRadarPoint 修改监测点管理
 // @Summary 修改监测点管理
 // @Description 修改监测点管理
 // @Tags 监测点管理
 // @Accept application/json
 // @Product application/json
 // @Param id path int true "id"
-// @Param data body dto.RadarPointUpdateReq true "body"
+// @Param data body dto.UpdateRadarPointReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "修改成功"}"
-// @Router /api/v1/radar-point/{id} [put]
+// @Router /api/v1/radar_point/{id} [put]
 // @Security Bearer
-func (e RadarPoint) Update(c *gin.Context) {
-	req := dto.RadarPointUpdateReq{}
+func (e RadarPoint) UpdateRadarPoint(c *gin.Context) {
+	req := dto.UpdateRadarPointReq{}
 	s := service.RadarPoint{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -250,17 +249,17 @@ func (e RadarPoint) Update(c *gin.Context) {
 	e.OK(req.GetId(), "修改成功")
 }
 
-// Delete 删除监测点管理
+// DeleteRadarPoint 删除监测点管理
 // @Summary 删除监测点管理
 // @Description 删除监测点管理
 // @Tags 监测点管理
-// @Param data body dto.RadarPointDeleteReq true "body"
+// @Param data body dto.DeleteRadarPointReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "删除成功"}"
-// @Router /api/v1/radar-point [delete]
+// @Router /api/v1/radar_point [delete]
 // @Security Bearer
-func (e RadarPoint) Delete(c *gin.Context) {
+func (e RadarPoint) DeleteRadarPoint(c *gin.Context) {
 	s := service.RadarPoint{}
-	req := dto.RadarPointDeleteReq{}
+	req := dto.DeleteRadarPointReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -302,7 +301,7 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 		if radarId == 0 {
 			radarId, _ = s.GetRadarIdByPointId(id, p)
 		}
-		req := dto.RadarPointGetReq{Id: id}
+		req := dto.GetRadarPointByIdReq{Id: id}
 		object := &models.RadarPoint{}
 		err := s.Get(&req, p, object)
 		if err == nil {
@@ -314,52 +313,122 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 	return radarId, points, nil
 }
 
-// GetDeformationData 获取变形点数据
-// @Summary 获取变形点数据
-// @Description 根据设备ID、索引和时间范围获取采样后的变形点数据
+// GetDeformationData 获取形变点数据
+// @Summary 获取形变点数据
+// @Description 根据设备ID、索引和时间范围获取采样后的形变点数据
 // @Tags 监测点管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.DeformationPointQueryReq true "变形点数据查询参数"
-// @Success 200 {object} response.Response{data=[]mongosvr.DeformationPointData} "成功"
-// @Router /api/v1/radar-point/deformation-data [post]
+// @Param data body dto.GetDeformationDataReq true "形变点数据查询参数"
+// @Success 200 {object} response.Response{data=[]dto.GetDeformationDataResp} "成功"
+// @Router /api/v1/radar_point/deformation_data [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationData(c *gin.Context) {
-	req := dto.DeformationPointQueryReq{}
+	req := dto.GetDeformationDataReq{}
 	var err error
-	if err = e.MakeContext(c).MakeOrm().Bind(&req).Errors; err != nil {
+	var s = service.DeformationPoint{}
+	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Bind(&req).Errors; err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
 	}
-
 	// 参数验证
-	if req.Devid <= 0 || req.Index < 0 || req.StartTime == "" || req.EndTime == "" {
+	if req.RadarId <= 0 || req.Index < 0 || req.StartTime == "" || req.EndTime == "" {
 		e.Error(400, nil, "参数不完整")
 		return
 	}
-	hours := req.Hours
-	radarId := req.Devid
-	pointIndex := req.Index
-	startTime := req.StartTime
-	endTime := req.EndTime
-	timeType := req.TimeType
-	if hours < 0 {
-		hours = 0
-	}
 
 	// 获取数据
-	var lastTime time.Time
-	var data []mongosvr.DeformationPointData
-	if data, lastTime, err = mongosvr.QueryDeformationPointData(radarId, pointIndex, startTime, endTime, hours, timeType); err != nil {
-		e.Error(500, err, fmt.Sprintf("获取变形点数据失败: %s", err.Error()))
+	var resp *dto.GetDeformationDataResp
+	if resp, err = s.GetDeformationPoinList(c, req); err != nil {
+		e.Error(500, err, fmt.Sprintf("获取形变点数据失败: %s", err.Error()))
+		return
+	}
+	// 返回采样后的数据
+	e.OK(resp, "查询成功")
+}
+
+// GetDeformationData 获取形变速度数据
+// @Summary 获取形变速度数据
+// @Description 根据设备ID、索引和时间范围获取采样后的形变点速度数据
+// @Tags 监测点管理
+// @Accept application/json
+// @Product application/json
+// @Param data body dto.GetDeformationVelocityReq true "形变点数据查询参数"
+// @Success 200 {object} response.Response{data=[]mongosvr.DeformationPointData} "成功"
+// @Router /api/v1/radar_point/deformation_data [post]
+// @Security Bearer
+func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
+	req := dto.GetDeformationDataReq{}
+	var err error
+	var s = service.DeformationPoint{}
+	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Bind(&req).Errors; err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	// 参数验证
+	if req.RadarId <= 0 || req.Index < 0 || req.StartTime == "" || req.EndTime == "" {
+		e.Error(400, nil, "参数不完整")
 		return
 	}
 
-	resp := dto.DeformationPointQueryResp{}
-	resp.LastTime = lastTime
-	resp.List = data
-
+	// 获取数据
+	var resp *dto.GetDeformationVelocityResp
+	if resp, err = s.GetDeformationVelocity(c, req); err != nil {
+		e.Error(500, err, fmt.Sprintf("获取形变速度统计失败: %s", err.Error()))
+		return
+	}
 	// 返回采样后的数据
 	e.OK(resp, "查询成功")
+}
+
+// GetDeformationData 获取形变加速度数据
+// @Summary 获取形变加速度数据
+// @Description 根据设备ID、索引和时间范围获取采样后的形变点加速度数据
+// @Tags 监测点管理
+// @Accept application/json
+// @Product application/json
+// @Param data body dto.GetDeformationVelocityReq true "形变点数据查询参数"
+// @Success 200 {object} response.Response{data=[]mongosvr.DeformationPointData} "成功"
+// @Router /api/v1/radar_point/deformation_data [post]
+// @Security Bearer
+func (e RadarPoint) GetDeformationAcceleration(c *gin.Context) {
+	// req := dto.GetDeformationAccelerationReq{}
+	// var err error
+	// if err = e.MakeContext(c).MakeOrm().Bind(&req).Errors; err != nil {
+	// 	e.Logger.Error(err)
+	// 	e.Error(500, err, err.Error())
+	// 	return
+	// }
+
+	// // 参数验证
+	// if req.RadarId <= 0 || req.Index < 0 || req.StartTime == "" || req.EndTime == "" {
+	// 	e.Error(400, nil, "参数不完整")
+	// 	return
+	// }
+	// hours := req.Hours
+	// radarId := req.RadarId
+	// pointIndex := req.Index
+	// startTime := req.StartTime
+	// endTime := req.EndTime
+	// timeType := req.TimeType
+	// if hours < 0 {
+	// 	hours = 0
+	// }
+
+	// // 获取数据
+	// var lastTime time.Time
+	// var data []mongosvr.DeformationPointModel
+	// if data, lastTime, err = mongosvr.DeformationPointService.QueryDeformationPointData(radarId, pointIndex, startTime, endTime, hours, timeType); err != nil {
+	// 	e.Error(500, err, fmt.Sprintf("获取形变点数据失败: %s", err.Error()))
+	// 	return
+	// }
+
+	// resp := dto.GetDeformationDataResp{}
+	// resp.LastTime = lastTime
+	// resp.List = data
+
+	// // 返回采样后的数据
+	// e.OK(resp, "查询成功")
 }

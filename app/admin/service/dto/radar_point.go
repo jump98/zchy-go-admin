@@ -6,7 +6,7 @@ import (
 	common "go-admin/common/models"
 )
 
-type RadarPointGetPageReq struct {
+type GetRadarPointListDeptIdReq struct {
 	dto.Pagination `search:"-"`
 	Id             int    `form:"id"  search:"type:exact;column:id;table:radar_point" comment:"PointID"`
 	PointName      string `form:"pointName"  search:"type:contains;column:point_name;table:radar_point" comment:"监测点名称"`
@@ -38,11 +38,11 @@ type RadarPointOrder struct {
 	DeletedAt  string `form:"deletedAtOrder"  search:"type:order;column:deleted_at;table:radar_point"`
 }
 
-func (m *RadarPointGetPageReq) GetNeedSearch() interface{} {
+func (m *GetRadarPointListDeptIdReq) GetNeedSearch() interface{} {
 	return *m
 }
 
-type RadarPointInsertReq struct {
+type InsertRadarPointReq struct {
 	Id         int    `json:"-" comment:"PointID"` // PointID
 	PointName  string `json:"pointName" comment:"监测点名称"`
 	PointKey   string `json:"pointKey" comment:"监测点编号"`
@@ -60,7 +60,7 @@ type RadarPointInsertReq struct {
 	common.ControlBy
 }
 
-func (s *RadarPointInsertReq) Generate(model *models.RadarPoint) {
+func (s *InsertRadarPointReq) Generate(model *models.RadarPoint) {
 	if s.Id == 0 {
 		model.Id = s.Id
 	}
@@ -80,11 +80,11 @@ func (s *RadarPointInsertReq) Generate(model *models.RadarPoint) {
 	model.CreateBy = s.CreateBy // 添加这而，需要记录是被谁创建的
 }
 
-func (s *RadarPointInsertReq) GetId() interface{} {
+func (s *InsertRadarPointReq) GetId() interface{} {
 	return s.Id
 }
 
-type RadarPointUpdateReq struct {
+type UpdateRadarPointReq struct {
 	Id         int    `uri:"id" comment:"PointID"` // PointID
 	PointName  string `json:"pointName" comment:"监测点名称"`
 	PointKey   string `json:"pointKey" comment:"监测点编号"`
@@ -121,7 +121,7 @@ type RadarPointUpdateReq struct {
 // :
 // "005"
 
-func (s *RadarPointUpdateReq) Generate(model *models.RadarPoint) {
+func (s *UpdateRadarPointReq) Generate(model *models.RadarPoint) {
 	if s.Id == 0 {
 		model.Id = s.Id
 	}
@@ -141,27 +141,27 @@ func (s *RadarPointUpdateReq) Generate(model *models.RadarPoint) {
 	model.UpdateBy = s.UpdateBy // 添加这而，需要记录是被谁更新的
 }
 
-func (s *RadarPointUpdateReq) GetId() interface{} {
+func (s *UpdateRadarPointReq) GetId() interface{} {
 	return s.Id
 	//return s.id
 }
 
-// RadarPointGetReq 功能获取请求参数
-type RadarPointGetReq struct {
+// GetRadarPointByIdReq 功能获取请求参数
+type GetRadarPointByIdReq struct {
 	Id int `uri:"id"`
 }
 
-func (s *RadarPointGetReq) GetId() interface{} {
+func (s *GetRadarPointByIdReq) GetId() interface{} {
 	return s.Id
 	//return s.id
 }
 
-// RadarPointDeleteReq 功能删除请求参数
-type RadarPointDeleteReq struct {
+// DeleteRadarPointReq 功能删除请求参数
+type DeleteRadarPointReq struct {
 	Ids []int `json:"ids"`
 }
 
-func (s *RadarPointDeleteReq) GetId() interface{} {
+func (s *DeleteRadarPointReq) GetId() interface{} {
 	return s.Ids
 }
 

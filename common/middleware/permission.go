@@ -38,9 +38,6 @@ func AuthCheckRole() gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		// if "/api/v1/radar-point/deformation-data" == c.Request.URL.Path {
-		// 	log.Errorf("AuthCheckRole method:%s path:%s", c.Request.Method, c.Request.URL.Path)
-		// }
 		res, err = e.Enforce(v["rolekey"], c.Request.URL.Path, c.Request.Method)
 		if err != nil {
 			log.Errorf("AuthCheckRole error:%s method:%s path:%s", err, c.Request.Method, c.Request.URL.Path)
