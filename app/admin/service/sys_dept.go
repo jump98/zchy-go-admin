@@ -235,7 +235,7 @@ func (e *SysDept) deptPageCall(deptlist *[]models.SysDept, menu models.SysDept) 
 		mi.ParentId = list[j].ParentId
 		mi.DeptPath = list[j].DeptPath
 		mi.DeptName = list[j].DeptName
-		mi.FromProject = list[j].FromProject
+		// mi.FromProject = list[j].FromProject
 		mi.Sort = list[j].Sort
 		mi.Leader = list[j].Leader
 		mi.Phone = list[j].Phone
@@ -319,7 +319,7 @@ func (e *SysDept) GetOrCreateById(id int, model *models.SysDept) error {
 		di.DeptId = id
 		di.ParentId = 1 //根目录下
 		di.DeptName = "新项目-" + strconv.FormatInt(int64(id), 10)
-		di.FromProject = 1
+		// di.FromProject = 1
 		di.Sort = 0
 		di.Leader = "未知"
 		di.Status = 2

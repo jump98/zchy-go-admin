@@ -43,7 +43,7 @@ func (m *GetRadarPointListDeptIdReq) GetNeedSearch() interface{} {
 }
 
 type InsertRadarPointReq struct {
-	Id         int    `json:"-" comment:"PointID"` // PointID
+	Id         int64  `json:"-" comment:"PointID"` // PointID
 	PointName  string `json:"pointName" comment:"监测点名称"`
 	PointKey   string `json:"pointKey" comment:"监测点编号"`
 	PointType  string `json:"pointType" comment:"监测点类型"`
@@ -52,7 +52,7 @@ type InsertRadarPointReq struct {
 	Lat        string `json:"lat" comment:"纬度"`
 	Alt        string `json:"alt" comment:"高度"`
 	Distance   string `json:"distance" comment:"距离"`
-	PointIndex int    `json:"pointIndex" comment:"下标"`
+	PointIndex int64  `json:"pointIndex" comment:"下标"`
 	Remark     string `json:"remark" comment:"备注"`
 	AStatus    string `json:"aStatus" comment:"激活状态"`
 	XStatus    string `json:"xStatus" comment:"消警状态"`
@@ -85,7 +85,7 @@ func (s *InsertRadarPointReq) GetId() interface{} {
 }
 
 type UpdateRadarPointReq struct {
-	Id         int    `uri:"id" comment:"PointID"` // PointID
+	Id         int64  `uri:"id" comment:"PointID"` // PointID
 	PointName  string `json:"pointName" comment:"监测点名称"`
 	PointKey   string `json:"pointKey" comment:"监测点编号"`
 	PointType  string `json:"pointType" comment:"监测点类型"`
@@ -94,7 +94,7 @@ type UpdateRadarPointReq struct {
 	Lat        string `json:"lat" comment:"纬度"`
 	Alt        string `json:"alt" comment:"高度"`
 	Distance   string `json:"distance" comment:"距离"`
-	PointIndex int    `json:"pointIndex" comment:"下标"`
+	PointIndex int64  `json:"pointIndex" comment:"下标"`
 	Remark     string `json:"remark" comment:"备注"`
 	AStatus    string `json:"aStatus" comment:"激活状态"`
 	XStatus    string `json:"xStatus" comment:"消警状态"`
@@ -166,5 +166,5 @@ func (s *DeleteRadarPointReq) GetId() interface{} {
 }
 
 type RadarPointIndex struct {
-	Index int `json:"index" comment:"监测点下标"`
+	Index int64 `json:"index" comment:"监测点下标"`
 }

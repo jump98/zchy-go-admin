@@ -47,7 +47,7 @@ func (e *RadarPoint) GetDeptPage(c *dto.GetRadarPointListDeptIdReq, deptid int, 
 			cDto.MakeCondition(c.GetNeedSearch()),
 			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
 			actions.Permission(data.TableName(), p),
-		).Where("radar_id in(select radar_id from sys_radar where dept_id=?)", deptid).
+		).Where("radar_id in(select radar_id from radar where dept_id=?)", deptid).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 	if err != nil {

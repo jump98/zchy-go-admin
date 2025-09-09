@@ -6,8 +6,8 @@ import (
 
 	"gorm.io/gorm"
 
+	"go-admin/app/radar/models"
 	"go-admin/cmd/migrate/migration"
-	"go-admin/cmd/migrate/migration/models"
 	common "go-admin/common/models"
 )
 
@@ -20,8 +20,13 @@ func _1752490642079Test(db *gorm.DB, version string) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		fmt.Println("创建数据库的表=================================")
 		err := tx.Debug().Migrator().AutoMigrate(
-			new(models.SysRadar),
+			new(models.Radar),
 			new(models.RadarPoint),
+			new(models.RadarAlarmRule),
+			new(models.RadarAlarmRuleLevel),
+			new(models.RadarAlarmConfig),
+			new(models.AlarmContactGroup),
+			new(models.AlarmContactGroupMember),
 		)
 		if err != nil {
 			fmt.Println("创建数据库的表出错:", err)

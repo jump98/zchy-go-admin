@@ -9,19 +9,19 @@ package dto
 
 // type SysDeviceRadarGetPageReq struct {
 // 	dto.Pagination `search:"-"`
-// 	RadarId        int    `form:"radarId" search:"type:exact;column:radar_id;table:sys_radar" comment:"雷达ID"`
-// 	RadarName      string `form:"radarName" search:"type:contains;column:radar_name;table:sys_radar" comment:"雷达名称"`
-// 	RadarKey       string `form:"radarKey" search:"type:contains;column:radar_key;table:sys_radar" comment:"雷达编号"`
-// 	SpecialKey     string `form:"specialkey" search:"type:contains;column:special_key;table:sys_radar" comment:"特殊编号"`
-// 	DeptJoin       `search:"type:left;on:dept_id:dept_id;table:sys_radar;join:sys_dept"`
+// 	RadarId        int    `form:"radarId" search:"type:exact;column:radar_id;table:radar" comment:"雷达ID"`
+// 	RadarName      string `form:"radarName" search:"type:contains;column:radar_name;table:radar" comment:"雷达名称"`
+// 	RadarKey       string `form:"radarKey" search:"type:contains;column:radar_key;table:radar" comment:"雷达编号"`
+// 	SpecialKey     string `form:"specialkey" search:"type:contains;column:special_key;table:radar" comment:"特殊编号"`
+// 	DeptJoin       `search:"type:left;on:dept_id:dept_id;table:radar;join:sys_dept"`
 // 	SysDeviceRadarOrder
 // }
 
 // type SysDeviceRadarOrder struct {
-// 	RadarIdOrder   string `search:"type:order;column:radar_id;table:sys_radar" form:"radarIdOrder"`
-// 	RadarNameOrder string `search:"type:order;column:radar_name;table:sys_radar" form:"radarNameOrder"`
-// 	StatusOrder    string `search:"type:order;column:status;table:sys_radar" form:"statusOrder"`
-// 	CreatedAtOrder string `search:"type:order;column:created_at;table:sys_radar" form:"createdAtOrder"`
+// 	RadarIdOrder   string `search:"type:order;column:radar_id;table:radar" form:"radarIdOrder"`
+// 	RadarNameOrder string `search:"type:order;column:radar_name;table:radar" form:"radarNameOrder"`
+// 	StatusOrder    string `search:"type:order;column:status;table:radar" form:"statusOrder"`
+// 	CreatedAtOrder string `search:"type:order;column:created_at;table:radar" form:"createdAtOrder"`
 // }
 
 // func (m *SysDeviceRadarGetPageReq) GetNeedSearch() interface{} {

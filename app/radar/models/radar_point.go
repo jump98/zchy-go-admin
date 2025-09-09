@@ -8,12 +8,12 @@ import (
 
 // 雷达检测点表
 type RadarPoint struct {
-	Id         int    `json:"id"          gorm:"primaryKey;autoIncrement;comment:主键编码"`
+	Id         int64  `json:"id"          gorm:"primaryKey;autoIncrement;comment:主键编码"`
 	PointName  string `json:"pointName"   gorm:"type:varchar(64);  comment:监测点名称"`
 	PointKey   string `json:"pointKey"    gorm:"type:varchar(100); comment:监测点编号"`
 	PointType  string `json:"pointType"   gorm:"type:varchar(10);  comment:监测点类型"`
-	RadarId    int64  `json:"radarId"     gorm:"type:int; uniqueIndex:idx_radarid_pointindex_key; comment:雷达ID"`
-	PointIndex int    `json:"pointIndex"  gorm:"type:int; uniqueIndex:idx_radarid_pointindex_key; comment:下标"`
+	RadarId    int64  `json:"radarId"     gorm:"uniqueIndex:idx_radarid_pointindex_key; comment:雷达ID"`
+	PointIndex int64  `json:"pointIndex"  gorm:"uniqueIndex:idx_radarid_pointindex_key; comment:下标"`
 	Lng        string `json:"lng"         gorm:"type:varchar(20);  comment:经度"` //经度
 	Lat        string `json:"lat"         gorm:"type:varchar(20);  comment:纬度"` //纬度
 	Alt        string `json:"alt"         gorm:"type:varchar(20);  comment:高度"` //高度

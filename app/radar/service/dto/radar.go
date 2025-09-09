@@ -8,12 +8,12 @@ import (
 
 type RadarGetPageReq struct {
 	dto.Pagination `search:"-"`
-	RadarId        int64  `form:"radarId"  search:"type:exact;column:radar_id;table:sys_radar" comment:"RadarID"`
-	RadarName      string `form:"radarName"  search:"type:exact;column:radar_name;table:sys_radar" comment:"雷达名称"`
-	RadarKey       string `form:"radarKey"  search:"type:exact;column:radar_key;table:sys_radar" comment:"雷达编号"`
-	SpecialKey     string `form:"specialKey"  search:"type:exact;column:special_key;table:sys_radar" comment:"雷达特殊编号"`
-	//DeptId         int64  `form:"deptId"  search:"type:exact;column:dept_id;table:sys_radar" comment:"部门"`
-	DeptJoin `search:"type:left;on:dept_id:dept_id;table:sys_radar;join:sys_dept"`
+	RadarId        int64  `form:"radarId"  search:"type:exact;column:radar_id;table:radar" comment:"RadarID"`
+	RadarName      string `form:"radarName"  search:"type:exact;column:radar_name;table:radar" comment:"雷达名称"`
+	RadarKey       string `form:"radarKey"  search:"type:exact;column:radar_key;table:radar" comment:"雷达编号"`
+	SpecialKey     string `form:"specialKey"  search:"type:exact;column:special_key;table:radar" comment:"雷达特殊编号"`
+	//DeptId         int64  `form:"deptId"  search:"type:exact;column:dept_id;table:radar" comment:"部门"`
+	DeptJoin `search:"type:left;on:dept_id:dept_id;table:radar;join:sys_dept"`
 	RadarOrder
 }
 
@@ -22,21 +22,21 @@ type DeptJoin struct {
 }
 
 type RadarOrder struct {
-	RadarId    string `form:"radarIdOrder"  search:"type:order;column:radar_id;table:sys_radar"`
-	RadarName  string `form:"radarNameOrder"  search:"type:order;column:radar_name;table:sys_radar"`
-	RadarKey   string `form:"radarKeyOrder"  search:"type:order;column:radar_key;table:sys_radar"`
-	SpecialKey string `form:"specialKeyOrder"  search:"type:order;column:special_key;table:sys_radar"`
-	DeptId     string `form:"deptIdOrder"  search:"type:order;column:dept_id;table:sys_radar"`
-	Lng        string `form:"lngOrder"  search:"type:order;column:lng;table:sys_radar"`
-	Lat        string `form:"latOrder"  search:"type:order;column:lat;table:sys_radar"`
-	Alt        string `form:"altOrder"  search:"type:order;column:alt;table:sys_radar"`
-	Remark     string `form:"remarkOrder"  search:"type:order;column:remark;table:sys_radar"`
-	Status     string `form:"statusOrder"  search:"type:order;column:status;table:sys_radar"`
-	CreateBy   string `form:"createByOrder"  search:"type:order;column:create_by;table:sys_radar"`
-	UpdateBy   string `form:"updateByOrder"  search:"type:order;column:update_by;table:sys_radar"`
-	CreatedAt  string `form:"createdAtOrder"  search:"type:order;column:created_at;table:sys_radar"`
-	UpdatedAt  string `form:"updatedAtOrder"  search:"type:order;column:updated_at;table:sys_radar"`
-	DeletedAt  string `form:"deletedAtOrder"  search:"type:order;column:deleted_at;table:sys_radar"`
+	RadarId    string `form:"radarIdOrder"  search:"type:order;column:radar_id;table:radar"`
+	RadarName  string `form:"radarNameOrder"  search:"type:order;column:radar_name;table:radar"`
+	RadarKey   string `form:"radarKeyOrder"  search:"type:order;column:radar_key;table:radar"`
+	SpecialKey string `form:"specialKeyOrder"  search:"type:order;column:special_key;table:radar"`
+	DeptId     string `form:"deptIdOrder"  search:"type:order;column:dept_id;table:radar"`
+	Lng        string `form:"lngOrder"  search:"type:order;column:lng;table:radar"`
+	Lat        string `form:"latOrder"  search:"type:order;column:lat;table:radar"`
+	Alt        string `form:"altOrder"  search:"type:order;column:alt;table:radar"`
+	Remark     string `form:"remarkOrder"  search:"type:order;column:remark;table:radar"`
+	Status     string `form:"statusOrder"  search:"type:order;column:status;table:radar"`
+	CreateBy   string `form:"createByOrder"  search:"type:order;column:create_by;table:radar"`
+	UpdateBy   string `form:"updateByOrder"  search:"type:order;column:update_by;table:radar"`
+	CreatedAt  string `form:"createdAtOrder"  search:"type:order;column:created_at;table:radar"`
+	UpdatedAt  string `form:"updatedAtOrder"  search:"type:order;column:updated_at;table:radar"`
+	DeletedAt  string `form:"deletedAtOrder"  search:"type:order;column:deleted_at;table:radar"`
 }
 
 func (m *RadarGetPageReq) GetNeedSearch() interface{} {
@@ -44,19 +44,19 @@ func (m *RadarGetPageReq) GetNeedSearch() interface{} {
 }
 
 type RadarInsertReq struct {
-	RadarId     int64  `json:"-" comment:"RadarID"` // RadarID
-	RadarName   string `json:"radarName" comment:"雷达名称"`
-	RadarKey    string `json:"radarKey" comment:"雷达编号"`
-	SpecialKey  string `json:"specialKey" comment:"雷达特殊编号"`
-	DeptId      int    `json:"deptId" comment:"部门" vd:"$>0"`
-	Lng         string `json:"lng" comment:"经度"`
-	Lat         string `json:"lat" comment:"纬度"`
-	Alt         string `json:"alt" comment:"高度"`
-	Remark      string `json:"remark" comment:"备注"`
-	Status      string `json:"status" comment:"状态"`
-	Vender      string `json:"vender" comment:"设备厂家名"`
-	Secret      string `json:"secret" comment:"密钥"`
-	FromProject int    `json:"fromProject" comment:"来自项目"`
+	RadarId    int64  `json:"-" comment:"RadarID"` // RadarID
+	RadarName  string `json:"radarName" comment:"雷达名称"`
+	RadarKey   string `json:"radarKey" comment:"雷达编号"`
+	SpecialKey string `json:"specialKey" comment:"雷达特殊编号"`
+	DeptId     int    `json:"deptId" comment:"部门" vd:"$>0"`
+	Lng        string `json:"lng" comment:"经度"`
+	Lat        string `json:"lat" comment:"纬度"`
+	Alt        string `json:"alt" comment:"高度"`
+	Remark     string `json:"remark" comment:"备注"`
+	Status     string `json:"status" comment:"状态"`
+	Vender     string `json:"vender" comment:"设备厂家名"`
+	Secret     string `json:"secret" comment:"密钥"`
+	// FromProject int    `json:"fromProject" comment:"来自项目"`
 	common.ControlBy
 }
 
@@ -75,7 +75,7 @@ func (s *RadarInsertReq) Generate(model *models.Radar) {
 	model.Remark = s.Remark
 	model.Status = s.Status
 	model.CreateBy = s.CreateBy // 添加这而，需要记录是被谁创建的
-	model.FromProject = s.FromProject
+	// model.FromProject = s.FromProject
 	model.Vender = s.Vender
 	model.Secret = s.Secret
 }
@@ -85,17 +85,17 @@ func (s *RadarInsertReq) GetId() interface{} {
 }
 
 type RadarUpdateReq struct {
-	RadarId     int64  `uri:"radarId" comment:"RadarID"` // RadarID
-	RadarName   string `json:"radarName" comment:"雷达名称"`
-	RadarKey    string `json:"radarKey" comment:"雷达编号"`
-	SpecialKey  string `json:"specialKey" comment:"雷达特殊编号"`
-	DeptId      int    `json:"deptId" comment:"部门" vd:"$>0"`
-	Lng         string `json:"lng" comment:"经度"`
-	Lat         string `json:"lat" comment:"纬度"`
-	Alt         string `json:"alt" comment:"高度"`
-	Remark      string `json:"remark" comment:"备注"`
-	Status      string `json:"status" comment:"状态"`
-	FromProject int    `json:"fromProject" comment:"来自项目"`
+	RadarId    int64  `uri:"radarId" comment:"RadarID"` // RadarID
+	RadarName  string `json:"radarName" comment:"雷达名称"`
+	RadarKey   string `json:"radarKey" comment:"雷达编号"`
+	SpecialKey string `json:"specialKey" comment:"雷达特殊编号"`
+	DeptId     int64  `json:"deptId" comment:"部门" vd:"$>0"`
+	Lng        string `json:"lng" comment:"经度"`
+	Lat        string `json:"lat" comment:"纬度"`
+	Alt        string `json:"alt" comment:"高度"`
+	Remark     string `json:"remark" comment:"备注"`
+	Status     string `json:"status" comment:"状态"`
+	// FromProject int64  `json:"fromProject" comment:"来自项目"`
 	common.ControlBy
 }
 
@@ -114,7 +114,7 @@ func (s *RadarUpdateReq) Generate(model *models.Radar) {
 	model.Remark = s.Remark
 	model.Status = s.Status
 	model.UpdateBy = s.UpdateBy // 添加这而，需要记录是被谁更新的
-	model.FromProject = s.FromProject
+	// model.FromProject = s.FromProject
 }
 
 func (s *RadarUpdateReq) GetId() interface{} {
