@@ -23,6 +23,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/qiniu/go-sdk/v7 v7.18.2
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/lo v1.51.0
 	github.com/shirou/gopsutil/v3 v3.23.10
 	github.com/spf13/cobra v1.7.0
 	github.com/swaggo/files v1.0.1
@@ -155,10 +156,10 @@ require (
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/term v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

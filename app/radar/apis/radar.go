@@ -210,7 +210,7 @@ func (e Radar) Delete(c *gin.Context) {
 		return
 	}
 	for i := 0; i < len(req.Ids); i++ {
-		err = spt.RemoveRadarPoint(int64(req.Ids[i]), p)
+		spt.RemoveRadarPoint(int64(req.Ids[i]), p)
 	}
 
 	err = s.Remove(&req, p)
@@ -272,6 +272,7 @@ func (e Radar) GetRadarImage(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
+
 	//插入获取图像命令
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     req.RadarId,
@@ -280,6 +281,7 @@ func (e Radar) GetRadarImage(c *gin.Context) {
 		TimeStamp:   time.Now().Unix(),
 		Parameters:  map[string]interface{}{},
 	})
+
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     req.RadarId,
 		CommandCode: mongosvr.CMD_RD_GETSTATEINFO,

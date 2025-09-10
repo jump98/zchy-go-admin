@@ -17,9 +17,9 @@ const (
 )
 
 // 预警规则
-type RadarAlarmRule struct {
+type AlarmRule struct {
 	Id        int64         `json:"id"             gorm:"primaryKey;autoIncrement;comment:主键编码"`
-	DeptId    int64         `json:"deptId"         gorm:"comment:机构"`                  //机构ID
+	DeptId    int64         `json:"deptId"         gorm:"comment:机构Id"`                //机构ID
 	AlarmType AlarmRuleType `json:"alarmType"      gorm:"type:tinyint;  comment:预警类型"` //预警类型
 	AlarmName string        `json:"alarmName"      gorm:"size:64;   comment:规则名称"`     //预警规则名称
 	Remark    string        `json:"remark"         gorm:"size:255;  comment:规则介绍"`     //预警规则介绍
@@ -27,6 +27,6 @@ type RadarAlarmRule struct {
 	UpdatedAt time.Time     `json:"updatedAt"      gorm:"comment:最后更新时间"`
 }
 
-func (RadarAlarmRule) TableName() string {
+func (AlarmRule) TableName() string {
 	return "alarm_rule"
 }

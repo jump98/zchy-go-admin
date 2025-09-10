@@ -197,6 +197,7 @@ func (e RadarPoint) InsertRadarPoint(c *gin.Context) {
 		TimeStamp:   time.Now().Unix(),
 		Parameters:  map[string]interface{}{"polygon": param},
 	})
+
 	if err != nil {
 		e.Error(500, err, "创建监测点管理失败")
 		return

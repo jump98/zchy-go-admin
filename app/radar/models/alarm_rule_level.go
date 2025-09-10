@@ -31,18 +31,19 @@ type Condition struct {
 }
 
 // 预警规则等级表
-type RadarAlarmRuleLevel struct {
-	Id         int64               `json:"id"         gorm:"primaryKey;autoIncrement"`
-	RuleId     int64               `json:"ruleId"     gorm:"uniqueIndex:idx_ruleid_level_key;"`
-	AlarmLevel AlarmLevel          `json:"alarmLevel" gorm:"uniqueIndex:idx_ruleid_level_key; type:tinyint;not null;comment:预警等级 1=红 2=橙 3=黄 4=蓝"` //预警等级 1=红 2=橙 3=黄 4=蓝
-	Option     JSON[Condition]     `json:"option"     gorm:"serializer:json;comment:条件"`                                                           // GORM v2                                          //预警条件
-	OptionMode AlarmRuleOptionMode `json:"optionMode" gorm:"type:tinyint;    default:1;comment:条件组合方式"`                                            //预警满足条件:all、or
-	Suggestion string              `json:"suggestion" gorm:"size:255;  comment:处理建议"`
-	Horn       bool                `json:"horn"       gorm:"type:tinyint(1) ;default:0;comment:喇叭是否开启"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+type AlarmRuleLevel struct {
+	Id          int64               `json:"id"          gorm:"primaryKey;autoIncrement"`
+	DeptId      int64               `json:"deptId"      gorm:"comment:机构Id"` //机构ID
+	AlarmRuleId int64               `json:"alarmRuleId" gorm:"uniqueIndex:idx_ruleid_level_key;"`
+	AlarmLevel  AlarmLevel          `json:"alarmLevel"  gorm:"uniqueIndex:idx_ruleid_level_key; type:tinyint;not null;comment:预警等级 1=红 2=橙 3=黄 4=蓝"` //预警等级 1=红 2=橙 3=黄 4=蓝
+	Option      JSON[Condition]     `json:"option"      gorm:"serializer:json;comment:条件"`                                                           //预警条件
+	OptionMode  AlarmRuleOptionMode `json:"optionMode"  gorm:"type:tinyint;    default:1;comment:条件组合方式"`                                            //预警满足条件:all、or
+	Suggestion  string              `json:"suggestion"  gorm:"size:255;  comment:处理建议"`
+	Horn        bool                `json:"horn"        gorm:"type:tinyint(1) ;default:0;comment:喇叭是否开启"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
-func (RadarAlarmRuleLevel) TableName() string {
+func (AlarmRuleLevel) TableName() string {
 	return "alarm_rule_level"
 }

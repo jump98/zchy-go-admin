@@ -102,25 +102,6 @@ type UpdateRadarPointReq struct {
 	common.ControlBy
 }
 
-// aStatus
-// :
-// "0"
-// lat
-// :
-// "60"
-// lng
-// :
-// "50"
-// pointIndex
-// :
-// 4760
-// pointKey
-// :
-// "005"
-// pointName
-// :
-// "005"
-
 func (s *UpdateRadarPointReq) Generate(model *models.RadarPoint) {
 	if s.Id == 0 {
 		model.Id = s.Id

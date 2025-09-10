@@ -2,6 +2,7 @@ package actions
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/go-admin-team/go-admin-core/logger"
@@ -38,6 +39,8 @@ func PermissionAction() gin.HandlerFunc {
 				return
 			}
 		}
+
+		fmt.Printf("打印权限信息: %+v \n", p)
 		c.Set(PermissionKey, p)
 		c.Next()
 	}

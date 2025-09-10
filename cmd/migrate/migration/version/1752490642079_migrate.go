@@ -22,9 +22,9 @@ func _1752490642079Test(db *gorm.DB, version string) error {
 		err := tx.Debug().Migrator().AutoMigrate(
 			new(models.Radar),
 			new(models.RadarPoint),
-			new(models.RadarAlarmRule),
-			new(models.RadarAlarmRuleLevel),
-			new(models.RadarAlarmConfig),
+			new(models.AlarmRule),
+			new(models.AlarmRuleLevel),
+			new(models.AlarmConfig),
 			new(models.AlarmContactGroup),
 			new(models.AlarmContactGroupMember),
 		)
