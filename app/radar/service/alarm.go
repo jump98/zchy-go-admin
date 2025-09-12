@@ -14,7 +14,7 @@ type Alarm struct {
 	service.Service
 }
 
-// 获取所有的预警规则
+// GetAlarmRules 获取所有的预警规则
 func (e *Alarm) GetAlarmRules(deptId int64) ([]models.AlarmRule, []models.AlarmRuleLevel, error) {
 	var err error
 	alarmRuleList := make([]models.AlarmRule, 0)
@@ -28,7 +28,7 @@ func (e *Alarm) GetAlarmRules(deptId int64) ([]models.AlarmRule, []models.AlarmR
 	return alarmRuleList, alarmRuleLevelList, nil
 }
 
-// 增加预警规则
+// AddAlarmRule 增加预警规则
 func (e *Alarm) AddAlarmRule(req dto.AddAlarmRuleReq) error {
 	var errTx error
 	tx := e.Orm.Begin()
@@ -69,7 +69,7 @@ func (e *Alarm) AddAlarmRule(req dto.AddAlarmRuleReq) error {
 	return errTx
 }
 
-// 修改预警规则
+// UpdateAlarmRule 修改预警规则
 func (e *Alarm) UpdateAlarmRule(req dto.UpdateAlarmRuleReq) error {
 	ruleId := req.AlarmRuleId
 	alarmRuleItem := &models.AlarmRule{
@@ -121,7 +121,7 @@ func (e *Alarm) UpdateAlarmRule(req dto.UpdateAlarmRuleReq) error {
 	return errTx
 }
 
-// 删除预警规则
+// DeleteAlarmRule 删除预警规则
 func (e *Alarm) DeleteAlarmRule(alarmRuleId int64) error {
 	alarmRuleLevelItems := make([]*models.AlarmRuleLevel, 4)
 	var err error

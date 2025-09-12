@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// 预警联系人组
+// AlarmContactGroup 预警联系人组
 type AlarmContactGroup struct {
 	Id          int64  `gorm:"primaryKey;autoIncrement"`
 	DeptId      int64  `json:"deptId"  gorm:"comment:机构"` //机构ID
@@ -13,5 +13,5 @@ type AlarmContactGroup struct {
 }
 
 func (AlarmContactGroup) TableName() string {
-	return "alram_contact_group"
+	return "alarm_contact_group"
 }

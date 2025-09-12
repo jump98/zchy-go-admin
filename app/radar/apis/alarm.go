@@ -69,6 +69,7 @@ func (e Alarm) AddAlarmRule(c *gin.Context) {
 
 	levelItems := req.AlarmRuleLevelItem
 	if len(levelItems) != 4 {
+		// e.Error(400, errors.New("参数错误"), "参数错误")
 		utils.ParameterError("参数错误")
 		return
 	}
