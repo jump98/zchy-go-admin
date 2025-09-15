@@ -185,10 +185,13 @@ func (s *RadarGetAlarmsBeforeReq) GetNum() int {
 	return s.Num
 }
 
-// // RadarConfirmReq 功能删除请求参数
-// type RadarConfirmReq struct {
-// 	RadarId int64 `uri:"radarId" comment:"RadarID"` // RadarID
-// }
+// GetRadarListByDeptIdReq 根据deptId获得雷达列表
+type GetRadarListByDeptIdReq struct {
+	DeptId int64 `json:"deptId"` // DeptId
+}
+type GetRadarListByDeptIdResp struct {
+	List models.Radar `json:"list"` // RadarID
+}
 
 // func (s *RadarConfirmReq) GetId() interface{} {
 // 	return s.RadarId

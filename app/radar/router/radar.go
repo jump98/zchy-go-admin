@@ -25,6 +25,7 @@ func registerRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewa
 		r.POST("", api.Insert)
 		r.PUT("/:radarId", actions.PermissionAction(), api.Update)
 		r.DELETE("", api.Delete)
+		r.POST("/getRadarListByDeptId", api.GetRadarListByDeptId)
 
 		//TODO:需要删除
 		r.POST("/get_alarms", api.GetAlarms)

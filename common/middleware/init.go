@@ -1,10 +1,11 @@
 package middleware
 
 import (
+	"go-admin/common/actions"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-admin-team/go-admin-core/sdk"
 	jwt "github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth"
-	"go-admin/common/actions"
 )
 
 const (
@@ -20,7 +21,7 @@ func InitMiddleware(r *gin.Engine) {
 	// 日志处理
 	r.Use(LoggerToFile())
 	// 自定义错误处理
-	r.Use(CustomError)
+	//r.Use(CustomError)
 	// NoCache is a middleware function that appends headers
 	r.Use(NoCache)
 	// 跨域处理

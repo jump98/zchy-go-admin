@@ -22,11 +22,11 @@ func _1752490642079Test(db *gorm.DB, version string) error {
 		err := tx.Debug().Migrator().AutoMigrate(
 			new(models.Radar),
 			new(models.RadarPoint),
-			new(models.AlarmRule),
-			new(models.AlarmRuleLevel),
-			new(models.AlarmConfig),
-			new(models.AlarmContactGroup),
-			new(models.AlarmContactGroupMember),
+			new(models.AlarmPoint),
+			//new(models.AlarmRuleLevel),
+			//new(models.AlarmConfig),
+			//new(models.AlarmContactGroup),
+			//new(models.AlarmContactGroupMember),
 		)
 		if err != nil {
 			fmt.Println("创建数据库的表出错:", err)

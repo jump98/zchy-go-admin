@@ -6,8 +6,23 @@ import (
 	common "go-admin/common/models"
 )
 
+type GetRadarPointListReq struct {
+	dto.Pagination `search:"-"`
+	Id             int    `form:"id"  search:"type:exact;column:id;table:radar_point" comment:"PointID"`
+	PointName      string `form:"pointName"  search:"type:contains;column:point_name;table:radar_point" comment:"监测点名称"`
+	PointKey       string `form:"pointKey"  search:"type:exact;column:point_key;table:radar_point" comment:"监测点编号"`
+	RadarId        int64  `form:"radarId"  search:"type:exact;column:radar_id;table:radar_point" comment:"雷达ID"`
+	AStatus        string `form:"aStatus"  search:"type:exact;column:a_status;table:radar_point" comment:"激活状态"`
+	RadarPointOrder
+}
+
+func (m *GetRadarPointListReq) GetNeedSearch() interface{} {
+	return *m
+}
+
 type GetRadarPointListDeptIdReq struct {
 	dto.Pagination `search:"-"`
+	DeptId         int    `json:"deptId" form:"deptId"  search:"-"`
 	Id             int    `form:"id"  search:"type:exact;column:id;table:radar_point" comment:"PointID"`
 	PointName      string `form:"pointName"  search:"type:contains;column:point_name;table:radar_point" comment:"监测点名称"`
 	PointKey       string `form:"pointKey"  search:"type:exact;column:point_key;table:radar_point" comment:"监测点编号"`
@@ -76,8 +91,8 @@ func (s *InsertRadarPointReq) Generate(model *models.RadarPoint) {
 	model.Remark = s.Remark
 	model.AStatus = s.AStatus
 	model.XStatus = s.XStatus
-	model.MTypeId = s.MTypeId
-	model.CreateBy = s.CreateBy // 添加这而，需要记录是被谁创建的
+	model.MTypeId = models.RadarPointMTypeGlobal //默认全局门限
+	model.CreateBy = s.CreateBy                  // 添加这而，需要记录是被谁创建的
 }
 
 func (s *InsertRadarPointReq) GetId() interface{} {
@@ -98,7 +113,7 @@ type UpdateRadarPointReq struct {
 	Remark     string `json:"remark" comment:"备注"`
 	AStatus    string `json:"aStatus" comment:"激活状态"`
 	XStatus    string `json:"xStatus" comment:"消警状态"`
-	MTypeId    string `json:"mTypeId" comment:"门限类型"`
+	//MTypeId    string `json:"mTypeId" comment:"门限类型"`
 	common.ControlBy
 }
 
@@ -118,7 +133,7 @@ func (s *UpdateRadarPointReq) Generate(model *models.RadarPoint) {
 	model.Remark = s.Remark
 	model.AStatus = s.AStatus
 	model.XStatus = s.XStatus
-	model.MTypeId = s.MTypeId
+	//model.MTypeId = s.MTypeId
 	model.UpdateBy = s.UpdateBy // 添加这而，需要记录是被谁更新的
 }
 

@@ -89,6 +89,11 @@ func (e *SysDept) Insert(c *dto.SysDeptInsertReq) error {
 		e.Log.Errorf("db error:%s", err)
 		return err
 	}
+
+	//deptId := data.DeptId
+	//创建监测点全局预警配置
+	//models.
+
 	return nil
 }
 

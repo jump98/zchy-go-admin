@@ -28,7 +28,7 @@ type Radar struct {
 	models.ControlBy
 }
 
-func (Radar) TableName() string {
+func (*Radar) TableName() string {
 	return "radar"
 }
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
@@ -197,4 +198,17 @@ func (e *Radar) GetByRadarKey(key string, model *models.Radar) error {
 func (e *Radar) GetImageV2(d *dto.RadarGetImageReq) (*mongosvr.DistanceDataV2, error) {
 
 	return mongosvr.GetLatestDistanceDataV2(d.RadarId)
+}
+
+// GetListByDeptId 获取Radar列表
+func (e *Radar) GetListByDeptId(deptId int64) ([]*models.Radar, error) {
+
+	fmt.Println("GetListByDeptId:", deptId)
+	var err error
+	radarList := make([]*models.Radar, 0)
+	if err = e.Orm.Model(&models.Radar{}).Where("dept_id = ?", deptId).Find(&radarList).Error; err != nil {
+		e.Log.Errorf("GetListByDeptId error:%s \r\n", err)
+		return radarList, err
+	}
+	return radarList, nil
 }

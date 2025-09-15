@@ -18,7 +18,7 @@ type RadarPoint struct {
 }
 
 // GetPage 获取RadarPoint列表
-func (e *RadarPoint) GetPage(c *dto.GetRadarPointListDeptIdReq, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
+func (e *RadarPoint) GetPage(c *dto.GetRadarPointListReq, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
 	var err error
 	var data models.RadarPoint
 
@@ -37,8 +37,8 @@ func (e *RadarPoint) GetPage(c *dto.GetRadarPointListDeptIdReq, p *actions.DataP
 	return nil
 }
 
-// GetPage 获取RadarPoint列表
-func (e *RadarPoint) GetDeptPage(c *dto.GetRadarPointListDeptIdReq, deptid int, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
+// GetPointListByDeptId 获取RadarPoint列表-byDeptId
+func (e *RadarPoint) GetPointListByDeptId(c *dto.GetRadarPointListDeptIdReq, deptId int, p *actions.DataPermission, list *[]models.RadarPoint, count *int64) error {
 	var err error
 	var data models.RadarPoint
 
@@ -47,7 +47,7 @@ func (e *RadarPoint) GetDeptPage(c *dto.GetRadarPointListDeptIdReq, deptid int, 
 			cDto.MakeCondition(c.GetNeedSearch()),
 			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
 			actions.Permission(data.TableName(), p),
-		).Where("radar_id in(select radar_id from radar where dept_id=?)", deptid).
+		).Where("radar_id in(select radar_id from radar where dept_id=?)", deptId).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 	if err != nil {

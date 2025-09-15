@@ -18,12 +18,12 @@ func registerRadarPointRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMid
 	r := v1.Group("/radar_point").Use(authMiddleware.MiddlewareFunc())
 	//形变点管理
 	{
-		r.GET("getList", actions.PermissionAction(), api.GetRadarPointList)            //获取检测点列表
-		r.GET("/getById/:id", actions.PermissionAction(), api.GetRadarPointById)       //获得监测点ById
-		r.POST("/add", api.InsertRadarPoint)                                           //插入监测点
-		r.PUT("/update/:id", actions.PermissionAction(), api.UpdateRadarPoint)         //修改监测点
-		r.DELETE("/delete", api.DeleteRadarPoint)                                      //删除监测点
-		r.GET("/getDeptList", actions.PermissionAction(), api.GetRadarPointListDeptId) //获取某个部门下的所有监测点列表
+		r.GET("getList", actions.PermissionAction(), api.GetRadarPointList)                     //获取检测点列表
+		r.GET("/getById/:id", actions.PermissionAction(), api.GetRadarPointById)                //获得监测点ById
+		r.POST("/add", api.InsertRadarPoint)                                                    //插入监测点
+		r.PUT("/update/:id", actions.PermissionAction(), api.UpdateRadarPoint)                  //修改监测点
+		r.DELETE("/delete", api.DeleteRadarPoint)                                               //删除监测点
+		r.GET("/getPointListByDeptId", actions.PermissionAction(), api.GetRadarPointListDeptId) //获取某个部门下的所有监测点列表
 	}
 	//形变数据
 	{

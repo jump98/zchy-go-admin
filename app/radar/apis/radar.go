@@ -546,3 +546,24 @@ func (e Radar) GetAlarmsBefore(c *gin.Context) {
 
 	e.OK(alarms, "查询成功")
 }
+
+// GetRadarListByDeptId 根据部门ID获取雷达列表
+func (e Radar) GetRadarListByDeptId(c *gin.Context) {
+	fmt.Println("GetRadarListByDeptId")
+	req := dto.GetRadarListByDeptIdReq{}
+	s := service.Radar{}
+	err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	deptId := req.DeptId
+	fmt.Println("查询deptId：", deptId)
+	var radarList []*models.Radar
+	if radarList, err = s.GetListByDeptId(deptId); err != nil {
+		e.Error(500, err, fmt.Sprintf("获取雷达管理失败，\r\n失败信息 %s", err.Error()))
+		return
+	}
+	e.OK(radarList, "查询成功")
+}

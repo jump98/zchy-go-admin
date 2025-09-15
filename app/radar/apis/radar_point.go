@@ -9,7 +9,6 @@ import (
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
 
-	adminApi "go-admin/app/admin/apis"
 	"go-admin/app/monsvr/mongosvr"
 	"go-admin/app/radar/models"
 	"go-admin/app/radar/service"
@@ -36,7 +35,7 @@ type RadarPoint struct {
 // @Router /api/v1/radar_point [get]
 // @Security Bearer
 func (e RadarPoint) GetRadarPointList(c *gin.Context) {
-	req := dto.GetRadarPointListDeptIdReq{}
+	req := dto.GetRadarPointListReq{}
 	s := service.RadarPoint{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -90,35 +89,43 @@ func (e RadarPoint) GetRadarPointListDeptId(c *gin.Context) {
 		return
 	}
 
+	deptId := req.DeptId
+	fmt.Println("根据deptId查询监测点信息：", deptId)
 	p := actions.GetPermissionFromContext(c)
 	list := make([]models.RadarPoint, 0)
 	var count int64
 
-	sc := adminApi.SysCommon{}
-	admin, _, err := sc.IsSuperAdmin(c)
-	if err != nil {
-		e.Error(500, err, "查询失败")
+	//sc := adminApi.SysCommon{}
+	//admin, _, err := sc.IsSuperAdmin(c)
+	//if err != nil {
+	//	e.Error(500, err, "查询失败")
+	//	return
+	//}
+	//fmt.Println("admin:", admin)
+	if err = s.GetPointListByDeptId(&req, deptId, p, &list, &count); err != nil {
+		e.Error(500, err, fmt.Sprintf("获取监测点管理失败，\r\n失败信息 %s", err.Error()))
 		return
 	}
-	if admin {
-		err = s.GetPage(&req, p, &list, &count)
-		if err != nil {
-			e.Error(500, err, fmt.Sprintf("获取监测点管理失败，\r\n失败信息 %s", err.Error()))
-			return
-		}
-	} else {
-		// data, _ := c.Get(jwtauth.JwtPayloadKey)
-		// fmt.Println(data)
-		// v := data.(jwtauth.MapClaims)
-		// deptid, err := v.Int("deptId")
-		deptid := user.GetDeptId(c)
-		err = s.GetDeptPage(&req, deptid, p, &list, &count)
-		if err != nil {
-			e.Error(500, err, fmt.Sprintf("获取监测点管理失败，\r\n失败信息 %s", err.Error()))
-			return
-		}
-	}
 
+	//if admin {
+	//	err = s.GetPage(&req, p, &list, &count)
+	//	if err != nil {
+	//		e.Error(500, err, fmt.Sprintf("获取监测点管理失败，\r\n失败信息 %s", err.Error()))
+	//		return
+	//	}
+	//} else {
+	//	// data, _ := c.Get(jwtauth.JwtPayloadKey)
+	//	// fmt.Println(data)
+	//	// v := data.(jwtauth.MapClaims)
+	//	// deptid, err := v.Int("deptId")
+	//	deptid := user.GetDeptId(c)
+	//	err = s.GetPointListByDeptId(&req, deptid, p, &list, &count)
+	//	if err != nil {
+	//		e.Error(500, err, fmt.Sprintf("获取监测点管理失败，\r\n失败信息 %s", err.Error()))
+	//		return
+	//	}
+	//}
+	fmt.Println("list:", list)
 	e.PageOK(list, int(count), req.GetPageIndex(), req.GetPageSize(), "查询成功")
 }
 

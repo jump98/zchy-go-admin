@@ -50,8 +50,8 @@ type PutCommandsReq struct {
 	Command int `json:"command"`
 }
 
-// 获得token中的radarId
-func (e *Radar) GetTokenRadarId(c *gin.Context) (int64, error) {
+// GetTokenRadarId 获得token中的radarId
+func (e Radar) GetTokenRadarId(c *gin.Context) (int64, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		return 0, errors.New("authorization header missing")
@@ -59,10 +59,11 @@ func (e *Radar) GetTokenRadarId(c *gin.Context) (int64, error) {
 
 	var err error
 	var tokenClaims *TokenClaims
-	if tokenClaims, err = e.GetParseClaimsToken(authHeader); err != nil {
+	if tokenClaims, err = e.GetParseClaimsToken(authHeader); err != nil || tokenClaims == nil {
 		fmt.Println("请求解析token出错:", err)
 		return 0, fmt.Errorf("请求解析token出错: %v", err)
 	}
+
 	// nowTime := time.Now().Unix()
 	// if tokenClaims.Exp < nowTime {
 	// 	e.Logger.Error("token已过期")
@@ -77,8 +78,8 @@ type TokenClaims struct {
 	Exp     int64
 }
 
-// 解密token
-func (e *Radar) GetParseClaimsToken(tokenStr string) (*TokenClaims, error) {
+// GetParseClaimsToken 解密token
+func (e Radar) GetParseClaimsToken(tokenStr string) (*TokenClaims, error) {
 	tokenStr2 := strings.TrimPrefix(tokenStr, "Bearer ")
 	token, err := jwt.ParseWithClaims(tokenStr2, &TokenClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(config.JwtConfig.Secret), nil
