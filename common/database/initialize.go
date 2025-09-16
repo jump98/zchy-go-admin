@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/go-admin-team/go-admin-core/logger"
@@ -25,6 +26,7 @@ func Setup() {
 }
 
 func setupSimpleDatabase(host string, c *toolsConfig.Database) {
+	fmt.Println("host:", host)
 	if global.Driver == "" {
 		global.Driver = c.Driver
 	}

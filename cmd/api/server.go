@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"go-admin/app/radar/tasks"
 	"log"
 	"net/http"
 	"os"
@@ -78,6 +79,9 @@ func setup() {
 
 	//启动mangoDB
 	monsvr.InitMonSvr()
+
+	//启动预警监测点任务
+	go tasks.InitAlarmPointTask()
 
 	fmt.Println("starting api server...")
 }
@@ -172,6 +176,7 @@ func initRouter() {
 		h = gin.New()
 		sdk.Runtime.SetEngine(h)
 	}
+	sdk.Runtime.GetDb()
 	switch h.(type) {
 	case *gin.Engine:
 		r = h.(*gin.Engine)

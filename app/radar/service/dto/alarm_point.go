@@ -11,7 +11,7 @@ type GetAlarmRulesReq struct {
 }
 
 type GetAlarmRulesResp struct {
-	AlarmRuleList []*models.AlarmPoint `json:"alarmRule"` //机构ID
+	AlarmRuleList []models.AlarmPoint `json:"alarmRule"` //机构ID
 }
 
 // AddAlarmPointReq 增加预警规则列表

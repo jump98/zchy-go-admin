@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// 雷达基本信息表
+// Radar 雷达基本信息表
 type Radar struct {
 	RadarId    int64  `json:"radarId"     gorm:"column:radar_id;     primaryKey;  autoIncrement;comment:主键编码"`
 	RadarName  string `json:"radarName"   gorm:"column:radar_name;   type:varchar(64);  comment:雷达名称"`

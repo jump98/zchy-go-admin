@@ -22,9 +22,9 @@ const (
 )
 
 const (
-	AlarmType_RadarPoint_Deformation  AlarmType = 100 //监测点-形变
-	AlarmType_RadarPoint_Velocity     AlarmType = 101 //监测点-速度-状态信息
-	AlarmType_RadarPoint_Acceleration AlarmType = 102 //监测点-加速度-状态信息
+	AlarmTypeRadarPointDeformation  AlarmType = 100 //监测点-形变
+	AlarmTypeRadarPointVelocity     AlarmType = 101 //监测点-速度-状态信息
+	AlarmTypeRadarPointAcceleration AlarmType = 102 //监测点-加速度-状态信息
 )
 
 const (

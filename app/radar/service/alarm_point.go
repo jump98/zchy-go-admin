@@ -15,9 +15,9 @@ type AlarmPoint struct {
 }
 
 // GetAlarmRules 获取所有的预警规则
-func (e *AlarmPoint) GetAlarmRules(deptId int64, radarPointId int64) ([]*models.AlarmPoint, error) {
+func (e *AlarmPoint) GetAlarmRules(deptId int64, radarPointId int64) ([]models.AlarmPoint, error) {
 	var err error
-	alarmPointItems := make([]*models.AlarmPoint, 0)
+	alarmPointItems := make([]models.AlarmPoint, 0)
 	if err = e.Orm.Model(&models.AlarmPoint{}).Where("dept_id = ? and radar_point_id = ?", deptId, radarPointId).Find(&alarmPointItems).Error; err != nil {
 		return nil, err
 	}
@@ -208,15 +208,16 @@ func (e *AlarmPoint) DeleteAlarmRule(alarmRuleId int64) error {
 }
 
 // GetDefaultRadarPointConfig 获得默认监测点预警配置
-func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId int64) []*models.AlarmPoint {
-	items := make([]*models.AlarmPoint, 0)
-	items = append(items, &models.AlarmPoint{
+func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId int64) []models.AlarmPoint {
+	fmt.Println("GetDefaultRadarPointConfig:", deptId, radarId, radarPointId)
+	items := make([]models.AlarmPoint, 0)
+	items = append(items, models.AlarmPoint{
 		DeptId:         deptId,
 		AlarmCheckType: models.AlarmCheckRadarPoint,
 		AlarmName:      "",
 		RadarId:        radarId,
 		RadarPointId:   radarPointId,
-		AlarmType:      models.AlarmType_RadarPoint_Deformation,
+		AlarmType:      models.AlarmTypeRadarPointDeformation,
 		RedOption:      "150",
 		OrangeOption:   "100",
 		YellowOption:   "60",
@@ -225,13 +226,13 @@ func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId in
 		Duration:       24,
 	})
 	//监测点-速度
-	items = append(items, &models.AlarmPoint{
+	items = append(items, models.AlarmPoint{
 		DeptId:         deptId,
 		AlarmCheckType: models.AlarmCheckRadarPoint,
 		AlarmName:      "",
 		RadarId:        radarId,
 		RadarPointId:   radarPointId,
-		AlarmType:      models.AlarmType_RadarPoint_Velocity,
+		AlarmType:      models.AlarmTypeRadarPointVelocity,
 		RedOption:      "15",
 		OrangeOption:   "10",
 		YellowOption:   "6",
@@ -240,13 +241,13 @@ func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId in
 		Duration:       24,
 	})
 	//监测点-加速度
-	items = append(items, &models.AlarmPoint{
+	items = append(items, models.AlarmPoint{
 		DeptId:         deptId,
 		AlarmCheckType: models.AlarmCheckRadarPoint,
 		AlarmName:      "",
 		RadarId:        radarId,
 		RadarPointId:   radarPointId,
-		AlarmType:      models.AlarmType_RadarPoint_Acceleration,
+		AlarmType:      models.AlarmTypeRadarPointAcceleration,
 		RedOption:      "15",
 		OrangeOption:   "10",
 		YellowOption:   "6",

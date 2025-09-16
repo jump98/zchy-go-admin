@@ -38,7 +38,7 @@ func (e AlarmPoint) GetAlarmRules(c *gin.Context) {
 	// deptId := user.GetDeptId(c)
 	fmt.Println("deptId:", req.DeptId)
 	fmt.Println("radarPointId:", req.RadarPointId)
-	var alarmRuleList []*models.AlarmPoint
+	var alarmRuleList []models.AlarmPoint
 	deptId := req.DeptId
 	radarPointId := req.RadarPointId
 
