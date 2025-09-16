@@ -23,6 +23,7 @@ func _1752490642079Test(db *gorm.DB, version string) error {
 			new(models.Radar),
 			new(models.RadarPoint),
 			new(models.AlarmPoint),
+			new(models.AlarmPointLogs),
 			//new(models.AlarmRuleLevel),
 			//new(models.AlarmConfig),
 			//new(models.AlarmContactGroup),

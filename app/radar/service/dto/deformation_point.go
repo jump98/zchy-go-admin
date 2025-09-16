@@ -18,7 +18,7 @@ const (
 // 变形点数据查询参数
 type GetDeformationDataReq struct {
 	RadarId   int64    `json:"radarId"   validate:"required"` // 设备ID
-	Index     int      `json:"index"     validate:"required"` // 索引
+	Index     int64    `json:"index"     validate:"required"` // 索引
 	StartTime string   `json:"startTime" validate:"required"` // 开始时间 (格式: 2006-01-02 15:04:05)
 	EndTime   string   `json:"endTime"   validate:"required"` // 结束时间 (格式: 2006-01-02 15:04:05)
 	Hours     int64    `json:"hours"`                         // 查询最近几小时（单位：小时）
@@ -34,10 +34,10 @@ type GetDeformationDataResp struct {
 // 形变数据列表
 type DeformationDataItem struct {
 	Time           time.Time `json:"time"`           //时间（可能是一个区间范围值）
-	DeformationMax int       `json:"deformationMax"` //最大形变值(毫米) 已乘100 (最大形变值)
-	DeformationMin int       `json:"deformationMin"` //最小形变值(毫米) 已乘100 (最小形变值)
-	DeformationAvg int       `json:"deformationAvg"` //最小形变值(毫米) 已乘100 (平均形变值)
-	Distance       int       `json:"distance"`       //距离值(毫米) 已乘100
+	DeformationMax int64     `json:"deformationMax"` //最大形变值(毫米) 已乘100 (最大形变值)
+	DeformationMin int64     `json:"deformationMin"` //最小形变值(毫米) 已乘100 (最小形变值)
+	DeformationAvg int64     `json:"deformationAvg"` //最小形变值(毫米) 已乘100 (平均形变值)
+	Distance       int64     `json:"distance"`       //距离值(毫米) 已乘100
 }
 
 // 变形点速度参数

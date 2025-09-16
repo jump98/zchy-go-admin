@@ -331,9 +331,9 @@ func (e Radar) InitDeformationData(dd *mongosvr.DeformationData, dr *Deformation
 	dd.Interval = dr.Interval
 	for _, dp := range dr.Data {
 		dd.DefData = append(dd.DefData, mongosvr.DeformationDefData{
-			Index:       dp.Index,
-			Deformation: int(dp.Deformation * 100),
-			Distance:    int(dp.Distance * 100),
+			Index:       int64(dp.Index),
+			Deformation: int64(dp.Deformation * 100),
+			Distance:    int64(dp.Distance * 100),
 		})
 	}
 }

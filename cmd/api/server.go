@@ -80,9 +80,6 @@ func setup() {
 	//启动mangoDB
 	monsvr.InitMonSvr()
 
-	//启动预警监测点任务
-	go tasks.InitAlarmPointTask()
-
 	fmt.Println("starting api server...")
 }
 
@@ -145,19 +142,28 @@ func run() error {
 	fmt.Printf("-  Local:   http://localhost:%d/swagger/admin/index.html \r\n", config.ApplicationConfig.Port)
 	fmt.Printf("-  Network: %s://%s:%d/swagger/admin/index.html \r\n", "http", pkg.GetLocaHonst(), config.ApplicationConfig.Port)
 	fmt.Printf("%s Enter Control + C Shutdown Server \r\n", pkg.GetCurrentTimeStr())
+
+	//启动预警监测点任务
+	ctx, cancel := context.WithCancel(context.Background())
+	tasks.Init(ctx)
+
 	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 	fmt.Printf("%s Shutdown Server ... \r\n", pkg.GetCurrentTimeStr())
 
-	if err := srv.Shutdown(ctx); err != nil {
+	tasks.Stop() // 或通过 context cancel
+
+	// 优雅关闭 HTTP 服务
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
 	log.Println("Server exiting")
+	cancel()
 
 	return nil
 }

@@ -60,14 +60,14 @@ func Init() {
 // 初始化MongoDB连接
 func initMongoDB(uri string) error {
 
-	// loggerOptions := options.
-	// 	Logger().
-	// 	SetComponentLevel(options.LogComponentCommand, options.LogLevelDebug)
+	loggerOptions := options.
+		Logger().
+		SetComponentLevel(options.LogComponentCommand, options.LogLevelInfo)
 
 	// 设置客户端连接配置
 	clientOpts := options.Client().
 		ApplyURI(uri).
-		// SetLoggerOptions(loggerOptions).     // 设置日志级别
+		SetLoggerOptions(loggerOptions).     // 设置日志级别
 		SetMaxPoolSize(100).                 // 最大连接数
 		SetMinPoolSize(10).                  // 最小保持连接数
 		SetMaxConnIdleTime(30 * time.Second) // 连接最大空闲时间
@@ -92,6 +92,9 @@ func initMongoDB(uri string) error {
 	InitRadarStatus()
 	InitRadarDevInfo()
 	InitAlarm()
+	if err = DeformationPointMinuteService.CreateIndex(); err != nil {
+		fmt.Println("创建索引失败：", err)
+	}
 
 	fmt.Println("Connected to MongoDB!")
 	return nil

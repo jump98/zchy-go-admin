@@ -22,14 +22,15 @@ const (
 )
 
 const (
-	AlarmTypeRadarPointDeformation  AlarmType = 100 //监测点-形变
-	AlarmTypeRadarPointVelocity     AlarmType = 101 //监测点-速度-状态信息
-	AlarmTypeRadarPointAcceleration AlarmType = 102 //监测点-加速度-状态信息
+	AlarmTypeRadarPointDeformation  AlarmType = 100 //监测点-累计水平位移，单位 ： mm
+	AlarmTypeRadarPointVelocity     AlarmType = 101 //监测点-水平位移速度（瞬时位移量）预警阈值，单位：mm/h
+	AlarmTypeRadarPointAcceleration AlarmType = 102 //监测点-水平位移加速度预警阈值，单位： mm/h2
 )
 
 const (
-	AlarmLevelRed    AlarmLevel = iota + 1 // 红色
-	AlarmLevelOrange                       // 橙色
-	AlarmLevelYellow                       // 黄色
-	AlarmLevelBlue                         // 蓝色
+	AlarmLevelNone   AlarmLevel = iota
+	AlarmLevelBlue              // 蓝色
+	AlarmLevelYellow            // 黄色
+	AlarmLevelOrange            // 橙色
+	AlarmLevelRed               // 红色
 )

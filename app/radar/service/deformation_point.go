@@ -205,9 +205,7 @@ func (s DeformationPoint) sampleDeformData(data []collections.DeformationPointMo
 
 		maxVal := data[start]
 		minVal := data[start]
-		sum := 0
-		count := 0
-
+		var sum, count int64
 		for j := start; j < end; j++ {
 			val := data[j].Deformation
 			sum += val
@@ -362,9 +360,7 @@ func (s DeformationPoint) groupDeformData(data []dto.DeformationDataItem, timeUn
 		// 初始化极值
 		maxVal := vals[0].DeformationMax
 		minVal := vals[0].DeformationMin
-		sumAvg := 0
-		sumDist := 0
-
+		var sumAvg, sumDist int64
 		for _, v := range vals {
 			if v.DeformationMax > maxVal {
 				maxVal = v.DeformationMax
@@ -376,7 +372,7 @@ func (s DeformationPoint) groupDeformData(data []dto.DeformationDataItem, timeUn
 			sumDist += v.Distance
 		}
 
-		count := len(vals)
+		count := int64(len(vals))
 		avgVal := sumAvg / count
 		distVal := sumDist / count
 

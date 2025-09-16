@@ -20,9 +20,9 @@ type DeformationData struct {
 
 // 形变数据 详细
 type DeformationDefData struct {
-	Index       int //下标
-	Deformation int //形变值(毫米) *100
-	Distance    int //距离值(毫米) *100
+	Index       int64 //下标
+	Deformation int64 //形变值(毫米) *100
+	Distance    int64 //距离值(毫米) *100
 }
 
 // 插入形变数据

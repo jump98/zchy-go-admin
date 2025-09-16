@@ -16,18 +16,13 @@ type deformationPointService struct {
 
 var DeformationPointService = deformationPointService{}
 
-// func InsertDeformationPointData(data *DeformationPointData) error {
-// 	data.SvrTime = time.Now()
-// 	return insertDocumentData(mongoUri, mongoRadarDBName, Table_Deformation_Point, data)
-// }
-
-// 插入多条形变数据
+// InsertArrayDeformationPointData 插入多条形变数据
 func (s deformationPointService) InsertArrayDeformationPointData(data []interface{}) error {
-	return insertArrayDocumentData(mongoUri, mongoRadarDBName, collections.Table_Deformation_Point, data)
+	return insertArrayDocumentData(mongoUri, mongoRadarDBName, collections.TableDeformationPoint, data)
 }
 
-// 根据时间范围查询距离像形变数据列表
-func (s deformationPointService) QueryDeformationPointData(ctx context.Context, radarId int64, pointIndex int, startTimeStr, endTimeStr string) ([]collections.DeformationPointModel, error) {
+// QueryDeformationPointData 根据时间范围查询距离像形变数据列表
+func (s deformationPointService) QueryDeformationPointData(ctx context.Context, radarId, pointIndex int64, startTimeStr, endTimeStr string) ([]collections.DeformationPointModel, error) {
 	var err error
 	var startTime, endTime time.Time
 
@@ -60,10 +55,39 @@ func (s deformationPointService) QueryDeformationPointData(ctx context.Context, 
 	opts := options.Find().SetSort(bson.M{"svrtime": 1}) // 1升序，-1降序
 	// 执行查询
 	var cursor *mongo.Cursor
-	if cursor, err = MDB.Collection(collections.Table_Deformation_Point).Find(ctx, filter, opts); err != nil {
+	if cursor, err = MDB.Collection(collections.TableDeformationPoint).Find(ctx, filter, opts); err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	//defer cursor.Close(ctx)
+	// 解析查询结果
+	var data []collections.DeformationPointModel
+	if err = cursor.All(ctx, &data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// QueryDeformationPointByTime 根据时间范围查询距离像形变数据列表
+func (s deformationPointService) QueryDeformationPointByTime(ctx context.Context, startTime, endTime time.Time) ([]collections.DeformationPointModel, error) {
+	var err error
+	fmt.Println("查询开始时间:", startTime.Format("2006-01-02 15:04:05"))
+	fmt.Println("查询结束时间:", endTime.Format("2006-01-02 15:04:05"))
+
+	// 构建查询条件，MongoDB 内部存储 UTC 时间
+	filter := bson.M{
+		"svrtime": bson.M{
+			"$gt":  startTime.UTC(), //大于
+			"$lte": endTime.UTC(),   //小于等于
+		},
+	}
+	// 按时间字段排序
+	opts := options.Find().SetSort(bson.M{"svrtime": 1}) // 1升序，-1降序
+	// 执行查询
+	var cursor *mongo.Cursor
+	if cursor, err = MDB.Collection(collections.TableDeformationPoint).Find(ctx, filter, opts); err != nil {
+		return nil, err
+	}
+	//defer cursor.Close(ctx)
 	// 解析查询结果
 	var data []collections.DeformationPointModel
 	if err = cursor.All(ctx, &data); err != nil {
