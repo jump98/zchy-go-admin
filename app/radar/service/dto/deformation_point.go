@@ -88,3 +88,22 @@ type DeformationAccelerationItem struct {
 	Max  float64   `json:"max"`  //最大速度
 	Min  float64   `json:"min"`  //最小速度
 }
+
+// GetDeformCurveListReq 形变曲线
+type GetDeformCurveListReq struct {
+	Kind      int64    `json:"kind"`                          // 数据类型：0=形变、1=速度、2=加速度
+	RadarId   int64    `json:"radarId"   validate:"required"` // 设备ID
+	Index     []int64  `json:"index"     validate:"required"` // 监测点
+	StartTime string   `json:"startTime" validate:"required"` // 开始时间 (格式: 2006-01-02 15:04:05)
+	EndTime   string   `json:"endTime"   validate:"required"` // 结束时间 (格式: 2006-01-02 15:04:05)
+	Hours     int64    `json:"hours"`                         // 查询最近几小时（单位：小时）
+	TimeUnit  TimeUnit `json:"timeUnit"`                      // 时间单位（seconds,minutes,hours,days）
+}
+type GetDeformCurveListResp struct {
+	LastTime time.Time                   `json:"lastTime"` //最后一条数据的时间
+	List     map[int64][]DeformCurveItem `json:"list"`     //形变数据
+}
+type DeformCurveItem struct {
+	T time.Time `json:"t"` //时间
+	V int64     `json:"v"` //值  （已乘100）
+}

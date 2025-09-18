@@ -30,5 +30,6 @@ func registerRadarPointRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMid
 		r.POST("/getDeformationData", actions.PermissionAction(), api.GetDeformationData)                 //获取形变数据
 		r.POST("/getDeformationVelocity", actions.PermissionAction(), api.GetDeformationVelocity)         //获取形变速度
 		r.POST("/getDeformationAcceleration", actions.PermissionAction(), api.GetDeformationAcceleration) //获取形变加速度
+		r.POST("/getDeformCurveList", api.GetDeformCurveList)                                             //获取形变曲线列表（包含速度、加速度）
 	}
 }

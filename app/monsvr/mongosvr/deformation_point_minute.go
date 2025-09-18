@@ -82,8 +82,6 @@ func (s deformationPointMinuteService) SaveDeformMinuteByTime(ctx context.Contex
 // FindDeformMinuteByTime 根据时间范围查询距离像形变数据列表
 func (s deformationPointMinuteService) FindDeformMinuteByTime(ctx context.Context, radarId, pointIndex int64, startTime, endTime time.Time) ([]collections.DeformationPointMinuteModel, error) {
 	var err error
-	//fmt.Println("查询开始时间:", startTime.Format("2006-01-02 15:04:05"))
-	//fmt.Println("查询结束时间:", endTime.Format("2006-01-02 15:04:05"))
 	// 构建查询条件，MongoDB 内部存储 UTC 时间
 	var filter bson.M
 	if radarId != 0 && pointIndex != 0 {
@@ -103,6 +101,34 @@ func (s deformationPointMinuteService) FindDeformMinuteByTime(ctx context.Contex
 			},
 		}
 	}
+	// 按时间字段排序
+	opts := options.Find().SetSort(bson.M{"time": 1}) // 1升序，-1降序
+	var cursor *mongo.Cursor
+	if cursor, err = MDB.Collection(collections.TableDeformationPointMinute).Find(ctx, filter, opts); err != nil {
+		return nil, err
+	}
+	var data []collections.DeformationPointMinuteModel
+	if err = cursor.All(ctx, &data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (s deformationPointMinuteService) FindDeformMinuteByTimeV2(ctx context.Context, radarId int64, pointIndex []int64, startTime, endTime time.Time) ([]collections.DeformationPointMinuteModel, error) {
+	var err error
+	// 构建查询条件，MongoDB 内部存储 UTC 时间
+	var filter bson.M
+	filter = bson.M{
+		"radarid": radarId,
+		"pointindex": bson.M{
+			"$in": pointIndex, // 多个值
+		},
+		"time": bson.M{
+			"$gt":  startTime.UTC(), //大于
+			"$lte": endTime.UTC(),   //小于等于
+		},
+	}
+
 	// 按时间字段排序
 	opts := options.Find().SetSort(bson.M{"time": 1}) // 1升序，-1降序
 	var cursor *mongo.Cursor

@@ -363,7 +363,7 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 	e.OK(resp, "查询成功")
 }
 
-// GetDeformationData 获取形变速度数据
+// GetDeformationVelocity 获取形变速度数据
 // @Summary 获取形变速度数据
 // @Description 根据设备ID、索引和时间范围获取采样后的形变点速度数据
 // @Tags 监测点管理
@@ -404,7 +404,7 @@ func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
 	e.OK(resp, "查询成功")
 }
 
-// GetDeformationData 获取形变加速度数据
+// GetDeformationAcceleration 获取形变加速度数据
 // @Summary 获取形变加速度数据
 // @Description 根据设备ID、索引和时间范围获取采样后的形变点加速度数据
 // @Tags 监测点管理
@@ -441,5 +441,37 @@ func (e RadarPoint) GetDeformationAcceleration(c *gin.Context) {
 		e.Error(500, err, fmt.Sprintf("获取形变加速度统计失败: %s", err.Error()))
 		return
 	}
+	e.OK(resp, "查询成功")
+}
+
+// GetDeformCurveList 获得形变曲线数据（形变曲线、速度、加速度）
+func (e RadarPoint) GetDeformCurveList(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			e.Logger.Error("GetDeformCurveList panic:", r)
+		}
+	}()
+
+	req := dto.GetDeformCurveListReq{}
+	var err error
+	var s = service.DeformationPointV2{}
+	if err = e.MakeContext(c).MakeOrm().MakeService(&s.Service).Bind(&req).Errors; err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	// 参数验证
+	if req.RadarId <= 0 || len(req.Index) == 0 || req.StartTime == "" || req.EndTime == "" {
+		e.Error(400, nil, "参数不完整")
+		return
+	}
+
+	// 获取数据
+	var resp *dto.GetDeformCurveListResp
+	if resp, err = s.GetDeformCurveList(c, req); err != nil {
+		e.Error(500, err, "获取形变曲线失败")
+		return
+	}
+	// 返回采样后的数据
 	e.OK(resp, "查询成功")
 }
