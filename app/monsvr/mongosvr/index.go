@@ -21,9 +21,9 @@ var mongoUri string         //mongoDB URL
 var mongoRadarDBName string //雷达数据库DB name
 
 func Init() {
-	config := config.ExtConfig
-	mongoUri = config.MongoDB.Source
-	mongoRadarDBName = config.MongoDB.RadarDBName
+	extConfig := config.ExtConfig
+	mongoUri = extConfig.MongoDB.Source
+	mongoRadarDBName = extConfig.MongoDB.RadarDBName
 	// 连接到MongoDB
 	if err := initMongoDB(mongoUri); err != nil {
 		fmt.Println("连接mangoDB出错：", err)
