@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-admin/app/radar/models"
 	"go-admin/app/radar/service/dto"
+	cDto "go-admin/common/dto"
 
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
@@ -36,51 +37,41 @@ func (e *AlarmPoint) GetAlarmRules(deptId int64, radarPointId int64) ([]models.A
 	return alarmPointItems, nil
 }
 
-// GetAlarmRulesByRadarPointId 获取所有的预警规则
-//func (e *AlarmPoint) GetAlarmRulesByRadarPointId(deptId int64, radarPointId int64) ([]models.AlarmPoint, error) {
-//	var err error
-//	alarmRuleList := make([]models.AlarmPoint, 0)
-//	if err = e.Orm.Model(&models.AlarmPoint{}).Where("dept_id = ? and radar_point_id = ?", deptId, radarPointId).Find(&alarmRuleList).Error; err != nil {
-//		return nil, err
-//	}
-//	return alarmRuleList, nil
-//}
-
 // AddAlarmRule 增加预警规则
-func (e *AlarmPoint) AddAlarmRule(req dto.AddAlarmPointReq) error {
-	var errTx error
-	tx := e.Orm.Begin()
-	defer func() {
-		if errTx != nil {
-			tx.Commit()
-		} else {
-			tx.Rollback()
-		}
-	}()
-
-	alarmPointItems := make([]*models.AlarmPoint, 4)
-	for i, item := range req.Items {
-		alarmPointItems[i].DeptId = item.DeptId
-		alarmPointItems[i].AlarmCheckType = item.AlarmCheckType
-		alarmPointItems[i].AlarmName = item.AlarmName
-		//alarmPointItems[i].RadarId = item.RadarId
-		alarmPointItems[i].RadarPointId = item.RadarPointId
-		alarmPointItems[i].AlarmType = item.AlarmType
-		alarmPointItems[i].RedOption = item.RedOption
-		alarmPointItems[i].OrangeOption = item.OrangeOption
-		alarmPointItems[i].YellowOption = item.YellowOption
-		alarmPointItems[i].BlueOption = item.BlueOption
-		alarmPointItems[i].Interval = item.Interval
-		alarmPointItems[i].Duration = item.Duration
-	}
-	if errTx = tx.Create(alarmPointItems).Error; errTx != nil {
-		return errTx
-	}
-	for _, item := range alarmPointItems {
-		fmt.Println("打印预警LevelID:", item.Id)
-	}
-	return errTx
-}
+//func (e *AlarmPoint) AddAlarmRule(req dto.AddAlarmPointReq) error {
+//	var errTx error
+//	tx := e.Orm.Begin()
+//	defer func() {
+//		if errTx != nil {
+//			tx.Commit()
+//		} else {
+//			tx.Rollback()
+//		}
+//	}()
+//
+//	alarmPointItems := make([]*models.AlarmPoint, 4)
+//	for i, item := range req.Items {
+//		alarmPointItems[i].DeptId = item.DeptId
+//		alarmPointItems[i].AlarmCheckType = item.AlarmCheckType
+//		alarmPointItems[i].AlarmName = item.AlarmName
+//		//alarmPointItems[i].RadarId = item.RadarId
+//		alarmPointItems[i].RadarPointId = item.RadarPointId
+//		alarmPointItems[i].AlarmType = item.AlarmType
+//		alarmPointItems[i].RedOption = item.RedOption
+//		alarmPointItems[i].OrangeOption = item.OrangeOption
+//		alarmPointItems[i].YellowOption = item.YellowOption
+//		alarmPointItems[i].BlueOption = item.BlueOption
+//		alarmPointItems[i].Interval = item.Interval
+//		alarmPointItems[i].Duration = item.Duration
+//	}
+//	if errTx = tx.Create(alarmPointItems).Error; errTx != nil {
+//		return errTx
+//	}
+//	for _, item := range alarmPointItems {
+//		fmt.Println("打印预警LevelID:", item.Id)
+//	}
+//	return errTx
+//}
 
 // UpdateAlarmRule 修改预警规则
 func (e *AlarmPoint) UpdateAlarmRule(items []dto.AlarmPointItem, deptId, radarPointId int64, mode models.RadarPointMType) error {
@@ -170,42 +161,42 @@ func (e *AlarmPoint) UpdateAlarmRule(items []dto.AlarmPointItem, deptId, radarPo
 }
 
 // DeleteAlarmRule 删除预警规则
-func (e *AlarmPoint) DeleteAlarmRule(alarmRuleId int64) error {
-	alarmPointItems := make([]*models.AlarmPoint, 3)
-	var err error
-	db := e.Orm
-	alarmRuleItem := &models.AlarmPoint{
-		Id: alarmRuleId,
-	}
-	if err = db.First(alarmRuleItem).Error; err != nil {
-		return err
-	}
-	if err = db.Where("radar_point_id = ?", alarmRuleId).Find(alarmPointItems).Error; err != nil {
-		return err
-	}
-	var errTx error
-	tx := e.Orm.Begin()
-	defer func() {
-		if errTx != nil {
-			tx.Commit()
-		} else {
-			tx.Rollback()
-		}
-	}()
-	//1.删除预警规则
-	if errTx = tx.Model(&models.AlarmPoint{}).Where("id = ?", alarmRuleId).Delete(alarmRuleItem).Error; errTx != nil {
-		return errTx
-	}
-	////2.删除预警规矩等级
-	//if errTx = tx.Model(&models.AlarmRuleLevel{}).Where("alarm_rule_id = ?", alarmRuleId).Delete(alarmPointItems).Error; errTx != nil {
-	//	return errTx
-	//}
-	//TODO:
-	//3.删除预警告警配置
-	//4.删除预警联系人组
-	//5.删除预警联系人员
-	return errTx
-}
+//func (e *AlarmPoint) DeleteAlarmRule(alarmRuleId int64) error {
+//	alarmPointItems := make([]*models.AlarmPoint, 3)
+//	var err error
+//	db := e.Orm
+//	alarmRuleItem := &models.AlarmPoint{
+//		Id: alarmRuleId,
+//	}
+//	if err = db.First(alarmRuleItem).Error; err != nil {
+//		return err
+//	}
+//	if err = db.Where("radar_point_id = ?", alarmRuleId).Find(alarmPointItems).Error; err != nil {
+//		return err
+//	}
+//	var errTx error
+//	tx := e.Orm.Begin()
+//	defer func() {
+//		if errTx != nil {
+//			tx.Commit()
+//		} else {
+//			tx.Rollback()
+//		}
+//	}()
+//	//1.删除预警规则
+//	if errTx = tx.Model(&models.AlarmPoint{}).Where("id = ?", alarmRuleId).Delete(alarmRuleItem).Error; errTx != nil {
+//		return errTx
+//	}
+//	////2.删除预警规矩等级
+//	//if errTx = tx.Model(&models.AlarmRuleLevel{}).Where("alarm_rule_id = ?", alarmRuleId).Delete(alarmPointItems).Error; errTx != nil {
+//	//	return errTx
+//	//}
+//	//TODO:
+//	//3.删除预警告警配置
+//	//4.删除预警联系人组
+//	//5.删除预警联系人员
+//	return errTx
+//}
 
 // GetDefaultRadarPointConfig 获得默认监测点预警配置
 func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId int64) []models.AlarmPoint {
@@ -222,7 +213,7 @@ func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId in
 		OrangeOption:   "100",
 		YellowOption:   "60",
 		BlueOption:     "30",
-		Interval:       5,
+		Interval:       10,
 		Duration:       24,
 	})
 	//监测点-速度
@@ -237,7 +228,7 @@ func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId in
 		OrangeOption:   "10",
 		YellowOption:   "6",
 		BlueOption:     "3",
-		Interval:       5,
+		Interval:       10,
 		Duration:       24,
 	})
 	//监测点-加速度
@@ -252,8 +243,27 @@ func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId in
 		OrangeOption:   "10",
 		YellowOption:   "6",
 		BlueOption:     "3",
-		Interval:       5,
+		Interval:       10,
 		Duration:       24,
 	})
 	return items
+}
+
+// GetAlarmPointLogsPage 获得监测点的告警日志
+func (e *AlarmPoint) GetAlarmPointLogsPage(c dto.GetAlarmPointLogsPageReq, list []*models.AlarmPointLogs, count *int64) error {
+	var err error
+	var data models.AlarmPointLogs
+
+	err = e.Orm.Model(&data).
+		Scopes(
+			cDto.MakeCondition(c.GetNeedSearch()),
+			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
+		).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	return nil
 }

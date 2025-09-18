@@ -19,7 +19,8 @@ func registerAlarmRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewa
 		r.GET("/getPointAlarmRules", api.GetAlarmRules) //获取监测点预警规则
 		//	r.GET("/addPointAlarmRule", api.AddAlarmRule)        //增加预警规则
 		r.POST("/updatePointAlarmRules", api.UpdateAlarmRule) //修改预警规则
-		r.POST("/deletePointAlarmRule", api.DeleteAlarmRule)  //删除预警规则
+		//r.POST("/deletePointAlarmRule", api.DeleteAlarmRule)  //删除预警规则
+		r.POST("/getAlarmPointLogsPage", api.GetAlarmPointLogsPage) //获得监测点告警日志
 
 		// r.POST("/get_alarmsofids", api.GetAlarmsOfIds)
 		// r.POST("/get_dev_info", api.GetDevInfo)

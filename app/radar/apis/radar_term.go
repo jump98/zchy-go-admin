@@ -431,7 +431,7 @@ func (e Radar) PutRawData(c *gin.Context) {
 	}
 
 	// 处理距离像数据逻辑
-	e.Logger.Infof("接收到雷达 %d 的距离像数据: %+v", radarId, req)
+	e.Logger.Infof("接收到雷达 %d 的距离像数据", radarId)
 	d := mongosvr.DistanceDataV2{}
 	d.RadarID = radarId
 	d.CommandCode = req.CommandCode

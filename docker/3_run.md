@@ -21,7 +21,9 @@
 
 ```sh
   #！！！非初始化项目不可同步数据库，否则必出问题
-  docker run -d -p 8889:8888 --name zchy-api-a 88b  migrate -c /app/config/settings.prod.yml
+#  docker run -d -p 8889:8888 --name zchy-api-a 88b  migrate -c /app/config/settings.prod.yml
+
+  docker run --rm -it 962 /go-admin migrate -c /config/settings.prod.yml
 ```
 
 <!-- # docker run -d -p 8898:8888 --name zchy-api-a 597 server -c /app/config/settings.dev.yml -->

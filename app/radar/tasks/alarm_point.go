@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"go-admin/app/monsvr/mongosvr"
 	"go-admin/app/monsvr/mongosvr/collections"
@@ -40,14 +41,7 @@ type AlarmPointConifg struct {
 	PointIndex    int64               `json:"rointIndex"`   //监测点index
 	DeptId        int64               `json:"deptId"`       //机构ID
 	AlarmPoint    []models.AlarmPoint `json:"alarmPoint"`   //预警规则
-
-	//AlarmType     models.AlarmType `json:"alarmType"`    //预警类型
-	//Interval      uint64           `json:"interval"`     //预警间隔时间(m)
-	//Duration      uint64           `json:"duration"`     //形变值的查询事件跨度（h）
-	//RedOption     string           `json:"redOption"`    //红色预警条件
-	//OrangeOption  string           `json:"orangeOption"` //橙色预警条件
-	//YellowOption  string           `json:"yellowOption"` //黄色预警条件
-	//BlueOption    string           `json:"blueOption"`   //蓝色预警条件
+	RadarPoint    models.RadarPoint   `json:"radarPoint"`   //监测点信息
 }
 
 // InitAlarmPointTask 初始化监测点预警任务
@@ -65,6 +59,7 @@ func InitAlarmPointTask(parentCtx context.Context) *AlarmPointTask {
 	return t
 }
 
+// 1分钟执行一次任务
 func (t *AlarmPointTask) startTask() {
 	defer func() {
 		if err := recover(); err != nil {
@@ -72,7 +67,8 @@ func (t *AlarmPointTask) startTask() {
 		}
 	}()
 
-	ticker := time.NewTicker(time.Minute * 10)
+	ticker := time.NewTicker(time.Second * 5)
+	//ticker := time.NewTicker(time.Minute * 1)
 	defer ticker.Stop()
 
 	for {
@@ -112,9 +108,7 @@ func (t *AlarmPointTask) monitor() {
 	radarToDeptMap := map[int64]int64{}
 	for _, item := range radarItems {
 		radarToDeptMap[item.RadarId] = item.DeptId
-		fmt.Println("设置radarToDeptMap[item.RadarId] ：", item.RadarId, item.DeptId)
 	}
-
 	alarmPointItems := make([]models.AlarmPoint, 0)
 	if err = t.DB.Model(models.AlarmPoint{}).Find(&alarmPointItems).Error; err != nil {
 		return
@@ -153,32 +147,53 @@ func (t *AlarmPointTask) monitor() {
 				RadarId:       item.RadarId,
 				DeptId:        deptId,
 				AlarmPoint:    aps,
+				RadarPoint:    item,
 			}
 			t.Config = append(t.Config, cfg)
 		}
 	}
 
-	fmt.Println("打印配置:", len(t.Config))
+	fmt.Println("打印配置数量:", len(t.Config))
 
 	for _, item := range t.Config {
 		data := t.findDeformMintueList(ctx, item)
 		if len(data) == 0 {
 			return
 		}
+
+		velocityData := t.getVelocityDataList(item.LastAlarmTime, data)
+
+		t.Logger.Info("加速度的数据:", len(velocityData))
+		for _, item := range velocityData {
+			t.Logger.Info("时间：", item.Time.Local().Format("2006-01-02 15:04:05"))
+		}
+
 		deptId := item.DeptId
-		radarId := item.RadarId
-		pointIndex := item.PointIndex
+		//启动预警监测
 		for _, alarmItem := range item.AlarmPoint {
 			switch alarmItem.AlarmType {
 			case models.AlarmTypeRadarPointDeformation:
-				t.monitorDeform(deptId, radarId, pointIndex, alarmItem, data)
+				t.monitorDeform(deptId, &item.RadarPoint, alarmItem, data)
 			case models.AlarmTypeRadarPointVelocity:
-				t.monitorVelocity(deptId, radarId, pointIndex, alarmItem, data)
+				t.monitorVelocity(deptId, &item.RadarPoint, alarmItem, velocityData)
 			case models.AlarmTypeRadarPointAcceleration:
-				t.monitorAcceleration(deptId, radarId, pointIndex, alarmItem, data)
+				t.monitorAcceleration(deptId, &item.RadarPoint, alarmItem, velocityData)
 			}
 		}
+		//保存最近一次检测预警的时间
+		t.saveRadarPointTime(item.RadarPoint)
+	}
+}
 
+func (t *AlarmPointTask) saveRadarPointTime(radarPoint models.RadarPoint) {
+	var err error
+	lastTime := sql.NullTime{
+		Time:  time.Now().Local(), // 真实时间
+		Valid: true,               // 表示这个时间有效
+	}
+	radarPoint.LastAlarmTime = lastTime
+	if err = t.DB.Save(&radarPoint).Error; err != nil {
+		return
 	}
 }
 
@@ -198,7 +213,7 @@ func (t *AlarmPointTask) findDeformMintueList(ctx context.Context, item AlarmPoi
 	elapsed := now.Sub(item.LastAlarmTime)
 	//fmt.Println("elapsed:", elapsed.String())
 	if elapsed < time.Duration(interval)*time.Minute {
-		t.Logger.Info("预警间隔时间中...")
+		t.Logger.Infof("预警间隔时间中:%d minute...", interval)
 		return []collections.DeformationPointMinuteModel{}
 	}
 	radarId := item.RadarId
@@ -220,16 +235,19 @@ func (t *AlarmPointTask) findDeformMintueList(ctx context.Context, item AlarmPoi
 	return data
 }
 
-func CalculateTotalDeformation(data []collections.DeformationPointMinuteModel) int64 {
-	var total int64 = 0
-	for _, d := range data {
-		total += int64(d.Deformation)
+// 加速度形变数据 - 只取上一次预警到当前时间的形变列表
+func (t *AlarmPointTask) getVelocityDataList(lastAlarmTime time.Time, data []collections.DeformationPointMinuteModel) []collections.DeformationPointMinuteModel {
+	var velocityData []collections.DeformationPointMinuteModel
+	for _, item := range data {
+		if item.Time.After(lastAlarmTime) {
+			velocityData = append(velocityData, item)
+		}
 	}
-	return total
+	return velocityData
 }
 
 // 监测累计形变
-func (t *AlarmPointTask) monitorDeform(deptId, radarId, RadarPointId int64, alarmPoint models.AlarmPoint, data []collections.DeformationPointMinuteModel) {
+func (t *AlarmPointTask) monitorDeform(deptId int64, radarPoint *models.RadarPoint, alarmPoint models.AlarmPoint, data []collections.DeformationPointMinuteModel) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -273,39 +291,43 @@ func (t *AlarmPointTask) monitorDeform(deptId, radarId, RadarPointId int64, alar
 	}
 
 	var alarmLevel models.AlarmLevel
-	var triggerValue int64 // 触发的预警阈值
+	var alarmValue int64 // 触发的预警阈值
 	switch {
 	case absDeformation >= redValue:
 		alarmLevel = models.AlarmLevelRed
-		triggerValue = redValue
+		alarmValue = redValue
 	case absDeformation >= orangeValue:
 		alarmLevel = models.AlarmLevelOrange
-		triggerValue = orangeValue
+		alarmValue = orangeValue
 	case absDeformation >= yellowValue:
 		alarmLevel = models.AlarmLevelYellow
-		triggerValue = yellowValue
+		alarmValue = yellowValue
 	case absDeformation >= blueValue:
 		alarmLevel = models.AlarmLevelBlue
-		triggerValue = blueValue
+		alarmValue = blueValue
 	default:
 		alarmLevel = models.AlarmLevelNone
-		triggerValue = 0
+		alarmValue = 0
 		return
+	}
+
+	if alarmLevel > radarPoint.AlarmLevel {
+		radarPoint.AlarmLevel = alarmLevel
 	}
 
 	// 输出日志
 	t.Logger.Info(fmt.Sprintf("监测点ID: %d, 累计形变: %d, 预警等级: %d, 触发阈值: %d",
-		RadarPointId, totalDeformationMM, alarmLevel, triggerValue))
+		radarPoint.Id, totalDeformationMM, alarmLevel, alarmValue))
 
 	db := t.DB
 	alarmPointLogs := &models.AlarmPointLogs{
 		AlarmType:     alarmPoint.AlarmType,
-		RadarId:       radarId,
-		RadarPointId:  RadarPointId,
+		RadarId:       radarPoint.RadarId,
+		RadarPointId:  radarPoint.Id,
 		AlarmLevel:    alarmLevel,
 		DeptId:        deptId,
-		CurrentValue:  strconv.FormatInt(triggerValue, 10),       // 触发阈值
-		AlarmValue:    strconv.FormatInt(totalDeformationMM, 10), // 原始累计形变
+		CurrentValue:  strconv.FormatInt(totalDeformationMM, 10), // 原始累计形变
+		AlarmValue:    strconv.FormatInt(alarmValue, 10),         // 触发阈值
 		Interval:      alarmPoint.Interval,
 		Duration:      1,
 		ProcessRemark: "",
@@ -320,7 +342,7 @@ func (t *AlarmPointTask) monitorDeform(deptId, radarId, RadarPointId int64, alar
 }
 
 // 监测形变位移速度（瞬时位移量）预警阈值，单位：mm/m
-func (t *AlarmPointTask) monitorVelocity(deptId, radarId, RadarPointId int64, alarmPoint models.AlarmPoint, data []collections.DeformationPointMinuteModel) {
+func (t *AlarmPointTask) monitorVelocity(deptId int64, radarPoint *models.RadarPoint, alarmPoint models.AlarmPoint, data []collections.DeformationPointMinuteModel) {
 	if len(data) < 2 {
 		t.Logger.Info("数据不足，无法计算瞬时形变速度")
 		return
@@ -343,8 +365,8 @@ func (t *AlarmPointTask) monitorVelocity(deptId, radarId, RadarPointId int64, al
 	}
 
 	var maxAlarmLevel models.AlarmLevel = models.AlarmLevelNone
-	var triggerValue float64
 	var alarmValue float64
+	var currentValue float64
 	var alarmCount int
 
 	// 遍历每两条数据计算瞬时速度
@@ -357,10 +379,9 @@ func (t *AlarmPointTask) monitorVelocity(deptId, radarId, RadarPointId int64, al
 		if deltaTime <= 0 {
 			continue
 		}
-		//fmt.Println("hour:", deltaTime, "minute:", curr.Time.Sub(prev.Time))
 		speed := deltaDeform / deltaTime
 		absSpeed := math.Abs(speed)
-		//fmt.Println("deltaDeform:", deltaDeform, "Time:", curr.Time.Sub(prev.Time), "speed:", speed, "speed2:", deltaDeform/(curr.Time.Sub(prev.Time).Minutes()))
+		t.Logger.Info("形变A:", curr.Deformation, "  形变B:", prev.Deformation, "  形变差值:", deltaDeform, "  时间:", deltaTime, "  曲线速度:", speed)
 
 		var level models.AlarmLevel
 		var curTrigger float64
@@ -384,8 +405,8 @@ func (t *AlarmPointTask) monitorVelocity(deptId, radarId, RadarPointId int64, al
 		// 更新最大等级
 		if level > maxAlarmLevel {
 			maxAlarmLevel = level
-			triggerValue = curTrigger
-			alarmValue = speed // 保留原始值
+			alarmValue = curTrigger
+			currentValue = speed // 保留原始值
 		}
 		alarmCount++
 	}
@@ -394,20 +415,23 @@ func (t *AlarmPointTask) monitorVelocity(deptId, radarId, RadarPointId int64, al
 		t.Logger.Info("未触发任何瞬时速度预警")
 		return
 	}
+	if maxAlarmLevel > radarPoint.AlarmLevel {
+		radarPoint.AlarmLevel = maxAlarmLevel
+	}
 
 	t.Logger.Info(fmt.Sprintf("监测点ID: %d, 瞬时速度预警次数: %d, 最大预警等级: %d, 触发阈值: %.2f, 原始速度: %.2f",
-		RadarPointId, alarmCount, maxAlarmLevel, triggerValue, alarmValue))
+		radarPoint.Id, alarmCount, maxAlarmLevel, alarmValue, currentValue))
 
 	//TODO 后续需要查询是否存在同等级预警，如果存在就不上报
 	db := t.DB
 	alarmPointLogs := &models.AlarmPointLogs{
 		AlarmType:     alarmPoint.AlarmType,
-		RadarId:       radarId,
-		RadarPointId:  RadarPointId,
+		RadarId:       radarPoint.RadarId,
+		RadarPointId:  radarPoint.Id,
 		AlarmLevel:    maxAlarmLevel,
 		DeptId:        deptId,
-		CurrentValue:  fmt.Sprintf("%.2f", triggerValue), // 触发阈值
-		AlarmValue:    fmt.Sprintf("%.2f", alarmValue),   // 瞬时速度原始值
+		CurrentValue:  fmt.Sprintf("%.2f", currentValue), // 瞬时速度原始值
+		AlarmValue:    fmt.Sprintf("%.2f", alarmValue),   // 触发阈值
 		Interval:      alarmPoint.Interval,
 		Duration:      uint64(alarmCount), // 触发次数
 		ProcessRemark: "",
@@ -422,7 +446,7 @@ func (t *AlarmPointTask) monitorVelocity(deptId, radarId, RadarPointId int64, al
 }
 
 // 监测形变位移加速度（瞬时加速度），单位：mm/m²
-func (t *AlarmPointTask) monitorAcceleration(deptId, radarId, RadarPointId int64, alarmPoint models.AlarmPoint, data []collections.DeformationPointMinuteModel) {
+func (t *AlarmPointTask) monitorAcceleration(deptId int64, radarPoint *models.RadarPoint, alarmPoint models.AlarmPoint, data []collections.DeformationPointMinuteModel) {
 	if len(data) < 3 { // 至少 3 条数据才能计算两段速度的加速度
 		t.Logger.Info("数据不足，无法计算瞬时加速度")
 		return
@@ -445,8 +469,8 @@ func (t *AlarmPointTask) monitorAcceleration(deptId, radarId, RadarPointId int64
 	}
 
 	var maxAlarmLevel models.AlarmLevel = models.AlarmLevelNone
-	var triggerValue float64
 	var alarmValue float64
+	var currentValue float64
 	var alarmCount int
 
 	// 先计算每条数据的瞬时速度
@@ -490,8 +514,8 @@ func (t *AlarmPointTask) monitorAcceleration(deptId, radarId, RadarPointId int64
 
 		if level > maxAlarmLevel {
 			maxAlarmLevel = level
-			triggerValue = curTrigger
-			alarmValue = acc // 保留原始值
+			alarmValue = curTrigger
+			currentValue = acc // 保留原始值
 		}
 		alarmCount++
 	}
@@ -500,19 +524,22 @@ func (t *AlarmPointTask) monitorAcceleration(deptId, radarId, RadarPointId int64
 		t.Logger.Info("未触发任何瞬时加速度预警")
 		return
 	}
+	if maxAlarmLevel > radarPoint.AlarmLevel {
+		radarPoint.AlarmLevel = maxAlarmLevel
+	}
 
 	t.Logger.Info(fmt.Sprintf("监测点ID: %d, 瞬时加速度预警次数: %d, 最大预警等级: %d, 触发阈值: %.2f, 原始加速度: %.2f",
-		RadarPointId, alarmCount, maxAlarmLevel, triggerValue, alarmValue))
+		radarPoint.Id, alarmCount, maxAlarmLevel, alarmValue, currentValue))
 
 	// 保存到数据库
 	db := t.DB
 	alarmPointLogs := &models.AlarmPointLogs{
 		AlarmType:     alarmPoint.AlarmType,
-		RadarId:       radarId,
-		RadarPointId:  RadarPointId,
+		RadarId:       radarPoint.RadarId,
+		RadarPointId:  radarPoint.Id,
 		AlarmLevel:    maxAlarmLevel,
 		DeptId:        deptId,
-		CurrentValue:  fmt.Sprintf("%.2f", triggerValue),
+		CurrentValue:  fmt.Sprintf("%.2f", currentValue),
 		AlarmValue:    fmt.Sprintf("%.2f", alarmValue),
 		Interval:      alarmPoint.Interval,
 		Duration:      uint64(alarmCount),

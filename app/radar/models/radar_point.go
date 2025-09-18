@@ -29,9 +29,9 @@ type RadarPoint struct {
 	Distance      string          `json:"distance"    gorm:"type:varchar(20);  comment:距离"` //距离
 	Remark        string          `json:"remark"      gorm:"type:varchar(255); comment:备注"`
 	AStatus       string          `json:"aStatus"     gorm:"type:varchar(20);  comment:激活状态"`
-	XStatus       string          `json:"xStatus"     gorm:"type:varchar(20);  comment:消警状态"`
-	MTypeId       RadarPointMType `json:"mTypeId"     gorm:"type:tinyint; DEFAULT:0;      comment:门限类型"` //0=全局门限 1=独立门限
-	LastAlarmTime sql.NullTime    `json:"last_time"   gorm:"comment:最近一次检测预警的时间"`                        //最近一次检测预警的时间
+	AlarmLevel    AlarmLevel      `json:"alarmLevel"  gorm:"type:tinyint; DEFAULT:0;  comment:预警状态"` //告警等级
+	MTypeId       RadarPointMType `json:"mTypeId"     gorm:"type:tinyint; DEFAULT:0;  comment:门限类型"` //0=全局门限 1=独立门限
+	LastAlarmTime sql.NullTime    `json:"last_time"   gorm:"comment:最近一次检测预警的时间"`                    //最近一次检测预警的时间
 	models.ModelTime
 	models.ControlBy
 }

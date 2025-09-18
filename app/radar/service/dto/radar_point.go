@@ -44,8 +44,6 @@ type RadarPointOrder struct {
 	PointIndex int    `form:"pointIndex"  search:"type:order;column:point_index;table:radar_point"`
 	Remark     string `form:"remarkOrder"  search:"type:order;column:remark;table:radar_point"`
 	AStatus    string `form:"aStatusOrder"  search:"type:order;column:a_status;table:radar_point"`
-	XStatus    string `form:"xStatusOrder"  search:"type:order;column:x_status;table:radar_point"`
-	MTypeId    string `form:"mTypeIdOrder"  search:"type:order;column:m_type_id;table:radar_point"`
 	CreateBy   string `form:"createByOrder"  search:"type:order;column:create_by;table:radar_point"`
 	UpdateBy   string `form:"updateByOrder"  search:"type:order;column:update_by;table:radar_point"`
 	CreatedAt  string `form:"createdAtOrder"  search:"type:order;column:created_at;table:radar_point"`
@@ -69,9 +67,6 @@ type InsertRadarPointReq struct {
 	Distance   string `json:"distance" comment:"距离"`
 	PointIndex int64  `json:"pointIndex" comment:"下标"`
 	Remark     string `json:"remark" comment:"备注"`
-	AStatus    string `json:"aStatus" comment:"激活状态"`
-	XStatus    string `json:"xStatus" comment:"消警状态"`
-	MTypeId    string `json:"mTypeId" comment:"门限类型"`
 	common.ControlBy
 }
 
@@ -89,8 +84,8 @@ func (s *InsertRadarPointReq) Generate(model *models.RadarPoint) {
 	model.Distance = s.Distance
 	model.PointIndex = s.PointIndex
 	model.Remark = s.Remark
-	model.AStatus = s.AStatus
-	model.XStatus = s.XStatus
+	model.AStatus = "0"
+	model.AlarmLevel = models.AlarmLevelNone     //默认不告警
 	model.MTypeId = models.RadarPointMTypeGlobal //默认全局门限
 	model.CreateBy = s.CreateBy                  // 添加这而，需要记录是被谁创建的
 }
@@ -112,8 +107,6 @@ type UpdateRadarPointReq struct {
 	PointIndex int64  `json:"pointIndex" comment:"下标"`
 	Remark     string `json:"remark" comment:"备注"`
 	AStatus    string `json:"aStatus" comment:"激活状态"`
-	XStatus    string `json:"xStatus" comment:"消警状态"`
-	//MTypeId    string `json:"mTypeId" comment:"门限类型"`
 	common.ControlBy
 }
 
@@ -132,9 +125,7 @@ func (s *UpdateRadarPointReq) Generate(model *models.RadarPoint) {
 	model.PointIndex = s.PointIndex
 	model.Remark = s.Remark
 	model.AStatus = s.AStatus
-	model.XStatus = s.XStatus
-	//model.MTypeId = s.MTypeId
-	model.UpdateBy = s.UpdateBy // 添加这而，需要记录是被谁更新的
+	model.UpdateBy = s.UpdateBy
 }
 
 func (s *UpdateRadarPointReq) GetId() interface{} {

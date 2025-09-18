@@ -2,6 +2,8 @@ package dto
 
 import (
 	"go-admin/app/radar/models"
+	"go-admin/common/dto"
+	"time"
 )
 
 // GetAlarmRulesReq  获取预警规则列表
@@ -50,7 +52,26 @@ type UpdateAlarmPointesp struct {
 
 // DeleteAlarmPointReq  删除预警设定列表
 type DeleteAlarmPointReq struct {
-	AlarmRuleId int64 `form:"alarmRuleId"` //预警规矩ID
+	AlarmRuleId int64 `json:"alarmRuleId"` //预警规矩ID
 }
 type DeleteAlarmPointResp struct {
+}
+
+type GetAlarmPointLogsPageReq struct {
+	dto.Pagination `search:"-"`
+	DeptId         int64             `form:"deptId" search:"type:exact;column:dept_id;table:alarm_point_logs"`              //机构ID
+	RadarId        int64             `form:"radarId" search:"type:exact;column:radar_id;table:alarm_point_logs"`            //雷达ID
+	radarPointId   int64             `form:"radarPointId" search:"type:exact;column:radar_point_id;table:alarm_point_logs"` //雷达ID
+	AlarmType      models.AlarmType  `form:"alarmType" search:"type:exact;column:alarm_type;table:alarm_point_logs"`        //预警类型
+	AlarmLevel     models.AlarmLevel `form:"alarmLevel" search:"type:exact;column:alarm_level;table:alarm_point_logs"`      //报警等级
+	StartTime      time.Time         `form:"start" search:"type:gte;column:created_at;table:alarm_point_logs"`              //开始时间
+	EndTime        time.Time         `form:"end" search:"type:lte;column:created_at;table:alarm_point_logs"`                //结束时间
+}
+
+func (m *GetAlarmPointLogsPageReq) GetNeedSearch() interface{} {
+	return *m
+}
+
+type GetAlarmPointLogsPageResp struct {
+	List []models.AlarmPointLogs `json:"list"`
 }

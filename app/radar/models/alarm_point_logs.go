@@ -10,7 +10,7 @@ type AlarmPointLogs struct {
 	RadarPointId int64      `json:"radarPointId"   gorm:"comment:监测点ID"`             //监测点ID
 	AlarmLevel   AlarmLevel `json:"alarmLevel"     gorm:"type:tinyint;comment:报警等级"` //报警等级
 	DeptId       int64      `json:"deptId"         gorm:"comment:机构Id"`              //机构ID
-	CurrentValue string     `json:"currentValue"   gorm:"size:255;comment:实际值"`      //门限值
+	CurrentValue string     `json:"currentValue"   gorm:"size:255;comment:实际值"`      //实际值
 	AlarmValue   string     `json:"alarmValue"     gorm:"size:255;comment:预警值"`      //预警值
 	Interval     uint64     `json:"interval"       gorm:"comment:预警间隔时间"`            //预警间隔时间（分）
 	Duration     uint64     `json:"duration"       gorm:"comment:报警次数"`              //连续预警次数
