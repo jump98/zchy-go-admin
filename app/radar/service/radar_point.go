@@ -171,7 +171,7 @@ func (e *RadarPoint) GetPointByRadarId(radarId int64, p *actions.DataPermission)
 }
 
 // GetRadarIdByPointId 根据监测点ID获取对应的雷达ID
-func (e *RadarPoint) GetRadarIdByPointId(pointId int, p *actions.DataPermission) (int64, error) {
+func (e *RadarPoint) GetRadarIdByPointId(pointId int) (int64, error) {
 	var radarId int64
 	if err := e.Orm.Model(&models.RadarPoint{}).Select("radar_id").Where("id = ?", pointId).First(&radarId).Error; err != nil {
 		return 0, err

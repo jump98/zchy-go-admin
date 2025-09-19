@@ -306,7 +306,7 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 	var radarId int64 = 0
 	for _, id := range ids {
 		if radarId == 0 {
-			radarId, _ = s.GetRadarIdByPointId(id, p)
+			radarId, _ = s.GetRadarIdByPointId(id)
 		}
 		req := dto.GetRadarPointByIdReq{Id: id}
 		object := &models.RadarPoint{}
