@@ -67,8 +67,7 @@ func (t *AlarmPointTask) startTask() {
 		}
 	}()
 
-	ticker := time.NewTicker(time.Second * 5)
-	//ticker := time.NewTicker(time.Minute * 1)
+	ticker := time.NewTicker(time.Minute * 1)
 	defer ticker.Stop()
 
 	for {

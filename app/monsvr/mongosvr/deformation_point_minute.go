@@ -63,6 +63,7 @@ func (s deformationPointMinuteService) SaveDeformMinuteByTime(ctx context.Contex
 	}
 
 	// 存入分表
+	var dayDocs []interface{}
 	for _, last := range lastMap {
 		dayDoc := collections.DeformationPointMinuteModel{
 			Time:        startTime,
@@ -70,10 +71,11 @@ func (s deformationPointMinuteService) SaveDeformMinuteByTime(ctx context.Contex
 			PointIndex:  last.Index,
 			Deformation: last.Deformation,
 		}
-		_, err = MDB.Collection(collections.TableDeformationPointMinute).InsertOne(ctx, dayDoc)
-		if err != nil {
-			return fmt.Errorf("保存形变分钟表数据失败: %v", err)
-		}
+		dayDocs = append(dayDocs, dayDoc)
+	}
+	opts := options.InsertMany().SetOrdered(false)
+	if _, err = MDB.Collection(collections.TableDeformationPointMinute).InsertMany(ctx, dayDocs, opts); err != nil {
+		return fmt.Errorf("保存形变分钟表数据失败: %v", err)
 	}
 
 	return nil

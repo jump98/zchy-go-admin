@@ -196,7 +196,7 @@ func (e RadarPoint) InsertRadarPoint(c *gin.Context) {
 	// }
 	// param := []dto.RadarPointIndex{}
 
-	param := []dto.RadarPointIndex{{Index: req.PointIndex}}
+	param := []dto.GetRadarPointsIndex{{Position: req.PointIndex, PhaseDepth: req.PhaseDepth, PoseDepth: req.PoseDepth}}
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     req.RadarId,
 		CommandCode: mongosvr.CMD_RD_ADDPOINT,
@@ -213,15 +213,15 @@ func (e RadarPoint) InsertRadarPoint(c *gin.Context) {
 	e.OK(req.GetId(), "创建成功")
 }
 
-func (e RadarPoint) convertToMapSlice(points []models.RadarPoint) []dto.RadarPointIndex {
-	var mapSlice []dto.RadarPointIndex
-	for _, point := range points {
-		mapSlice = append(mapSlice, dto.RadarPointIndex{
-			Index: point.PointIndex,
-		})
-	}
-	return mapSlice
-}
+//func (e RadarPoint) convertToMapSlice(points []models.RadarPoint) []dto.RadarPointIndex {
+//	var mapSlice []dto.RadarPointIndex
+//	for _, point := range points {
+//		mapSlice = append(mapSlice, dto.RadarPointIndex{
+//			Index: point.PointIndex,
+//		})
+//	}
+//	return mapSlice
+//}
 
 // UpdateRadarPoint 修改监测点管理
 // @Summary 修改监测点管理
@@ -282,13 +282,11 @@ func (e RadarPoint) DeleteRadarPoint(c *gin.Context) {
 
 	// req.SetUpdateBy(user.GetUserId(c))
 	p := actions.GetPermissionFromContext(c)
-
-	radarId, points, _ := e.getRadarIDandPoints(req.Ids, &s, p)
-	err = s.Remove(&req, p)
-	if err != nil {
+	if err = s.Remove(&req, p); err != nil {
 		e.Error(500, err, fmt.Sprintf("删除监测点管理失败，\r\n失败信息 %s", err.Error()))
 		return
 	}
+	radarId, points, _ := e.getRadarIDandPoints(req.Ids, &s, p)
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     radarId,
 		CommandCode: mongosvr.CMD_RD_DELETEPOINT,
@@ -303,8 +301,8 @@ func (e RadarPoint) DeleteRadarPoint(c *gin.Context) {
 	e.OK(req.GetId(), "删除成功")
 }
 
-func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *actions.DataPermission) (int64, []dto.RadarPointIndex, error) {
-	var points []dto.RadarPointIndex
+func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *actions.DataPermission) (int64, []dto.GetRadarPointsIndex, error) {
+	var points []dto.GetRadarPointsIndex
 	var radarId int64 = 0
 	for _, id := range ids {
 		if radarId == 0 {
@@ -314,8 +312,10 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 		object := &models.RadarPoint{}
 		err := s.Get(&req, p, object)
 		if err == nil {
-			points = append(points, dto.RadarPointIndex{
-				Index: object.PointIndex,
+			points = append(points, dto.GetRadarPointsIndex{
+				Position:   object.PointIndex,
+				PhaseDepth: object.PhaseDepth,
+				PoseDepth:  object.PoseDepth,
 			})
 		}
 	}

@@ -179,7 +179,7 @@ func (e *RadarPoint) GetRadarIdByPointId(pointId int, p *actions.DataPermission)
 	return radarId, nil
 }
 
-// 获得指定雷达是所有监测点
+// GetPointsByRadarId 获得指定雷达是所有监测点
 func (e *RadarPoint) GetPointsByRadarId(radarId int64) ([]int64, error) {
 	pointIndexs := make([]int64, 0)
 	var err error
@@ -187,5 +187,24 @@ func (e *RadarPoint) GetPointsByRadarId(radarId int64) ([]int64, error) {
 		e.Log.Errorf("Service GetPointsByRadarId error:%s \r\n", err)
 	}
 	e.Log.Info("查询雷达点位列表:", pointIndexs)
+	return pointIndexs, err
+}
+
+// GetPointsByRadarIdV2 获得指定雷达是所有监测点
+func (e *RadarPoint) GetPointsByRadarIdV2(radarId int64) ([]dto.GetRadarPointsIndex, error) {
+	pointIndexs := make([]dto.GetRadarPointsIndex, 0)
+	radarPointList := make([]models.RadarPoint, 0)
+	var err error
+	if err = e.Orm.Model(&models.RadarPoint{}).Where("radar_id = ?", radarId).Find(&radarPointList).Error; err != nil {
+		e.Log.Errorf("Service GetPointsByRadarIdV2 error:%s \r\n", err)
+	}
+	e.Log.Info("查询雷达点位列表:", pointIndexs)
+	for _, item := range radarPointList {
+		pointIndexs = append(pointIndexs, dto.GetRadarPointsIndex{
+			Position:   item.PointIndex,
+			PoseDepth:  item.PoseDepth,
+			PhaseDepth: item.PhaseDepth,
+		})
+	}
 	return pointIndexs, err
 }

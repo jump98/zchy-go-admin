@@ -23,6 +23,8 @@ type RadarPoint struct {
 	PointType     string          `json:"pointType"   gorm:"type:varchar(10);  comment:监测点类型"`
 	RadarId       int64           `json:"radarId"     gorm:"uniqueIndex:idx_radarid_pointindex_key; comment:雷达ID"`
 	PointIndex    int64           `json:"pointIndex"  gorm:"uniqueIndex:idx_radarid_pointindex_key; comment:监测点Index"`
+	PoseDepth     int64           `json:"PoseDepth"   gorm:"DEFAULT:0;comment:位置滤波器缓存深度"`
+	PhaseDepth    int64           `json:"PhaseDepth"  gorm:"DEFAULT:0;comment:相位滤波器缓存深度"`
 	Lng           string          `json:"lng"         gorm:"type:varchar(20);  comment:经度"` //经度
 	Lat           string          `json:"lat"         gorm:"type:varchar(20);  comment:纬度"` //纬度
 	Alt           string          `json:"alt"         gorm:"type:varchar(20);  comment:高度"` //高度

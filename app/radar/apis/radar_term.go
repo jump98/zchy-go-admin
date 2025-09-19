@@ -352,8 +352,8 @@ type GetCommandsResponse struct {
 
 // GetRadarPointsResp 获取雷达点位列表
 type GetRadarPointsResp struct {
-	Code  int     `json:"code"`
-	Index []int64 `json:"index"`
+	Code  int                       `json:"code"`
+	Index []dto.GetRadarPointsIndex `json:"index"`
 }
 
 // GetCommands 雷达设备获取下发命令
@@ -600,8 +600,8 @@ func (e Radar) GetRadarPoints(c *gin.Context) {
 		e.Error(400, err, err.Error())
 		return
 	}
-	var points []int64
-	if points, err = s.GetPointsByRadarId(radarId); err != nil {
+	var points []dto.GetRadarPointsIndex
+	if points, err = s.GetPointsByRadarIdV2(radarId); err != nil {
 		e.Error(500, err, "获得监测点列表出错")
 		return
 	}
@@ -612,7 +612,7 @@ func (e Radar) GetRadarPoints(c *gin.Context) {
 	e.OK(resp, "获取所有点位信息成功")
 }
 
-// GetRadarPoints 上传指令到服务器
+// PutCommands 上传指令到服务器
 // @Summary 上传指令到服务器
 // @Description 上传指令到服务器
 // @Tags 雷达管理-终端接口

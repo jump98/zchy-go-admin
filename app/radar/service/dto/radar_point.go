@@ -66,6 +66,8 @@ type InsertRadarPointReq struct {
 	Alt        string `json:"alt" comment:"高度"`
 	Distance   string `json:"distance" comment:"距离"`
 	PointIndex int64  `json:"pointIndex" comment:"下标"`
+	PoseDepth  int64  `json:"poseDepth" comment:"位置滤波器缓存深度"`
+	PhaseDepth int64  `json:"PhaseDepth" comment:"相位滤波器缓存深度"`
 	Remark     string `json:"remark" comment:"备注"`
 	common.ControlBy
 }
@@ -73,6 +75,12 @@ type InsertRadarPointReq struct {
 func (s *InsertRadarPointReq) Generate(model *models.RadarPoint) {
 	if s.Id == 0 {
 		model.Id = s.Id
+	}
+	if s.PoseDepth == 0 {
+		s.PoseDepth = 500
+	}
+	if s.PhaseDepth == 0 {
+		s.PhaseDepth = 400
 	}
 	model.PointName = s.PointName
 	model.PointKey = s.PointKey
@@ -83,6 +91,8 @@ func (s *InsertRadarPointReq) Generate(model *models.RadarPoint) {
 	model.Alt = s.Alt
 	model.Distance = s.Distance
 	model.PointIndex = s.PointIndex
+	model.PoseDepth = s.PoseDepth
+	model.PhaseDepth = s.PhaseDepth
 	model.Remark = s.Remark
 	model.AStatus = "0"
 	model.AlarmLevel = models.AlarmLevelNone     //默认不告警
@@ -105,6 +115,8 @@ type UpdateRadarPointReq struct {
 	Alt        string `json:"alt" comment:"高度"`
 	Distance   string `json:"distance" comment:"距离"`
 	PointIndex int64  `json:"pointIndex" comment:"下标"`
+	PoseDepth  int64  `json:"poseDepth" comment:"位置滤波器缓存深度"`
+	PhaseDepth int64  `json:"PhaseDepth" comment:"相位滤波器缓存深度"`
 	Remark     string `json:"remark" comment:"备注"`
 	AStatus    string `json:"aStatus" comment:"激活状态"`
 	common.ControlBy
@@ -123,6 +135,8 @@ func (s *UpdateRadarPointReq) Generate(model *models.RadarPoint) {
 	model.Alt = s.Alt
 	model.Distance = s.Distance
 	model.PointIndex = s.PointIndex
+	model.PoseDepth = s.PoseDepth
+	model.PhaseDepth = s.PhaseDepth
 	model.Remark = s.Remark
 	model.AStatus = s.AStatus
 	model.UpdateBy = s.UpdateBy
@@ -154,4 +168,10 @@ func (s *DeleteRadarPointReq) GetId() interface{} {
 
 type RadarPointIndex struct {
 	Index int64 `json:"index" comment:"监测点下标"`
+}
+
+type GetRadarPointsIndex struct {
+	Position   int64 `json:"position"`
+	PoseDepth  int64 `json:"pose_depth"`
+	PhaseDepth int64 `json:"phase_depth"`
 }
