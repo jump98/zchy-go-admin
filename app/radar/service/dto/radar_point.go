@@ -171,7 +171,7 @@ type RadarPointIndex struct {
 }
 
 type GetRadarPointsIndex struct {
-	Position   int64 `json:"position"`
-	PoseDepth  int64 `json:"pose_depth"`
-	PhaseDepth int64 `json:"phase_depth"`
+	Position   int64 `json:"position"     bson:"position"`
+	PoseDepth  int64 `json:"pose_depth"   bson:"pose_depth"`
+	PhaseDepth int64 `json:"phase_depth"  bson:"phase_depth"`
 }

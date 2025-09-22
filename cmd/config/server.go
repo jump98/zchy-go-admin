@@ -27,7 +27,7 @@ func init() {
 }
 
 func run() {
-	fmt.Println("读取配置文件:", configYml)
+	fmt.Println("config.读取配置文件:", configYml)
 	config.Setup(file.NewSource(file.WithPath(configYml)))
 
 	application, errs := json.MarshalIndent(config.ApplicationConfig, "", "   ") //转换成JSON返回的是byte[]

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
@@ -183,19 +184,12 @@ func (e RadarPoint) InsertRadarPoint(c *gin.Context) {
 	// 设置创建人
 	req.SetCreateBy(user.GetUserId(c))
 
+	radarPointItem := models.RadarPoint{}
 	fmt.Printf("创建监测点管理参数：%+v \n", req)
-	err = s.Insert(&req)
-	if err != nil {
+	if radarPointItem, err = s.Insert(&req); err != nil {
 		e.Error(500, err, "创建监测点管理失败")
 		return
 	}
-	// var points []int64
-	// if points, err = s.GetPointsByRadarId(req.RadarId); err != nil {
-	// 	e.Error(500, err, "获得监测点列表出错")
-	// 	return
-	// }
-	// param := []dto.RadarPointIndex{}
-
 	param := []dto.GetRadarPointsIndex{{Position: req.PointIndex, PhaseDepth: req.PhaseDepth, PoseDepth: req.PoseDepth}}
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     req.RadarId,
@@ -210,7 +204,8 @@ func (e RadarPoint) InsertRadarPoint(c *gin.Context) {
 		return
 	}
 
-	e.OK(req.GetId(), "创建成功")
+	fmt.Println("创建监测点成功：", radarPointItem.Id)
+	e.OK(radarPointItem.Id, "创建成功")
 }
 
 //func (e RadarPoint) convertToMapSlice(points []models.RadarPoint) []dto.RadarPointIndex {
@@ -271,7 +266,7 @@ func (e RadarPoint) DeleteRadarPoint(c *gin.Context) {
 	req := dto.DeleteRadarPointReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req).
+		Bind(&req, binding.JSON).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -280,13 +275,17 @@ func (e RadarPoint) DeleteRadarPoint(c *gin.Context) {
 		return
 	}
 
-	// req.SetUpdateBy(user.GetUserId(c))
+	if len(req.Ids) == 0 {
+		e.Error(400, nil, "监测ID不能为空")
+		return
+	}
+
 	p := actions.GetPermissionFromContext(c)
+	radarId, points, _ := e.getRadarIDandPoints(req.Ids, &s, p)
 	if err = s.Remove(&req, p); err != nil {
 		e.Error(500, err, fmt.Sprintf("删除监测点管理失败，\r\n失败信息 %s", err.Error()))
 		return
 	}
-	radarId, points, _ := e.getRadarIDandPoints(req.Ids, &s, p)
 	err = mongosvr.InsertCommandData(&mongosvr.CommandData{
 		RadarId:     radarId,
 		CommandCode: mongosvr.CMD_RD_DELETEPOINT,
@@ -294,6 +293,7 @@ func (e RadarPoint) DeleteRadarPoint(c *gin.Context) {
 		TimeStamp:   time.Now().Unix(),
 		Parameters:  map[string]interface{}{"polygon": points},
 	})
+	fmt.Printf("删除监测点:%+v \n", points)
 	if err != nil {
 		e.Error(500, err, fmt.Sprintf("删除监测点管理失败，\r\n失败信息 %s", err.Error()))
 		return
@@ -310,8 +310,7 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 		}
 		req := dto.GetRadarPointByIdReq{Id: id}
 		object := &models.RadarPoint{}
-		err := s.Get(&req, p, object)
-		if err == nil {
+		if err := s.Get(&req, p, object); err == nil {
 			points = append(points, dto.GetRadarPointsIndex{
 				Position:   object.PointIndex,
 				PhaseDepth: object.PhaseDepth,

@@ -35,6 +35,7 @@ import (
 var (
 	configYml string
 	apiCheck  bool
+	TaskCheck bool //定时任务
 	StartCmd  = &cobra.Command{
 		Use:          "server",
 		Short:        "Start API server",
@@ -55,6 +56,7 @@ func init() {
 	fmt.Println("api 初始化")
 	StartCmd.PersistentFlags().StringVarP(&configYml, "config", "c", "config/settings.yml", "Start server with provided configuration file")
 	StartCmd.PersistentFlags().BoolVarP(&apiCheck, "api", "a", false, "Start server with check api data")
+	StartCmd.PersistentFlags().BoolVarP(&TaskCheck, "task", "t", false, "Start timed task")
 
 	//注册路由 fixme 其他应用的路由，在本目录新建文件放在init方法
 	AppRouters = append(AppRouters, router.InitRouter)
@@ -144,8 +146,12 @@ func run() error {
 	fmt.Printf("%s Enter Control + C Shutdown Server \r\n", pkg.GetCurrentTimeStr())
 
 	//启动预警监测点任务
-	ctx, cancel := context.WithCancel(context.Background())
-	tasks.Init(ctx)
+	if TaskCheck {
+		fmt.Println("启动定时任务")
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		tasks.Init(ctx)
+	}
 
 	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
 	quit := make(chan os.Signal, 1)
@@ -153,8 +159,10 @@ func run() error {
 	<-quit
 	fmt.Printf("%s Shutdown Server ... \r\n", pkg.GetCurrentTimeStr())
 
-	tasks.Stop() // 或通过 context cancel
+	if TaskCheck {
+		tasks.Stop() // 或通过 context cancel
 
+	}
 	// 优雅关闭 HTTP 服务
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdownCancel()
@@ -163,7 +171,6 @@ func run() error {
 		log.Fatal("Server Shutdown:", err)
 	}
 	log.Println("Server exiting")
-	cancel()
 
 	return nil
 }

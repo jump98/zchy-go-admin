@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
@@ -79,18 +78,16 @@ func (e *RadarPoint) Get(d *dto.GetRadarPointByIdReq, p *actions.DataPermission,
 }
 
 // Insert 创建RadarPoint对象
-func (e *RadarPoint) Insert(c *dto.InsertRadarPointReq) error {
+func (e *RadarPoint) Insert(c *dto.InsertRadarPointReq) (models.RadarPoint, error) {
 	var err error
 	var data models.RadarPoint
 	c.Generate(&data)
-	fmt.Printf("data:%+v \n", data)
-	fmt.Println("data.Lat", data.Lat)
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("RadarPointService Insert error:%s \r\n", err)
-		return err
+		return models.RadarPoint{}, err
 	}
-	return nil
+	return data, nil
 }
 
 // Update 修改RadarPoint对象
@@ -116,7 +113,6 @@ func (e *RadarPoint) Update(c *dto.UpdateRadarPointReq, p *actions.DataPermissio
 // Remove 删除RadarPoint
 func (e *RadarPoint) Remove(d *dto.DeleteRadarPointReq, p *actions.DataPermission) error {
 	var data models.RadarPoint
-
 	db := e.Orm.Model(&data).
 		Scopes(
 			actions.Permission(data.TableName(), p),

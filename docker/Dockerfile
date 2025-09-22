@@ -38,7 +38,7 @@ COPY --from=builder /go-admin /go-admin
 COPY --from=builder /app/config /config
 
 # 执行命令
-CMD ["/go-admin","server","-c", "/config/settings.prod.yml"]
+CMD ["/go-admin","server","-c", "/config/settings.prod.yml","-t","true"]
 
 
 
