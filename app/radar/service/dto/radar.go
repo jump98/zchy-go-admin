@@ -187,7 +187,7 @@ func (s *RadarGetAlarmsBeforeReq) GetNum() int {
 
 // GetRadarListByDeptIdReq 根据deptId获得雷达列表
 type GetRadarListByDeptIdReq struct {
-	DeptId int64 `json:"deptId"` // DeptId
+	DeptId int64 `form:"deptId"` // DeptId
 }
 type GetRadarListByDeptIdResp struct {
 	List models.Radar `json:"list"` // RadarID

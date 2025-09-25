@@ -38,6 +38,20 @@ definitions:
           $ref: '#/definitions/mongodto.CommandDataDto'
         type: array
     type: object
+  apis.GetRadarPointsResp:
+    properties:
+      code:
+        type: integer
+      index:
+        items:
+          $ref: '#/definitions/dto.GetRadarPointsIndex'
+        type: array
+    type: object
+  apis.PutCommandsReq:
+    properties:
+      command:
+        type: integer
+    type: object
   apis.RadarAlarmRequest:
     properties:
       battery:
@@ -97,6 +111,7 @@ definitions:
       command_code:
         type: integer
       data:
+        description: 距离像数据 ：下标就是点位，参数就是信号的强度
         items:
           type: number
         type: array
@@ -106,25 +121,176 @@ definitions:
       timestamp:
         type: integer
     type: object
-  dto.DeformationPointQueryReq:
+  dto.AddAlarmPointResp:
     properties:
-      devid:
-        description: 设备ID
+      success:
+        description: 成功
+        type: boolean
+    type: object
+  dto.AlarmPointItem:
+    properties:
+      alarmCheckType:
+        allOf:
+        - $ref: '#/definitions/models.AlarmCheckType'
+        description: 监测类型
+      alarmName:
+        description: 预警规则名称
+        type: string
+      alarmType:
+        allOf:
+        - $ref: '#/definitions/models.AlarmType'
+        description: 预警类型
+      blueOption:
+        description: 预警条件
+        type: string
+      deptId:
+        description: 机构ID
         type: integer
+      duration:
+        description: 连续预警次数
+        type: integer
+      interval:
+        description: 预警间隔时间（分）
+        type: integer
+      orangeOption:
+        description: 预警条件
+        type: string
+      radarPointId:
+        description: 监测点ID
+        type: integer
+      redOption:
+        description: 预警条件
+        type: string
+      remark:
+        description: 预警规则介绍
+        type: string
+      yellowOption:
+        description: 预警条件
+        type: string
+    type: object
+  dto.CloseAlarmPointByIdReq:
+    properties:
+      processRemark:
+        description: 处理备注
+        type: string
+      radarPointId:
+        description: 监测点ID
+        type: integer
+    required:
+    - radarPointId
+    type: object
+  dto.CloseAlarmPointByIdResp:
+    properties:
+      ids:
+        description: 关闭的告警Ids
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.DeformCurveItem:
+    properties:
+      t:
+        description: 时间
+        type: string
+      v:
+        description: 值  （已乘100）
+        type: integer
+    type: object
+  dto.DeleteRadarPointReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.GetAlarmRulesResp:
+    properties:
+      alarmRule:
+        description: 机构ID
+        items:
+          $ref: '#/definitions/models.AlarmPoint'
+        type: array
+    type: object
+  dto.GetDeformCurveListReq:
+    properties:
       endTime:
         description: '结束时间 (格式: 2006-01-02 15:04:05)'
         type: string
+      hours:
+        description: 查询最近几小时（单位：小时）
+        type: integer
       index:
-        description: 索引
+        description: 监测点
+        items:
+          type: integer
+        type: array
+      kind:
+        description: 数据类型：0=形变、1=速度、2=加速度
+        type: integer
+      radarId:
+        description: 设备ID
         type: integer
       startTime:
         description: '开始时间 (格式: 2006-01-02 15:04:05)'
         type: string
+      timeUnit:
+        allOf:
+        - $ref: '#/definitions/dto.TimeUnit'
+        description: 时间单位（seconds,minutes,hours,days）
     required:
-    - devid
     - endTime
     - index
+    - radarId
     - startTime
+    type: object
+  dto.GetDeformCurveListResp:
+    properties:
+      lastTime:
+        description: 最后一条数据的时间
+        type: string
+      list:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dto.DeformCurveItem'
+          type: array
+        description: 形变数据
+        type: object
+    type: object
+  dto.GetDeformationDataReq:
+    properties:
+      endTime:
+        description: '结束时间 (格式: 2006-01-02 15:04:05)'
+        type: string
+      hours:
+        description: 查询最近几小时（单位：小时）
+        type: integer
+      index:
+        description: 索引
+        type: integer
+      radarId:
+        description: 设备ID
+        type: integer
+      startTime:
+        description: '开始时间 (格式: 2006-01-02 15:04:05)'
+        type: string
+      timeUnit:
+        allOf:
+        - $ref: '#/definitions/dto.TimeUnit'
+        description: 时间单位（seconds,minutes,hours,days）
+    required:
+    - endTime
+    - index
+    - radarId
+    - startTime
+    type: object
+  dto.GetRadarPointsIndex:
+    properties:
+      phase_depth:
+        type: integer
+      pose_depth:
+        type: integer
+      position:
+        type: integer
     type: object
   dto.GetSetSysConfigReq:
     properties:
@@ -133,6 +299,37 @@ definitions:
       configValue:
         type: string
     type: object
+  dto.InsertRadarPointReq:
+    properties:
+      PhaseDepth:
+        type: integer
+      alt:
+        type: string
+      createBy:
+        type: integer
+      distance:
+        type: string
+      lat:
+        type: string
+      lng:
+        type: string
+      pointIndex:
+        type: integer
+      pointKey:
+        type: string
+      pointName:
+        type: string
+      pointType:
+        type: string
+      poseDepth:
+        type: integer
+      radarId:
+        type: integer
+      remark:
+        type: string
+      updateBy:
+        type: integer
+    type: object
   dto.PassWord:
     properties:
       newPassword:
@@ -140,81 +337,74 @@ definitions:
       oldPassword:
         type: string
     type: object
-  dto.RadarPointDeleteReq:
+  dto.RadarDeleteReq:
     properties:
       ids:
         items:
           type: integer
         type: array
     type: object
-  dto.RadarPointInsertReq:
+  dto.RadarGetReq:
     properties:
-      aStatus:
-        type: string
+      radarId:
+        type: integer
+    type: object
+  dto.RadarInsertReq:
+    properties:
       alt:
         type: string
       createBy:
         type: integer
-      distance:
-        type: string
+      deptId:
+        type: integer
       lat:
         type: string
       lng:
         type: string
-      mTypeId:
+      radarKey:
         type: string
-      pointIndex:
-        type: integer
-      pointKey:
+      radarName:
         type: string
-      pointName:
-        type: string
-      pointType:
-        type: string
-      radarId:
-        type: integer
       remark:
+        type: string
+      secret:
+        type: string
+      specialKey:
+        type: string
+      status:
         type: string
       updateBy:
         type: integer
-      xStatus:
+      vender:
         type: string
     type: object
-  dto.RadarPointUpdateReq:
+  dto.RadarUpdateReq:
     properties:
-      aStatus:
-        type: string
       alt:
         type: string
       createBy:
         type: integer
-      distance:
-        type: string
-      id:
-        description: PointID
+      deptId:
         type: integer
       lat:
         type: string
       lng:
         type: string
-      mTypeId:
-        type: string
-      pointIndex:
-        type: integer
-      pointKey:
-        type: string
-      pointName:
-        type: string
-      pointType:
-        type: string
       radarId:
+        description: RadarID
         type: integer
+      radarKey:
+        type: string
+      radarName:
+        type: string
       remark:
+        type: string
+      specialKey:
+        type: string
+      status:
         type: string
       updateBy:
         type: integer
-      xStatus:
-        type: string
     type: object
   dto.ResetSysUserPwdReq:
     properties:
@@ -319,8 +509,6 @@ definitions:
       email:
         description: 邮箱
         type: string
-      fromProject:
-        type: integer
       leader:
         description: 负责人
         type: string
@@ -355,8 +543,6 @@ definitions:
       email:
         description: 邮箱
         type: string
-      fromProject:
-        type: integer
       leader:
         description: 负责人
         type: string
@@ -690,95 +876,6 @@ definitions:
       updateBy:
         type: integer
     type: object
-  dto.SysRadarDeleteReq:
-    properties:
-      ids:
-        items:
-          type: integer
-        type: array
-    type: object
-  dto.SysRadarGetAlarmsBeforeReq:
-    properties:
-      num:
-        type: integer
-      radarId:
-        type: integer
-      time:
-        type: string
-    type: object
-  dto.SysRadarGetAlarmsOfIdsReq:
-    properties:
-      ids:
-        items:
-          type: integer
-        type: array
-    type: object
-  dto.SysRadarGetReq:
-    properties:
-      radarId:
-        type: integer
-    type: object
-  dto.SysRadarInsertReq:
-    properties:
-      alt:
-        type: string
-      createBy:
-        type: integer
-      deptId:
-        type: integer
-      fromProject:
-        type: integer
-      lat:
-        type: string
-      lng:
-        type: string
-      radarKey:
-        type: string
-      radarName:
-        type: string
-      remark:
-        type: string
-      secret:
-        type: string
-      specialKey:
-        type: string
-      status:
-        type: string
-      updateBy:
-        type: integer
-      vender:
-        type: string
-    type: object
-  dto.SysRadarUpdateReq:
-    properties:
-      alt:
-        type: string
-      createBy:
-        type: integer
-      deptId:
-        type: integer
-      fromProject:
-        type: integer
-      lat:
-        type: string
-      lng:
-        type: string
-      radarId:
-        description: RadarID
-        type: integer
-      radarKey:
-        type: string
-      radarName:
-        type: string
-      remark:
-        type: string
-      specialKey:
-        type: string
-      status:
-        type: string
-      updateBy:
-        type: integer
-    type: object
   dto.SysRoleDeleteReq:
     properties:
       ids:
@@ -950,6 +1047,70 @@ definitions:
       username:
         type: string
     type: object
+  dto.TimeUnit:
+    enum:
+    - seconds
+    - minutes
+    - hours
+    - days
+    type: string
+    x-enum-varnames:
+    - TimeUnitSeconds
+    - TimeUnitMinutes
+    - TimeUnitHours
+    - TimeUnitDays
+  dto.UpdateAlarmPointReq:
+    properties:
+      deptId:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/dto.AlarmPointItem'
+        type: array
+      mode:
+        allOf:
+        - $ref: '#/definitions/models.RadarPointMType'
+        description: 门限类型
+      radarPointId:
+        description: 监测点ID
+        type: integer
+    type: object
+  dto.UpdateRadarPointReq:
+    properties:
+      PhaseDepth:
+        type: integer
+      aStatus:
+        type: string
+      alt:
+        type: string
+      createBy:
+        type: integer
+      distance:
+        type: string
+      id:
+        description: PointID
+        type: integer
+      lat:
+        type: string
+      lng:
+        type: string
+      pointIndex:
+        type: integer
+      pointKey:
+        type: string
+      pointName:
+        type: string
+      pointType:
+        type: string
+      poseDepth:
+        type: integer
+      radarId:
+        type: integer
+      remark:
+        type: string
+      updateBy:
+        type: integer
+    type: object
   dto.UpdateStatusReq:
     properties:
       createBy:
@@ -974,45 +1135,6 @@ definitions:
       userId:
         description: 用户ID
         type: integer
-    type: object
-  go-admin_app_admin_models.RadarPoint:
-    properties:
-      aStatus:
-        type: string
-      alt:
-        type: string
-      createBy:
-        type: integer
-      createdAt:
-        type: string
-      distance:
-        type: string
-      id:
-        type: integer
-      lat:
-        type: string
-      lng:
-        type: string
-      mTypeId:
-        type: string
-      pointIndex:
-        type: integer
-      pointKey:
-        type: string
-      pointName:
-        type: string
-      pointType:
-        type: string
-      radarId:
-        type: integer
-      remark:
-        type: string
-      updateBy:
-        type: integer
-      updatedAt:
-        type: string
-      xStatus:
-        type: string
     type: object
   go-admin_app_admin_models.SysApi:
     properties:
@@ -1085,9 +1207,6 @@ definitions:
       email:
         description: 邮箱
         type: string
-      fromProject:
-        description: 是否是自动创建，当来自项目时为1
-        type: integer
       leader:
         description: 负责人
         type: string
@@ -1173,7 +1292,167 @@ definitions:
       visible:
         type: string
     type: object
-  go-admin_app_admin_models.SysRadar:
+  handler.Login:
+    properties:
+      code:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+      uuid:
+        type: string
+    required:
+    - code
+    - password
+    - username
+    - uuid
+    type: object
+  models.AlarmCheckType:
+    enum:
+    - 1
+    type: integer
+    x-enum-comments:
+      AlarmCheckRadarPoint: 预警-检测点
+    x-enum-descriptions:
+    - 预警-检测点
+    x-enum-varnames:
+    - AlarmCheckRadarPoint
+  models.AlarmLevel:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      AlarmLevelBlue: 蓝色
+      AlarmLevelOrange: 橙色
+      AlarmLevelRed: 红色
+      AlarmLevelYellow: 黄色
+    x-enum-descriptions:
+    - ""
+    - 蓝色
+    - 黄色
+    - 橙色
+    - 红色
+    x-enum-varnames:
+    - AlarmLevelNone
+    - AlarmLevelBlue
+    - AlarmLevelYellow
+    - AlarmLevelOrange
+    - AlarmLevelRed
+  models.AlarmPoint:
+    properties:
+      alarmCheckType:
+        allOf:
+        - $ref: '#/definitions/models.AlarmCheckType'
+        description: 监测类型
+      alarmName:
+        description: 判据名称
+        type: string
+      alarmType:
+        allOf:
+        - $ref: '#/definitions/models.AlarmType'
+        description: 预警类型
+      blueOption:
+        description: 预警条件
+        type: string
+      createdAt:
+        type: string
+      deptId:
+        description: 机构ID
+        type: integer
+      duration:
+        description: 形变值的查询事件跨度（h）
+        type: integer
+      id:
+        type: integer
+      interval:
+        description: 预警间隔时间（分）
+        type: integer
+      orangeOption:
+        description: 预警条件
+        type: string
+      radarId:
+        description: 雷达Id
+        type: integer
+      radarPointId:
+        description: 监测点ID (0=对机构全局生效)
+        type: integer
+      redOption:
+        description: 预警条件
+        type: string
+      updatedAt:
+        type: string
+      yellowOption:
+        description: 预警条件
+        type: string
+    type: object
+  models.AlarmPointLogs:
+    properties:
+      alarmLevel:
+        allOf:
+        - $ref: '#/definitions/models.AlarmLevel'
+        description: 报警等级
+      alarmType:
+        allOf:
+        - $ref: '#/definitions/models.AlarmType'
+        description: 预警类型
+      alarmValue:
+        description: 预警值
+        type: string
+      createdAt:
+        type: string
+      currentValue:
+        description: 实际值
+        type: string
+      deptId:
+        description: 机构ID
+        type: integer
+      duration:
+        description: 连续预警次数
+        type: integer
+      id:
+        type: integer
+      interval:
+        description: 预警间隔时间（分）
+        type: integer
+      operatorId:
+        type: integer
+      processRemark:
+        type: string
+      processed:
+        type: boolean
+      radarId:
+        description: 雷达Id
+        type: integer
+      radarPointId:
+        description: 监测点ID
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.AlarmType:
+    enum:
+    - 100
+    - 101
+    - 102
+    type: integer
+    x-enum-comments:
+      AlarmTypeRadarPointAcceleration: 监测点-水平位移加速度预警阈值，单位： mm/h2
+      AlarmTypeRadarPointDeformation: 监测点-累计水平位移，单位 ： mm
+      AlarmTypeRadarPointVelocity: 监测点-水平位移速度（瞬时位移量）预警阈值，单位：mm/h
+    x-enum-descriptions:
+    - 监测点-累计水平位移，单位 ： mm
+    - 监测点-水平位移速度（瞬时位移量）预警阈值，单位：mm/h
+    - 监测点-水平位移加速度预警阈值，单位： mm/h2
+    x-enum-varnames:
+    - AlarmTypeRadarPointDeformation
+    - AlarmTypeRadarPointVelocity
+    - AlarmTypeRadarPointAcceleration
+  models.Radar:
     properties:
       alt:
         type: string
@@ -1182,18 +1461,17 @@ definitions:
       createdAt:
         type: string
       dept:
-        $ref: '#/definitions/go-admin_app_admin_models.SysDept'
+        allOf:
+        - $ref: '#/definitions/go-admin_app_admin_models.SysDept'
+        description: FromProject int64               `json:"fromProject" gorm:"column:from_project;
+          size:4;"` //是否是自动创建，当来自项目时为1
       deptId:
-        type: integer
-      fromProject:
-        description: 是否是自动创建，当来自项目时为1
         type: integer
       lat:
         type: string
       lng:
         type: string
       radarId:
-        description: models.Model
         type: integer
       radarKey:
         type: string
@@ -1214,22 +1492,75 @@ definitions:
       vender:
         type: string
     type: object
-  handler.Login:
+  models.RadarPoint:
     properties:
-      code:
+      PhaseDepth:
+        type: integer
+      PoseDepth:
+        type: integer
+      aStatus:
         type: string
-      password:
+      alarmLevel:
+        allOf:
+        - $ref: '#/definitions/models.AlarmLevel'
+        description: 告警等级
+      alt:
+        description: 高度
         type: string
-      username:
+      createBy:
+        type: integer
+      createdAt:
         type: string
-      uuid:
+      distance:
+        description: 距离
         type: string
-    required:
-    - code
-    - password
-    - username
-    - uuid
+      id:
+        type: integer
+      last_time:
+        allOf:
+        - $ref: '#/definitions/sql.NullTime'
+        description: 最近一次检测预警的时间
+      lat:
+        description: 纬度
+        type: string
+      lng:
+        description: 经度
+        type: string
+      mTypeId:
+        allOf:
+        - $ref: '#/definitions/models.RadarPointMType'
+        description: 0=全局门限 1=独立门限
+      pointIndex:
+        type: integer
+      pointKey:
+        type: string
+      pointName:
+        type: string
+      pointType:
+        type: string
+      radarId:
+        type: integer
+      remark:
+        type: string
+      updateBy:
+        type: integer
+      updatedAt:
+        type: string
     type: object
+  models.RadarPointMType:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-comments:
+      RadarPointMTypeAlone: 预警-检测点
+      RadarPointMTypeGlobal: 预警-检测点
+    x-enum-descriptions:
+    - 预警-检测点
+    - 预警-检测点
+    x-enum-varnames:
+    - RadarPointMTypeGlobal
+    - RadarPointMTypeAlone
   mongodto.CommandDataDto:
     properties:
       command_code:
@@ -1239,44 +1570,6 @@ definitions:
       parameters:
         additionalProperties: true
         type: object
-    type: object
-  mongosvr.AlarmData:
-    properties:
-      battery:
-        type: integer
-      radarData:
-        type: integer
-      radarId:
-        type: integer
-      solarPanel:
-        type: integer
-      svrTime:
-        type: string
-      temperature:
-        type: integer
-      timeStamp:
-        type: integer
-      voltage:
-        type: integer
-    type: object
-  mongosvr.DeformationPointData:
-    properties:
-      deformation:
-        description: 形变值(毫米)
-        type: number
-      distance:
-        description: 距离值(毫米)
-        type: number
-      index:
-        description: 下标
-        type: integer
-      radarID:
-        type: integer
-      svrTime:
-        type: string
-      timeStamp:
-        description: 时间戳
-        type: string
     type: object
   mongosvr.RadarDevInfo:
     properties:
@@ -1289,6 +1582,7 @@ definitions:
       ps_version:
         type: string
       radarId:
+        format: int64
         type: integer
       radarkey:
         type: string
@@ -1323,64 +1617,91 @@ definitions:
   mongosvr.RadarStatus:
     properties:
       battery:
+        description: 电池状态 0 充电中 1 放电中
         type: integer
       command_code:
+        description: 命令码
         type: integer
       current:
-        type: number
+        description: 供电电流：    {\"12V\":0.888750}"  {电流名：电流值(单位安)}
+        type: string
       disk_free:
+        description: 磁盘剩余容量
         type: integer
       disk_total:
+        description: 磁盘总容量
         type: integer
       radarId:
+        format: int64
         type: integer
       radarkey:
         type: string
       ram_free:
+        description: 内存剩余容量
         type: integer
       ram_total:
+        description: 内存总容量
         type: integer
       sim_RSSI:
+        description: SIM接收信号强度 单位（dBm）
         type: integer
       sim_state:
+        description: SIM卡状态 :0=正常 1异常
         type: integer
       svrTime:
         type: string
       temperature:
-        type: number
+        description: 设备温度：    {\"local\":44.625000,\"PCB\":44.375000,\"ZYNQ\":49.500000}"
+          //设备温度，可有多个值 键 温度名 值 温度值(单位摄氏度)
+        type: string
       timestamp:
+        description: 时间戳
         type: integer
       voltage:
-        type: number
+        description: 电压：   {"12V":11.686076, "5V3":5.285750, "2V1":2.123250}V
+        type: string
     type: object
   mongosvr.RadarStatusRequest:
     properties:
       battery:
+        description: 电池状态 0 充电中 1 放电中
         type: integer
       command_code:
+        description: 命令码
         type: integer
       current:
-        type: number
+        description: 供电电流：    {\"12V\":0.888750}"  {电流名：电流值(单位安)}
+        type: string
       disk_free:
+        description: 磁盘剩余容量
         type: integer
       disk_total:
+        description: 磁盘总容量
         type: integer
       radarkey:
         type: string
       ram_free:
+        description: 内存剩余容量
         type: integer
       ram_total:
+        description: 内存总容量
         type: integer
       sim_RSSI:
+        description: SIM接收信号强度 单位（dBm）
         type: integer
       sim_state:
+        description: SIM卡状态 :0=正常 1异常
         type: integer
       temperature:
-        type: number
+        description: 设备温度：    {\"local\":44.625000,\"PCB\":44.375000,\"ZYNQ\":49.500000}"
+          //设备温度，可有多个值 键 温度名 值 温度值(单位摄氏度)
+        type: string
       timestamp:
+        description: 时间戳
         type: integer
       voltage:
-        type: number
+        description: 电压：   {"12V":11.686076, "5V3":5.285750, "2V1":2.123250}V
+        type: string
     type: object
   response.Page:
     properties:
@@ -1402,6 +1723,14 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  sql.NullTime:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
     type: object
   tools.Params:
     properties:
@@ -1580,14 +1909,165 @@ definitions:
 info:
   contact: {}
   description: |-
-    基于Gin + Vue + Element UI的前后端分离权限管理系统的接口文档
+    接口文档
     radar api
   license:
     name: MIT
-    url: https://github.com/go-admin-team/go-admin/blob/master/LICENSE.md
   title: go-admin API
   version: 2.0.0
 paths:
+  /api/v1/alarm/closeAlarmPointById:
+    post:
+      consumes:
+      - application/json
+      description: 关闭告警，根据监测点ID条件
+      parameters:
+      - description: 请求参数
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CloseAlarmPointByIdReq'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CloseAlarmPointByIdResp'
+              type: object
+      security:
+      - Bearer: []
+      summary: 关闭告警
+      tags:
+      - 监测点-预警&告警&消警管理
+  /api/v1/alarm/getAlarmPointLogsPage:
+    get:
+      consumes:
+      - application/json
+      description: 分页查询监测点的告警日志，可以根据机构ID、雷达ID、监测点ID、预警类型、报警等级和时间范围过滤
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 机构ID
+        format: int64
+        in: query
+        name: deptId
+        required: true
+        type: integer
+      - description: 雷达ID
+        format: int64
+        in: query
+        name: radarId
+        type: integer
+      - description: 预警类型 (100=累计水平位移, 101=水平位移速度, 102=水平位移加速度)
+        in: query
+        name: alarmType
+        type: integer
+      - description: 报警等级 (1=蓝,1=黄,2=橙,3=红)
+        in: query
+        name: alarmLevel
+        type: integer
+      - description: 监测点ID
+        format: int64
+        in: query
+        name: radarPointId
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.Page'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/models.AlarmPointLogs'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - Bearer: []
+      summary: 获得监测点告警日志
+      tags:
+      - 监测点-预警&告警&消警管理
+  /api/v1/alarm/getPointAlarmRules:
+    get:
+      description: 获取预警规则
+      parameters:
+      - description: 机构ID
+        format: int64
+        in: query
+        name: deptId
+        required: true
+        type: integer
+      - description: 监测点ID
+        format: int64
+        in: query
+        name: radarPointId
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetAlarmRulesResp'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取预警规则
+      tags:
+      - 监测点-预警&告警&消警管理
+  /api/v1/alarm/updatePointAlarmRules:
+    post:
+      consumes:
+      - application/json
+      description: 修改预警规则，支持传入机构ID、监测点ID、门限类型和规则数组
+      parameters:
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAlarmPointReq'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AddAlarmPointResp'
+              type: object
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 修改预警规则
+      tags:
+      - 监测点-预警&告警&消警管理
   /api/v1/app-config:
     get:
       description: 获取系统配置信息，主要注意这里不在验证权限
@@ -2378,232 +2858,6 @@ paths:
       summary: 上传图片
       tags:
       - 公共接口
-  /api/v1/radar-point:
-    delete:
-      description: 删除监测点管理
-      parameters:
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RadarPointDeleteReq'
-      responses:
-        "200":
-          description: '{"code": 200, "message": "删除成功"}'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - Bearer: []
-      summary: 删除监测点管理
-      tags:
-      - 监测点管理
-    get:
-      description: 获取监测点管理列表
-      parameters:
-      - description: PointID
-        in: query
-        name: id
-        type: integer
-      - description: 监测点名称
-        in: query
-        name: pointName
-        type: string
-      - description: 监测点编号
-        in: query
-        name: pointKey
-        type: string
-      - description: 雷达ID
-        in: query
-        name: radarId
-        type: integer
-      - description: 激活状态
-        in: query
-        name: aStatus
-        type: string
-      - description: 页条数
-        in: query
-        name: pageSize
-        type: integer
-      - description: 页码
-        in: query
-        name: pageIndex
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  allOf:
-                  - $ref: '#/definitions/response.Page'
-                  - properties:
-                      list:
-                        items:
-                          $ref: '#/definitions/go-admin_app_admin_models.RadarPoint'
-                        type: array
-                    type: object
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取监测点管理列表
-      tags:
-      - 监测点管理
-    post:
-      consumes:
-      - application/json
-      description: 创建监测点管理
-      parameters:
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RadarPointInsertReq'
-      responses:
-        "200":
-          description: '{"code": 200, "message": "添加成功"}'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - Bearer: []
-      summary: 创建监测点管理
-      tags:
-      - 监测点管理
-  /api/v1/radar-point/{id}:
-    get:
-      description: 获取监测点管理
-      parameters:
-      - description: id
-        in: path
-        name: id
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/go-admin_app_admin_models.RadarPoint'
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取监测点管理
-      tags:
-      - 监测点管理
-    put:
-      consumes:
-      - application/json
-      description: 修改监测点管理
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RadarPointUpdateReq'
-      responses:
-        "200":
-          description: '{"code": 200, "message": "修改成功"}'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - Bearer: []
-      summary: 修改监测点管理
-      tags:
-      - 监测点管理
-  /api/v1/radar-point/deformation-data:
-    post:
-      consumes:
-      - application/json
-      description: 根据设备ID、索引和时间范围获取采样后的变形点数据
-      parameters:
-      - description: 变形点数据查询参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.DeformationPointQueryReq'
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/mongosvr.DeformationPointData'
-                  type: array
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取变形点数据
-      tags:
-      - 监测点管理
-  /api/v1/radar-point/dept:
-    get:
-      description: 获取某个部门下的所有监测点列表
-      parameters:
-      - description: PointID
-        in: query
-        name: id
-        type: integer
-      - description: 监测点名称
-        in: query
-        name: pointName
-        type: string
-      - description: 监测点编号
-        in: query
-        name: pointKey
-        type: string
-      - description: 雷达ID
-        in: query
-        name: radarId
-        type: integer
-      - description: 激活状态
-        in: query
-        name: aStatus
-        type: string
-      - description: 页条数
-        in: query
-        name: pageSize
-        type: integer
-      - description: 页码
-        in: query
-        name: pageIndex
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  allOf:
-                  - $ref: '#/definitions/response.Page'
-                  - properties:
-                      list:
-                        items:
-                          $ref: '#/definitions/go-admin_app_admin_models.RadarPoint'
-                        type: array
-                    type: object
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取某个部门下的所有监测点列表
-      tags:
-      - 获取某个部门下的所有监测点列表
   /api/v1/radar/authenticate:
     post:
       consumes:
@@ -2691,6 +2945,28 @@ paths:
       summary: 雷达设备获取下发命令
       tags:
       - 雷达管理-终端接口
+  /api/v1/radar/get_radar_points:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定雷达的监测点列表
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/apis.GetRadarPointsResp'
+      responses:
+        "200":
+          description: '{\"code\": 0, \"message\": \"设备信息接收成功\"}'
+          schema:
+            $ref: '#/definitions/apis.GetRadarPointsResp'
+      security:
+      - Bearer: []
+      summary: 获取指定雷达的监测点列表
+      tags:
+      - 雷达管理-终端接口
   /api/v1/radar/put_alarm:
     post:
       consumes:
@@ -2711,6 +2987,28 @@ paths:
       security:
       - Bearer: []
       summary: 雷达设备上传告警信息
+      tags:
+      - 雷达管理-终端接口
+  /api/v1/radar/put_commands:
+    post:
+      consumes:
+      - application/json
+      description: 上传指令到服务器
+      parameters:
+      - description: 设备信息数据
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/apis.PutCommandsReq'
+      responses:
+        "200":
+          description: '{\"code\": 0, \"message\": \"succesd\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 上传指令到服务器
       tags:
       - 雷达管理-终端接口
   /api/v1/radar/put_deformation:
@@ -2801,6 +3099,537 @@ paths:
       summary: 雷达设备状态上报
       tags:
       - 雷达管理-终端接口
+  /api/v1/radar_info:
+    delete:
+      description: 删除雷达管理
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RadarDeleteReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "删除成功"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除雷达管理
+      tags:
+      - 雷达管理
+    get:
+      description: 获取雷达管理列表
+      parameters:
+      - description: RadarID
+        format: int64
+        in: query
+        name: radarId
+        type: integer
+      - description: 雷达名称
+        in: query
+        name: radarName
+        type: string
+      - description: 雷达编号
+        in: query
+        name: radarKey
+        type: string
+      - description: 雷达特殊编号
+        in: query
+        name: specialKey
+        type: string
+      - description: 部门
+        format: int64
+        in: query
+        name: deptId
+        type: integer
+      - description: 页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.Page'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/models.Radar'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取雷达管理列表
+      tags:
+      - 雷达管理
+    post:
+      consumes:
+      - application/json
+      description: 创建雷达管理
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RadarInsertReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "添加成功"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 创建雷达管理
+      tags:
+      - 雷达管理
+  /api/v1/radar_info/{id}:
+    get:
+      description: 获取雷达管理
+      parameters:
+      - description: id
+        in: path
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Radar'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取雷达管理
+      tags:
+      - 雷达管理
+    put:
+      consumes:
+      - application/json
+      description: 修改雷达管理
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RadarUpdateReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "修改成功"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 修改雷达管理
+      tags:
+      - 雷达管理
+  /api/v1/radar_info/get_dev_info:
+    post:
+      consumes:
+      - application/json
+      description: 获取雷达最新设备信息
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RadarGetReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/mongosvr.RadarDevInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取雷达最新设备信息
+      tags:
+      - 雷达管理
+  /api/v1/radar_info/get_state_info:
+    post:
+      consumes:
+      - application/json
+      description: 获取雷达最新状态信息
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RadarGetReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/mongosvr.RadarStatus'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取雷达最新状态信息
+      tags:
+      - 雷达管理
+  /api/v1/radar_info/getRadarListByDeptId:
+    post:
+      description: 根据部门ID获取雷达列表
+      parameters:
+      - description: 部门
+        format: int64
+        in: query
+        name: deptId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Radar'
+              type: object
+      security:
+      - Bearer: []
+      summary: 根据部门ID获取雷达列表
+      tags:
+      - 雷达管理
+  /api/v1/radar_info/radarimage/{id}:
+    get:
+      description: 获取雷达影像
+      parameters:
+      - description: id
+        in: path
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Radar'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取雷达影像
+      tags:
+      - 雷达管理
+  /api/v1/radar_point:
+    delete:
+      description: 删除监测点管理
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DeleteRadarPointReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "删除成功"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除监测点管理
+      tags:
+      - 监测点管理
+    get:
+      description: 获取监测点管理列表
+      parameters:
+      - description: PointID
+        in: query
+        name: id
+        type: integer
+      - description: 监测点名称
+        in: query
+        name: pointName
+        type: string
+      - description: 监测点编号
+        in: query
+        name: pointKey
+        type: string
+      - description: 雷达ID
+        format: int64
+        in: query
+        name: radarId
+        type: integer
+      - description: 激活状态
+        in: query
+        name: aStatus
+        type: string
+      - description: 页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.Page'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/models.RadarPoint'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取监测点管理列表
+      tags:
+      - 监测点管理
+    post:
+      consumes:
+      - application/json
+      description: 创建监测点管理
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.InsertRadarPointReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "添加成功"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 创建监测点管理
+      tags:
+      - 监测点管理
+  /api/v1/radar_point/{id}:
+    get:
+      description: 获取监测点管理
+      parameters:
+      - description: id
+        in: path
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RadarPoint'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取监测点管理
+      tags:
+      - 监测点管理
+    put:
+      consumes:
+      - application/json
+      description: 修改监测点管理
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateRadarPointReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "修改成功"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 修改监测点管理
+      tags:
+      - 监测点管理
+  /api/v1/radar_point/deformation_data:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID、索引和时间范围获取采样后的形变点数据
+      parameters:
+      - description: 形变点数据查询参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GetDeformationDataReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取形变点数据
+      tags:
+      - 监测点管理
+  /api/v1/radar_point/getDeformCurveList:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID、索引和时间范围获取采样后的形变点加速度数据
+      parameters:
+      - description: 形变点数据查询参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GetDeformCurveListReq'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/dto.GetDeformCurveListResp'
+      security:
+      - Bearer: []
+      summary: 获取形变加速度数据
+      tags:
+      - 监测点管理
+  /api/v1/radar_point/getDeformationAcceleration:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID、索引和时间范围获取采样后的形变点加速度数据
+      parameters:
+      - description: 形变点数据查询参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GetDeformationDataReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取形变加速度数据
+      tags:
+      - 监测点管理
+  /api/v1/radar_point/getDeformationVelocity:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID、索引和时间范围获取采样后的形变点速度数据
+      parameters:
+      - description: 形变点数据查询参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GetDeformationDataReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取形变速度数据
+      tags:
+      - 监测点管理
+  /api/v1/radar_point/getPointListByDeptId:
+    get:
+      description: 获取某个部门下的所有监测点列表
+      parameters:
+      - description: 机构ID
+        in: query
+        name: deptId
+        required: true
+        type: integer
+      - description: 监测点名称
+        in: query
+        name: pointName
+        type: string
+      - description: 监测点编号
+        in: query
+        name: pointKey
+        type: string
+      - description: 雷达ID
+        format: int64
+        in: query
+        name: radarId
+        type: integer
+      - description: 页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.Page'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/models.RadarPoint'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取某个部门下的所有监测点列表
+      tags:
+      - 监测点管理
   /api/v1/role:
     delete:
       description: 删除数据
@@ -3399,309 +4228,6 @@ paths:
       summary: 操作日志通过id获取
       tags:
       - 操作日志
-  /api/v1/sys-radar:
-    delete:
-      description: 删除雷达管理
-      parameters:
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarDeleteReq'
-      responses:
-        "200":
-          description: '{"code": 200, "message": "删除成功"}'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - Bearer: []
-      summary: 删除雷达管理
-      tags:
-      - 雷达管理
-    get:
-      description: 获取雷达管理列表
-      parameters:
-      - description: RadarID
-        in: query
-        name: radarId
-        type: integer
-      - description: 雷达名称
-        in: query
-        name: radarName
-        type: string
-      - description: 雷达编号
-        in: query
-        name: radarKey
-        type: string
-      - description: 雷达特殊编号
-        in: query
-        name: specialKey
-        type: string
-      - description: 部门
-        in: query
-        name: deptId
-        type: integer
-      - description: 页条数
-        in: query
-        name: pageSize
-        type: integer
-      - description: 页码
-        in: query
-        name: pageIndex
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  allOf:
-                  - $ref: '#/definitions/response.Page'
-                  - properties:
-                      list:
-                        items:
-                          $ref: '#/definitions/go-admin_app_admin_models.SysRadar'
-                        type: array
-                    type: object
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取雷达管理列表
-      tags:
-      - 雷达管理
-    post:
-      consumes:
-      - application/json
-      description: 创建雷达管理
-      parameters:
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarInsertReq'
-      responses:
-        "200":
-          description: '{"code": 200, "message": "添加成功"}'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - Bearer: []
-      summary: 创建雷达管理
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/{id}:
-    get:
-      description: 获取雷达管理
-      parameters:
-      - description: id
-        in: path
-        name: id
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/go-admin_app_admin_models.SysRadar'
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取雷达管理
-      tags:
-      - 雷达管理
-    put:
-      consumes:
-      - application/json
-      description: 修改雷达管理
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarUpdateReq'
-      responses:
-        "200":
-          description: '{"code": 200, "message": "修改成功"}'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - Bearer: []
-      summary: 修改雷达管理
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/get_alarms:
-    post:
-      description: 获取雷达报警列表
-      parameters:
-      - description: StartTime
-        in: query
-        name: startTime
-        type: string
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/mongosvr.AlarmData'
-                  type: array
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取雷达报警列表
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/get_alarms_before:
-    post:
-      consumes:
-      - application/json
-      description: 获取指定时间之前的雷达报警列表
-      parameters:
-      - description: 雷达ID、时间和数量
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarGetAlarmsBeforeReq'
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/mongosvr.AlarmData'
-                  type: array
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取指定时间之前的雷达报警列表
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/get_alarmsofids:
-    post:
-      consumes:
-      - application/json
-      description: 通过ID列表获取雷达报警列表
-      parameters:
-      - description: 雷达ID列表
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarGetAlarmsOfIdsReq'
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/mongosvr.AlarmData'
-                  type: array
-              type: object
-      security:
-      - Bearer: []
-      summary: 通过ID列表获取雷达报警列表
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/get_dev_info:
-    post:
-      consumes:
-      - application/json
-      description: 获取雷达最新设备信息
-      parameters:
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarGetReq'
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/mongosvr.RadarDevInfo'
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取雷达最新设备信息
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/get_state_info:
-    post:
-      consumes:
-      - application/json
-      description: 获取雷达最新状态信息
-      parameters:
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysRadarGetReq'
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/mongosvr.RadarStatus'
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取雷达最新状态信息
-      tags:
-      - 雷达管理
-  /api/v1/sys-radar/radarimage/{id}:
-    get:
-      description: 获取雷达影像
-      parameters:
-      - description: id
-        in: path
-        name: id
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 200, "data": [...]}'
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/go-admin_app_admin_models.SysRadar'
-              type: object
-      security:
-      - Bearer: []
-      summary: 获取雷达影像
-      tags:
-      - 雷达管理
   /api/v1/sys-user:
     get:
       description: 获取JSON

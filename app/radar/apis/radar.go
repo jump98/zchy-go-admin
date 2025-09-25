@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
@@ -35,7 +36,7 @@ type Radar struct {
 // @Param pageSize query int false "页条数"
 // @Param pageIndex query int false "页码"
 // @Success 200 {object} response.Response{data=response.Page{list=[]models.Radar}} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar [get]
+// @Router /api/v1/radar_info [get]
 // @Security Bearer
 func (e Radar) GetList(c *gin.Context) {
 	req := dto.RadarGetPageReq{}
@@ -78,7 +79,7 @@ func (e Radar) GetList(c *gin.Context) {
 // @Tags 雷达管理
 // @Param id path int false "id"
 // @Success 200 {object} response.Response{data=models.Radar} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar/{id} [get]
+// @Router /api/v1/radar_info/{id} [get]
 // @Security Bearer
 func (e Radar) Get(c *gin.Context) {
 	req := dto.RadarGetReq{}
@@ -113,7 +114,7 @@ func (e Radar) Get(c *gin.Context) {
 // @Product application/json
 // @Param data body dto.RadarInsertReq true "data"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "添加成功"}"
-// @Router /api/v1/sys-radar [post]
+// @Router /api/v1/radar_info [post]
 // @Security Bearer
 func (e Radar) Insert(c *gin.Context) {
 	req := dto.RadarInsertReq{}
@@ -149,7 +150,7 @@ func (e Radar) Insert(c *gin.Context) {
 // @Param id path int true "id"
 // @Param data body dto.RadarUpdateReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "修改成功"}"
-// @Router /api/v1/sys-radar/{id} [put]
+// @Router /api/v1/radar_info/{id} [put]
 // @Security Bearer
 func (e Radar) Update(c *gin.Context) {
 	req := dto.RadarUpdateReq{}
@@ -181,7 +182,7 @@ func (e Radar) Update(c *gin.Context) {
 // @Tags 雷达管理
 // @Param data body dto.RadarDeleteReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "删除成功"}"
-// @Router /api/v1/sys-radar [delete]
+// @Router /api/v1/radar_info [delete]
 // @Security Bearer
 func (e Radar) Delete(c *gin.Context) {
 	s := service.Radar{}
@@ -221,47 +222,13 @@ func (e Radar) Delete(c *gin.Context) {
 	e.OK(req.GetId(), "删除成功")
 }
 
-// // Confirm 确认雷达管理
-// // @Summary 确认雷达管理
-// // @Description 确认雷达管理
-// // @Tags 雷达管理
-// // @Accept application/json
-// // @Product application/json
-// // @Param id path int true "id"
-// // @Param data body dto.RadarConfirmReq true "body"
-// // @Success 200 {object} response.Response	"{"code": 200, "message": "确认成功"}"
-// // @Router /api/v1/sys-radar/confirm/{id} [put]
-// // @Security Bearer
-// func (e Radar) Confirm(c *gin.Context) {
-// 	req := dto.RadarConfirmReq{}
-// 	s := service.Radar{}
-// 	err := e.MakeContext(c).
-// 		MakeOrm().
-// 		Bind(&req).
-// 		MakeService(&s.Service).
-// 		Errors
-// 	if err != nil {
-// 		e.Logger.Error(err)
-// 		e.Error(500, err, err.Error())
-// 		return
-// 	}
-// 	p := actions.GetPermissionFromContext(c)
-
-// 	err = s.Update(&req, p)
-// 	if err != nil {
-// 		e.Error(500, err, fmt.Sprintf("修改雷达管理失败，\r\n失败信息 %s", err.Error()))
-// 		return
-// 	}
-// 	e.OK(req.GetId(), "修改成功")
-// }
-
 // GetRadarImage 获取雷达影像
 // @Summary 获取雷达影像
 // @Description 获取雷达影像
 // @Tags 雷达管理
 // @Param id path int false "id"
 // @Success 200 {object} response.Response{data=models.Radar} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar/radarimage/{id} [get]
+// @Router /api/v1/radar_info/radarimage/{id} [get]
 // @Security Bearer
 func (e Radar) GetRadarImage(c *gin.Context) {
 	req := dto.RadarGetImageReq{}
@@ -313,108 +280,92 @@ func (e Radar) GetRadarImage(c *gin.Context) {
 }
 
 // GetAlarms 获取雷达报警列表
-// @Summary 获取雷达报警列表
-// @Description 获取雷达报警列表
-// @Tags 雷达管理
-// @Param startTime query string false "StartTime"
-// @Success 200 {object} response.Response{data=[]mongosvr.AlarmData} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar/get_alarms [post]
-// @Security Bearer
-func (e Radar) GetAlarms(c *gin.Context) {
-	req := dto.RadarGetPageReq{}
-	s := service.Radar{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	p := actions.GetPermissionFromContext(c)
-	list := make([]models.Radar, 0)
-	var count int64
-	sc := adminApi.SysCommon{}
-	parentID := 0
-	admin, u, err := sc.IsSuperAdmin(c)
-	if err != nil {
-		e.Error(500, err, "查询失败")
-		return
-	}
-	if !admin && u != nil {
-		parentID = u.DeptId
-	}
-	if parentID != 0 && req.DeptJoin.DeptId == "" {
-		req.DeptJoin.DeptId = strconv.FormatInt(int64(parentID), 10)
-	}
-	req.PageIndex = 1
-	req.PageSize = 1000
-	err = s.GetList(&req, p, &list, &count)
-	if err != nil {
-		e.Error(500, err, fmt.Sprintf("获取雷达失败，\r\n失败信息 %s", err.Error()))
-		return
-	}
-	//找到所有的雷达id
-	radarIDs := make([]int64, 0)
-	for i := 0; i < len(list); i++ {
-		radarIDs = append(radarIDs, list[i].RadarId)
-	}
-
-	// 查询每个雷达ID的最后一条告警记录
-	alarms, err := mongosvr.QueryLastAlarmForRadarIDs(radarIDs)
-	if err != nil {
-		e.Error(500, err, fmt.Sprintf("获取告警记录失败，\r\n失败信息 %s", err.Error()))
-		return
-	}
-
-	e.OK(alarms, "查询成功")
-}
+//func (e Radar) GetAlarms(c *gin.Context) {
+//	req := dto.RadarGetPageReq{}
+//	s := service.Radar{}
+//	err := e.MakeContext(c).
+//		MakeOrm().
+//		Bind(&req).
+//		MakeService(&s.Service).
+//		Errors
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//
+//	p := actions.GetPermissionFromContext(c)
+//	list := make([]models.Radar, 0)
+//	var count int64
+//	sc := adminApi.SysCommon{}
+//	parentID := 0
+//	admin, u, err := sc.IsSuperAdmin(c)
+//	if err != nil {
+//		e.Error(500, err, "查询失败")
+//		return
+//	}
+//	if !admin && u != nil {
+//		parentID = u.DeptId
+//	}
+//	if parentID != 0 && req.DeptJoin.DeptId == "" {
+//		req.DeptJoin.DeptId = strconv.FormatInt(int64(parentID), 10)
+//	}
+//	req.PageIndex = 1
+//	req.PageSize = 1000
+//	err = s.GetList(&req, p, &list, &count)
+//	if err != nil {
+//		e.Error(500, err, fmt.Sprintf("获取雷达失败，\r\n失败信息 %s", err.Error()))
+//		return
+//	}
+//	//找到所有的雷达id
+//	radarIDs := make([]int64, 0)
+//	for i := 0; i < len(list); i++ {
+//		radarIDs = append(radarIDs, list[i].RadarId)
+//	}
+//
+//	// 查询每个雷达ID的最后一条告警记录
+//	alarms, err := mongosvr.QueryLastAlarmForRadarIDs(radarIDs)
+//	if err != nil {
+//		e.Error(500, err, fmt.Sprintf("获取告警记录失败，\r\n失败信息 %s", err.Error()))
+//		return
+//	}
+//
+//	e.OK(alarms, "查询成功")
+//}
 
 // GetAlarmsOfIds 通过ID列表获取雷达报警列表
-// @Summary 通过ID列表获取雷达报警列表
-// @Description 通过ID列表获取雷达报警列表
-// @Tags 雷达管理
-// @Accept application/json
-// @Product application/json
-// @Param data body dto.RadarGetAlarmsOfIdsReq true "雷达ID列表"
-// @Success 200 {object} response.Response{data=[]mongosvr.AlarmData} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar/get_alarmsofids [post]
-// @Security Bearer
-func (e Radar) GetAlarmsOfIds(c *gin.Context) {
-	req := dto.RadarGetAlarmsOfIdsReq{}
-	s := service.Radar{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	if err = c.ShouldBindJSON(&req); err != nil {
-		e.Error(400, err, "请求参数错误")
-		return
-	}
-
-	if len(req.GetIds()) == 0 {
-		e.Error(400, err, "请求参数错误")
-		return
-	}
-
-	// 查询每个雷达ID的最后一条告警记录
-	alarms, err := mongosvr.QueryLastAlarmForRadarIDs(req.GetIds())
-	if err != nil {
-		e.Error(500, err, fmt.Sprintf("获取告警记录失败，\r\n失败信息 %s", err.Error()))
-		return
-	}
-
-	e.OK(alarms, "查询成功")
-}
+//func (e Radar) GetAlarmsOfIds(c *gin.Context) {
+//	req := dto.RadarGetAlarmsOfIdsReq{}
+//	s := service.Radar{}
+//	err := e.MakeContext(c).
+//		MakeOrm().
+//		MakeService(&s.Service).
+//		Errors
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//
+//	if err = c.ShouldBindJSON(&req); err != nil {
+//		e.Error(400, err, "请求参数错误")
+//		return
+//	}
+//
+//	if len(req.GetIds()) == 0 {
+//		e.Error(400, err, "请求参数错误")
+//		return
+//	}
+//
+//	// 查询每个雷达ID的最后一条告警记录
+//	alarms, err := mongosvr.QueryLastAlarmForRadarIDs(req.GetIds())
+//	if err != nil {
+//		e.Error(500, err, fmt.Sprintf("获取告警记录失败，\r\n失败信息 %s", err.Error()))
+//		return
+//	}
+//
+//	e.OK(alarms, "查询成功")
+//}
 
 // GetDevInfo 获取雷达最新设备信息
 // @Summary 获取雷达最新设备信息
@@ -424,7 +375,7 @@ func (e Radar) GetAlarmsOfIds(c *gin.Context) {
 // @Product application/json
 // @Param data body dto.RadarGetReq true "data"
 // @Success 200 {object} response.Response{data=mongosvr.RadarDevInfo} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar/get_dev_info [post]
+// @Router /api/v1/radar_info/get_dev_info [post]
 // @Security Bearer
 func (e Radar) GetDevInfo(c *gin.Context) {
 	s := service.Radar{}
@@ -470,7 +421,7 @@ func (e Radar) GetDevInfo(c *gin.Context) {
 // @Product application/json
 // @Param data body dto.RadarGetReq true "data"
 // @Success 200 {object} response.Response{data=mongosvr.RadarStatus} "{"code": 200, "data": [...]}"
-// @Router /api/v1/sys-radar/get_state_info [post]
+// @Router /api/v1/radar_info/get_state_info [post]
 // @Security Bearer
 func (e Radar) GetStateInfo(c *gin.Context) {
 	s := service.Radar{}
@@ -509,50 +460,48 @@ func (e Radar) GetStateInfo(c *gin.Context) {
 }
 
 // GetAlarmsBefore 获取指定时间之前的雷达报警列表
-// @Summary 获取指定时间之前的雷达报警列表
-// @Description 获取指定时间之前的雷达报警列表
-// @Tags 雷达管理
-// @Accept application/json
-// @Product application/json
-// @Param data body dto.RadarGetAlarmsBeforeReq true "雷达ID、时间和数量"
-// @Success 200 {object} response.Response{data=[]mongosvr.AlarmData} "成功"
-// @Router /api/v1/sys-radar/get_alarms_before [post]
-// @Security Bearer
-func (e Radar) GetAlarmsBefore(c *gin.Context) {
-	req := dto.RadarGetAlarmsBeforeReq{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	// 解析时间参数
-	startTime, err := time.Parse("2006-01-02 15:04:05", req.GetTime())
-	if err != nil {
-		e.Error(500, err, "时间格式错误")
-		return
-	}
-
-	// 调用queryAlarmsDataTimeBefore查询警告数据
-	alarms, err := mongosvr.QueryAlarmsDataTimeBefore(req.GetRadarId(), startTime, req.GetNum())
-	if err != nil {
-		e.Error(500, err, fmt.Sprintf("获取告警记录失败，\r\n失败信息 %s", err.Error()))
-		return
-	}
-
-	e.OK(alarms, "查询成功")
-}
+//func (e Radar) GetAlarmsBefore(c *gin.Context) {
+//	req := dto.RadarGetAlarmsBeforeReq{}
+//	err := e.MakeContext(c).
+//		MakeOrm().
+//		Bind(&req).
+//		Errors
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//
+//	// 解析时间参数
+//	startTime, err := time.Parse("2006-01-02 15:04:05", req.GetTime())
+//	if err != nil {
+//		e.Error(500, err, "时间格式错误")
+//		return
+//	}
+//
+//	// 调用queryAlarmsDataTimeBefore查询警告数据
+//	alarms, err := mongosvr.QueryAlarmsDataTimeBefore(req.GetRadarId(), startTime, req.GetNum())
+//	if err != nil {
+//		e.Error(500, err, fmt.Sprintf("获取告警记录失败，\r\n失败信息 %s", err.Error()))
+//		return
+//	}
+//
+//	e.OK(alarms, "查询成功")
+//}
 
 // GetRadarListByDeptId 根据部门ID获取雷达列表
+// @Summary 根据部门ID获取雷达列表
+// @Description 根据部门ID获取雷达列表
+// @Tags 雷达管理
+// @Param deptId query int64 true "部门"
+// @Success 200 {object} response.Response{data=models.Radar} "{"code": 200, "data": [...]}"
+// @Router /api/v1/radar_info/getRadarListByDeptId [post]
+// @Security Bearer
 func (e Radar) GetRadarListByDeptId(c *gin.Context) {
 	fmt.Println("GetRadarListByDeptId")
 	req := dto.GetRadarListByDeptIdReq{}
 	s := service.Radar{}
-	err := e.MakeContext(c).MakeOrm().Bind(&req).MakeService(&s.Service).Errors
+	err := e.MakeContext(c).MakeOrm().Bind(&req, binding.Form).MakeService(&s.Service).Errors
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())

@@ -6,6 +6,7 @@ import (
 	"go-admin/app/radar/models"
 	"go-admin/app/radar/service/dto"
 	cDto "go-admin/common/dto"
+	"time"
 
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
@@ -96,7 +97,7 @@ func (e *AlarmPoint) UpdateAlarmRule(items []dto.AlarmPointItem, deptId, radarPo
 	defer func() {
 		if errTx != nil {
 			tx.Rollback()
-			e.Log.Error("出错：事务回滚:", err)
+			e.Log.Error("出错：事务回滚:", errTx)
 		} else {
 			tx.Commit()
 		}
@@ -250,20 +251,73 @@ func (e *AlarmPoint) GetDefaultRadarPointConfig(deptId, radarId, radarPointId in
 }
 
 // GetAlarmPointLogsPage 获得监测点的告警日志
-func (e *AlarmPoint) GetAlarmPointLogsPage(c dto.GetAlarmPointLogsPageReq, list []*models.AlarmPointLogs, count *int64) error {
+func (e *AlarmPoint) GetAlarmPointLogsPage(c dto.GetAlarmPointLogsPageReq, list *[]models.AlarmPointLogs, count *int64) error {
 	var err error
-	var data models.AlarmPointLogs
+	defer func() {
+		if err := recover(); err != nil {
+			e.Log.Error("GetAlarmPointLogsPage:", err)
+		}
+	}()
+	err = e.Orm.Model(&models.AlarmPointLogs{}).Scopes(
+		cDto.MakeCondition(c.GetNeedSearch()),
+		cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
+	).Find(&list).Limit(-1).Offset(-1).Count(count).Error
 
-	err = e.Orm.Model(&data).
-		Scopes(
-			cDto.MakeCondition(c.GetNeedSearch()),
-			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
-		).
-		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
 	}
 	return nil
+}
+
+// CloseAlarmPointById 关闭告警
+func (e *AlarmPoint) CloseAlarmPointById(radarPointId int64, userId int64, remark string) ([]int64, error) {
+	var err error
+	var ids []int64
+	var radarPointItem models.RadarPoint
+	if err = e.Orm.Model(&models.RadarPoint{}).Where("id = ?", radarPointId).First(&radarPointItem).Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return ids, err
+	}
+	now := time.Now()
+	var alarmPointLogList []models.AlarmPointLogs
+	if err = e.Orm.Model(&models.AlarmPointLogs{}).Where("radar_point_id = ? and created_at < ? and processed IS NULL OR processed = 0", radarPointId, now).Find(&alarmPointLogList).Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return ids, err
+	}
+
+	for _, log := range alarmPointLogList {
+		ids = append(ids, log.Id)
+	}
+	fmt.Println("ids:", len(ids))
+	fmt.Println("alarmPointLogList:", len(alarmPointLogList))
+	if len(ids) <= 0 {
+		return ids, errors.New("没有找到符合条件的告警信息")
+	}
+
+	tx := e.Orm.Begin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			e.Log.Error("出错：事务回滚:", err)
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	//消警
+	radarPointItem.AlarmLevel = models.AlarmLevelNone
+	if err = tx.Save(&radarPointItem).Error; err != nil {
+		return ids, err
+	}
+	//告警记录=已处理
+	err = tx.Model(&models.AlarmPointLogs{}).Where("id in ?", ids).Updates(map[string]interface{}{
+		"processed":      1,
+		"operator_id":    userId,
+		"process_remark": remark,
+	}).Error
+	if err != nil {
+		return ids, err
+	}
+	return ids, nil
 }

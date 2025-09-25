@@ -11,14 +11,272 @@ const docTemplateadmin = `{
         "title": "{{.Title}}",
         "contact": {},
         "license": {
-            "name": "MIT",
-            "url": "https://github.com/go-admin-team/go-admin/blob/master/LICENSE.md"
+            "name": "MIT"
         },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/alarm/closeAlarmPointById": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "关闭告警，根据监测点ID条件",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点-预警\u0026告警\u0026消警管理"
+                ],
+                "summary": "关闭告警",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CloseAlarmPointByIdReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CloseAlarmPointByIdResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/alarm/getAlarmPointLogsPage": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "分页查询监测点的告警日志，可以根据机构ID、雷达ID、监测点ID、预警类型、报警等级和时间范围过滤",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点-预警\u0026告警\u0026消警管理"
+                ],
+                "summary": "获得监测点告警日志",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "pageIndex",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "机构ID",
+                        "name": "deptId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "雷达ID",
+                        "name": "radarId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "预警类型 (100=累计水平位移, 101=水平位移速度, 102=水平位移加速度)",
+                        "name": "alarmType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "报警等级 (1=蓝,1=黄,2=橙,3=红)",
+                        "name": "alarmLevel",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "监测点ID",
+                        "name": "radarPointId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.Page"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.AlarmPointLogs"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/alarm/getPointAlarmRules": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取预警规则",
+                "tags": [
+                    "监测点-预警\u0026告警\u0026消警管理"
+                ],
+                "summary": "获取预警规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "机构ID",
+                        "name": "deptId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "监测点ID",
+                        "name": "radarPointId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetAlarmRulesResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/alarm/updatePointAlarmRules": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "修改预警规则，支持传入机构ID、监测点ID、门限类型和规则数组",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点-预警\u0026告警\u0026消警管理"
+                ],
+                "summary": "修改预警规则",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateAlarmPointReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AddAlarmPointResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/app-config": {
             "get": {
                 "description": "获取系统配置信息，主要注意这里不在验证权限",
@@ -1290,391 +1548,6 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "/api/v1/radar-point": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取监测点管理列表",
-                "tags": [
-                    "监测点管理"
-                ],
-                "summary": "获取监测点管理列表",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "PointID",
-                        "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "监测点名称",
-                        "name": "pointName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "监测点编号",
-                        "name": "pointKey",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "雷达ID",
-                        "name": "radarId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "激活状态",
-                        "name": "aStatus",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页条数",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "pageIndex",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.Page"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "list": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/go-admin_app_admin_models.RadarPoint"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "创建监测点管理",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "监测点管理"
-                ],
-                "summary": "创建监测点管理",
-                "parameters": [
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RadarPointInsertReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"添加成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "删除监测点管理",
-                "tags": [
-                    "监测点管理"
-                ],
-                "summary": "删除监测点管理",
-                "parameters": [
-                    {
-                        "description": "body",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RadarPointDeleteReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"删除成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/radar-point/deformation-data": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "根据设备ID、索引和时间范围获取采样后的变形点数据",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "监测点管理"
-                ],
-                "summary": "获取变形点数据",
-                "parameters": [
-                    {
-                        "description": "变形点数据查询参数",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.DeformationPointQueryReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/mongosvr.DeformationPointData"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/radar-point/dept": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取某个部门下的所有监测点列表",
-                "tags": [
-                    "获取某个部门下的所有监测点列表"
-                ],
-                "summary": "获取某个部门下的所有监测点列表",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "PointID",
-                        "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "监测点名称",
-                        "name": "pointName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "监测点编号",
-                        "name": "pointKey",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "雷达ID",
-                        "name": "radarId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "激活状态",
-                        "name": "aStatus",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页条数",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "pageIndex",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.Page"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "list": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/go-admin_app_admin_models.RadarPoint"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/radar-point/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取监测点管理",
-                "tags": [
-                    "监测点管理"
-                ],
-                "summary": "获取监测点管理",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/go-admin_app_admin_models.RadarPoint"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "修改监测点管理",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "监测点管理"
-                ],
-                "summary": "修改监测点管理",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "body",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RadarPointUpdateReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"修改成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/radar/authenticate": {
             "post": {
                 "description": "雷达设备登录认证",
@@ -1813,6 +1686,42 @@ const docTemplateadmin = `{
                 }
             }
         },
+        "/api/v1/radar/get_radar_points": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取指定雷达的监测点列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "雷达管理-终端接口"
+                ],
+                "summary": "获取指定雷达的监测点列表",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apis.GetRadarPointsResp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\\\"code\\\": 0, \\\"message\\\": \\\"设备信息接收成功\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/apis.GetRadarPointsResp"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/radar/put_alarm": {
             "post": {
                 "security": [
@@ -1842,6 +1751,42 @@ const docTemplateadmin = `{
                 "responses": {
                     "200": {
                         "description": "{\\\"code\\\": 0, \\\"message\\\": \\\"告警信息接收成功\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar/put_commands": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "上传指令到服务器",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "雷达管理-终端接口"
+                ],
+                "summary": "上传指令到服务器",
+                "parameters": [
+                    {
+                        "description": "设备信息数据",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apis.PutCommandsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\\\"code\\\": 0, \\\"message\\\": \\\"succesd\\\"}",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1986,6 +1931,906 @@ const docTemplateadmin = `{
                 "responses": {
                     "200": {
                         "description": "{\\\"code\\\": 0, \\\"message\\\": \\\"状态接收成功\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取雷达管理列表",
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "获取雷达管理列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "RadarID",
+                        "name": "radarId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "雷达名称",
+                        "name": "radarName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "雷达编号",
+                        "name": "radarKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "雷达特殊编号",
+                        "name": "specialKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "部门",
+                        "name": "deptId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页条数",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "pageIndex",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.Page"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.Radar"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "创建雷达管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "创建雷达管理",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RadarInsertReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"添加成功\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除雷达管理",
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "删除雷达管理",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RadarDeleteReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"删除成功\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info/getRadarListByDeptId": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "根据部门ID获取雷达列表",
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "根据部门ID获取雷达列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "部门",
+                        "name": "deptId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Radar"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info/get_dev_info": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取雷达最新设备信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "获取雷达最新设备信息",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RadarGetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/mongosvr.RadarDevInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info/get_state_info": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取雷达最新状态信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "获取雷达最新状态信息",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RadarGetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/mongosvr.RadarStatus"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info/radarimage/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取雷达影像",
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "获取雷达影像",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Radar"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取雷达管理",
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "获取雷达管理",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Radar"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "修改雷达管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "雷达管理"
+                ],
+                "summary": "修改雷达管理",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RadarUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"修改成功\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取监测点管理列表",
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取监测点管理列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "PointID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "监测点名称",
+                        "name": "pointName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "监测点编号",
+                        "name": "pointKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "雷达ID",
+                        "name": "radarId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "激活状态",
+                        "name": "aStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页条数",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "pageIndex",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.Page"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.RadarPoint"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "创建监测点管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "创建监测点管理",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.InsertRadarPointReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"添加成功\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除监测点管理",
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "删除监测点管理",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteRadarPointReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"删除成功\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point/deformation_data": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "根据设备ID、索引和时间范围获取采样后的形变点数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取形变点数据",
+                "parameters": [
+                    {
+                        "description": "形变点数据查询参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetDeformationDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point/getDeformCurveList": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "根据设备ID、索引和时间范围获取采样后的形变点加速度数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取形变加速度数据",
+                "parameters": [
+                    {
+                        "description": "形变点数据查询参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetDeformCurveListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetDeformCurveListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point/getDeformationAcceleration": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "根据设备ID、索引和时间范围获取采样后的形变点加速度数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取形变加速度数据",
+                "parameters": [
+                    {
+                        "description": "形变点数据查询参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetDeformationDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point/getDeformationVelocity": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "根据设备ID、索引和时间范围获取采样后的形变点速度数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取形变速度数据",
+                "parameters": [
+                    {
+                        "description": "形变点数据查询参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetDeformationDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point/getPointListByDeptId": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取某个部门下的所有监测点列表",
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取某个部门下的所有监测点列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "机构ID",
+                        "name": "deptId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "监测点名称",
+                        "name": "pointName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "监测点编号",
+                        "name": "pointKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "雷达ID",
+                        "name": "radarId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页条数",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "pageIndex",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.Page"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.RadarPoint"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_point/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取监测点管理",
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "获取监测点管理",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.RadarPoint"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "修改监测点管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监测点管理"
+                ],
+                "summary": "修改监测点管理",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateRadarPointReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"修改成功\"}",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -2987,532 +3832,6 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "/api/v1/sys-radar": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取雷达管理列表",
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取雷达管理列表",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "RadarID",
-                        "name": "radarId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "雷达名称",
-                        "name": "radarName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "雷达编号",
-                        "name": "radarKey",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "雷达特殊编号",
-                        "name": "specialKey",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "部门",
-                        "name": "deptId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页条数",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "pageIndex",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.Page"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "list": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/go-admin_app_admin_models.SysRadar"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "创建雷达管理",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "创建雷达管理",
-                "parameters": [
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarInsertReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"添加成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "删除雷达管理",
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "删除雷达管理",
-                "parameters": [
-                    {
-                        "description": "body",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarDeleteReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"删除成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/get_alarms": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取雷达报警列表",
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取雷达报警列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "StartTime",
-                        "name": "startTime",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/mongosvr.AlarmData"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/get_alarms_before": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取指定时间之前的雷达报警列表",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取指定时间之前的雷达报警列表",
-                "parameters": [
-                    {
-                        "description": "雷达ID、时间和数量",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarGetAlarmsBeforeReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/mongosvr.AlarmData"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/get_alarmsofids": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "通过ID列表获取雷达报警列表",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "通过ID列表获取雷达报警列表",
-                "parameters": [
-                    {
-                        "description": "雷达ID列表",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarGetAlarmsOfIdsReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/mongosvr.AlarmData"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/get_dev_info": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取雷达最新设备信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取雷达最新设备信息",
-                "parameters": [
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarGetReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/mongosvr.RadarDevInfo"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/get_state_info": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取雷达最新状态信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取雷达最新状态信息",
-                "parameters": [
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarGetReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/mongosvr.RadarStatus"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/radarimage/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取雷达影像",
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取雷达影像",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/go-admin_app_admin_models.SysRadar"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sys-radar/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取雷达管理",
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "获取雷达管理",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/go-admin_app_admin_models.SysRadar"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "修改雷达管理",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "雷达管理"
-                ],
-                "summary": "修改雷达管理",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "body",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysRadarUpdateReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"修改成功\"}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/sys-user": {
             "get": {
                 "security": [
@@ -4078,6 +4397,28 @@ const docTemplateadmin = `{
                 }
             }
         },
+        "apis.GetRadarPointsResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "index": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GetRadarPointsIndex"
+                    }
+                }
+            }
+        },
+        "apis.PutCommandsReq": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "integer"
+                }
+            }
+        },
         "apis.RadarAlarmRequest": {
             "type": "object",
             "properties": {
@@ -4166,6 +4507,7 @@ const docTemplateadmin = `{
                     "type": "integer"
                 },
                 "data": {
+                    "description": "距离像数据 ：下标就是点位，参数就是信号的强度",
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -4180,30 +4522,255 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "dto.DeformationPointQueryReq": {
+        "dto.AddAlarmPointResp": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "description": "成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.AlarmPointItem": {
+            "type": "object",
+            "properties": {
+                "alarmCheckType": {
+                    "description": "监测类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmCheckType"
+                        }
+                    ]
+                },
+                "alarmName": {
+                    "description": "预警规则名称",
+                    "type": "string"
+                },
+                "alarmType": {
+                    "description": "预警类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmType"
+                        }
+                    ]
+                },
+                "blueOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                },
+                "deptId": {
+                    "description": "机构ID",
+                    "type": "integer"
+                },
+                "duration": {
+                    "description": "连续预警次数",
+                    "type": "integer"
+                },
+                "interval": {
+                    "description": "预警间隔时间（分）",
+                    "type": "integer"
+                },
+                "orangeOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                },
+                "radarPointId": {
+                    "description": "监测点ID",
+                    "type": "integer"
+                },
+                "redOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "预警规则介绍",
+                    "type": "string"
+                },
+                "yellowOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CloseAlarmPointByIdReq": {
             "type": "object",
             "required": [
-                "devid",
+                "radarPointId"
+            ],
+            "properties": {
+                "processRemark": {
+                    "description": "处理备注",
+                    "type": "string"
+                },
+                "radarPointId": {
+                    "description": "监测点ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CloseAlarmPointByIdResp": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "description": "关闭的告警Ids",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.DeformCurveItem": {
+            "type": "object",
+            "properties": {
+                "t": {
+                    "description": "时间",
+                    "type": "string"
+                },
+                "v": {
+                    "description": "值  （已乘100）",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.DeleteRadarPointReq": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.GetAlarmRulesResp": {
+            "type": "object",
+            "properties": {
+                "alarmRule": {
+                    "description": "机构ID",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AlarmPoint"
+                    }
+                }
+            }
+        },
+        "dto.GetDeformCurveListReq": {
+            "type": "object",
+            "required": [
                 "endTime",
                 "index",
+                "radarId",
                 "startTime"
             ],
             "properties": {
-                "devid": {
-                    "description": "设备ID",
-                    "type": "integer"
-                },
                 "endTime": {
                     "description": "结束时间 (格式: 2006-01-02 15:04:05)",
                     "type": "string"
                 },
+                "hours": {
+                    "description": "查询最近几小时（单位：小时）",
+                    "type": "integer"
+                },
                 "index": {
-                    "description": "索引",
+                    "description": "监测点",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "kind": {
+                    "description": "数据类型：0=形变、1=速度、2=加速度",
+                    "type": "integer"
+                },
+                "radarId": {
+                    "description": "设备ID",
                     "type": "integer"
                 },
                 "startTime": {
                     "description": "开始时间 (格式: 2006-01-02 15:04:05)",
                     "type": "string"
+                },
+                "timeUnit": {
+                    "description": "时间单位（seconds,minutes,hours,days）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TimeUnit"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.GetDeformCurveListResp": {
+            "type": "object",
+            "properties": {
+                "lastTime": {
+                    "description": "最后一条数据的时间",
+                    "type": "string"
+                },
+                "list": {
+                    "description": "形变数据",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/dto.DeformCurveItem"
+                        }
+                    }
+                }
+            }
+        },
+        "dto.GetDeformationDataReq": {
+            "type": "object",
+            "required": [
+                "endTime",
+                "index",
+                "radarId",
+                "startTime"
+            ],
+            "properties": {
+                "endTime": {
+                    "description": "结束时间 (格式: 2006-01-02 15:04:05)",
+                    "type": "string"
+                },
+                "hours": {
+                    "description": "查询最近几小时（单位：小时）",
+                    "type": "integer"
+                },
+                "index": {
+                    "description": "索引",
+                    "type": "integer"
+                },
+                "radarId": {
+                    "description": "设备ID",
+                    "type": "integer"
+                },
+                "startTime": {
+                    "description": "开始时间 (格式: 2006-01-02 15:04:05)",
+                    "type": "string"
+                },
+                "timeUnit": {
+                    "description": "时间单位（seconds,minutes,hours,days）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TimeUnit"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.GetRadarPointsIndex": {
+            "type": "object",
+            "properties": {
+                "phase_depth": {
+                    "type": "integer"
+                },
+                "pose_depth": {
+                    "type": "integer"
+                },
+                "position": {
+                    "type": "integer"
                 }
             }
         },
@@ -4218,6 +4785,53 @@ const docTemplateadmin = `{
                 }
             }
         },
+        "dto.InsertRadarPointReq": {
+            "type": "object",
+            "properties": {
+                "PhaseDepth": {
+                    "type": "integer"
+                },
+                "alt": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "distance": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "string"
+                },
+                "lng": {
+                    "type": "string"
+                },
+                "pointIndex": {
+                    "type": "integer"
+                },
+                "pointKey": {
+                    "type": "string"
+                },
+                "pointName": {
+                    "type": "string"
+                },
+                "pointType": {
+                    "type": "string"
+                },
+                "poseDepth": {
+                    "type": "integer"
+                },
+                "radarId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.PassWord": {
             "type": "object",
             "properties": {
@@ -4229,7 +4843,7 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "dto.RadarPointDeleteReq": {
+        "dto.RadarDeleteReq": {
             "type": "object",
             "properties": {
                 "ids": {
@@ -4240,20 +4854,25 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "dto.RadarPointInsertReq": {
+        "dto.RadarGetReq": {
             "type": "object",
             "properties": {
-                "aStatus": {
-                    "type": "string"
-                },
+                "radarId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.RadarInsertReq": {
+            "type": "object",
+            "properties": {
                 "alt": {
                     "type": "string"
                 },
                 "createBy": {
                     "type": "integer"
                 },
-                "distance": {
-                    "type": "string"
+                "deptId": {
+                    "type": "integer"
                 },
                 "lat": {
                     "type": "string"
@@ -4261,52 +4880,42 @@ const docTemplateadmin = `{
                 "lng": {
                     "type": "string"
                 },
-                "mTypeId": {
+                "radarKey": {
                     "type": "string"
                 },
-                "pointIndex": {
-                    "type": "integer"
-                },
-                "pointKey": {
+                "radarName": {
                     "type": "string"
-                },
-                "pointName": {
-                    "type": "string"
-                },
-                "pointType": {
-                    "type": "string"
-                },
-                "radarId": {
-                    "type": "integer"
                 },
                 "remark": {
+                    "type": "string"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "specialKey": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 },
                 "updateBy": {
                     "type": "integer"
                 },
-                "xStatus": {
+                "vender": {
                     "type": "string"
                 }
             }
         },
-        "dto.RadarPointUpdateReq": {
+        "dto.RadarUpdateReq": {
             "type": "object",
             "properties": {
-                "aStatus": {
-                    "type": "string"
-                },
                 "alt": {
                     "type": "string"
                 },
                 "createBy": {
                     "type": "integer"
                 },
-                "distance": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "PointID",
+                "deptId": {
                     "type": "integer"
                 },
                 "lat": {
@@ -4315,32 +4924,27 @@ const docTemplateadmin = `{
                 "lng": {
                     "type": "string"
                 },
-                "mTypeId": {
-                    "type": "string"
-                },
-                "pointIndex": {
-                    "type": "integer"
-                },
-                "pointKey": {
-                    "type": "string"
-                },
-                "pointName": {
-                    "type": "string"
-                },
-                "pointType": {
-                    "type": "string"
-                },
                 "radarId": {
+                    "description": "RadarID",
                     "type": "integer"
+                },
+                "radarKey": {
+                    "type": "string"
+                },
+                "radarName": {
+                    "type": "string"
                 },
                 "remark": {
                     "type": "string"
                 },
+                "specialKey": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
                 "updateBy": {
                     "type": "integer"
-                },
-                "xStatus": {
-                    "type": "string"
                 }
             }
         },
@@ -4498,9 +5102,6 @@ const docTemplateadmin = `{
                     "description": "邮箱",
                     "type": "string"
                 },
-                "fromProject": {
-                    "type": "integer"
-                },
                 "leader": {
                     "description": "负责人",
                     "type": "string"
@@ -4547,9 +5148,6 @@ const docTemplateadmin = `{
                 "email": {
                     "description": "邮箱",
                     "type": "string"
-                },
-                "fromProject": {
-                    "type": "integer"
                 },
                 "leader": {
                     "description": "负责人",
@@ -5040,142 +5638,6 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "dto.SysRadarDeleteReq": {
-            "type": "object",
-            "properties": {
-                "ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
-        "dto.SysRadarGetAlarmsBeforeReq": {
-            "type": "object",
-            "properties": {
-                "num": {
-                    "type": "integer"
-                },
-                "radarId": {
-                    "type": "integer"
-                },
-                "time": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SysRadarGetAlarmsOfIdsReq": {
-            "type": "object",
-            "properties": {
-                "ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
-        "dto.SysRadarGetReq": {
-            "type": "object",
-            "properties": {
-                "radarId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.SysRadarInsertReq": {
-            "type": "object",
-            "properties": {
-                "alt": {
-                    "type": "string"
-                },
-                "createBy": {
-                    "type": "integer"
-                },
-                "deptId": {
-                    "type": "integer"
-                },
-                "fromProject": {
-                    "type": "integer"
-                },
-                "lat": {
-                    "type": "string"
-                },
-                "lng": {
-                    "type": "string"
-                },
-                "radarKey": {
-                    "type": "string"
-                },
-                "radarName": {
-                    "type": "string"
-                },
-                "remark": {
-                    "type": "string"
-                },
-                "secret": {
-                    "type": "string"
-                },
-                "specialKey": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "updateBy": {
-                    "type": "integer"
-                },
-                "vender": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SysRadarUpdateReq": {
-            "type": "object",
-            "properties": {
-                "alt": {
-                    "type": "string"
-                },
-                "createBy": {
-                    "type": "integer"
-                },
-                "deptId": {
-                    "type": "integer"
-                },
-                "fromProject": {
-                    "type": "integer"
-                },
-                "lat": {
-                    "type": "string"
-                },
-                "lng": {
-                    "type": "string"
-                },
-                "radarId": {
-                    "description": "RadarID",
-                    "type": "integer"
-                },
-                "radarKey": {
-                    "type": "string"
-                },
-                "radarName": {
-                    "type": "string"
-                },
-                "remark": {
-                    "type": "string"
-                },
-                "specialKey": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "updateBy": {
-                    "type": "integer"
-                }
-            }
-        },
         "dto.SysRoleDeleteReq": {
             "type": "object",
             "properties": {
@@ -5426,6 +5888,101 @@ const docTemplateadmin = `{
                 }
             }
         },
+        "dto.TimeUnit": {
+            "type": "string",
+            "enum": [
+                "seconds",
+                "minutes",
+                "hours",
+                "days"
+            ],
+            "x-enum-varnames": [
+                "TimeUnitSeconds",
+                "TimeUnitMinutes",
+                "TimeUnitHours",
+                "TimeUnitDays"
+            ]
+        },
+        "dto.UpdateAlarmPointReq": {
+            "type": "object",
+            "properties": {
+                "deptId": {
+                    "type": "integer"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AlarmPointItem"
+                    }
+                },
+                "mode": {
+                    "description": "门限类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.RadarPointMType"
+                        }
+                    ]
+                },
+                "radarPointId": {
+                    "description": "监测点ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateRadarPointReq": {
+            "type": "object",
+            "properties": {
+                "PhaseDepth": {
+                    "type": "integer"
+                },
+                "aStatus": {
+                    "type": "string"
+                },
+                "alt": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "distance": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "PointID",
+                    "type": "integer"
+                },
+                "lat": {
+                    "type": "string"
+                },
+                "lng": {
+                    "type": "string"
+                },
+                "pointIndex": {
+                    "type": "integer"
+                },
+                "pointKey": {
+                    "type": "string"
+                },
+                "pointName": {
+                    "type": "string"
+                },
+                "pointType": {
+                    "type": "string"
+                },
+                "poseDepth": {
+                    "type": "integer"
+                },
+                "radarId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.UpdateStatusReq": {
             "type": "object",
             "properties": {
@@ -5460,65 +6017,6 @@ const docTemplateadmin = `{
                 "userId": {
                     "description": "用户ID",
                     "type": "integer"
-                }
-            }
-        },
-        "go-admin_app_admin_models.RadarPoint": {
-            "type": "object",
-            "properties": {
-                "aStatus": {
-                    "type": "string"
-                },
-                "alt": {
-                    "type": "string"
-                },
-                "createBy": {
-                    "type": "integer"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "distance": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "lat": {
-                    "type": "string"
-                },
-                "lng": {
-                    "type": "string"
-                },
-                "mTypeId": {
-                    "type": "string"
-                },
-                "pointIndex": {
-                    "type": "integer"
-                },
-                "pointKey": {
-                    "type": "string"
-                },
-                "pointName": {
-                    "type": "string"
-                },
-                "pointType": {
-                    "type": "string"
-                },
-                "radarId": {
-                    "type": "integer"
-                },
-                "remark": {
-                    "type": "string"
-                },
-                "updateBy": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "xStatus": {
-                    "type": "string"
                 }
             }
         },
@@ -5627,10 +6125,6 @@ const docTemplateadmin = `{
                 "email": {
                     "description": "邮箱",
                     "type": "string"
-                },
-                "fromProject": {
-                    "description": "是否是自动创建，当来自项目时为1",
-                    "type": "integer"
                 },
                 "leader": {
                     "description": "负责人",
@@ -5758,7 +6252,235 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "go-admin_app_admin_models.SysRadar": {
+        "handler.Login": {
+            "type": "object",
+            "required": [
+                "code",
+                "password",
+                "username",
+                "uuid"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AlarmCheckType": {
+            "type": "integer",
+            "enum": [
+                1
+            ],
+            "x-enum-comments": {
+                "AlarmCheckRadarPoint": "预警-检测点"
+            },
+            "x-enum-descriptions": [
+                "预警-检测点"
+            ],
+            "x-enum-varnames": [
+                "AlarmCheckRadarPoint"
+            ]
+        },
+        "models.AlarmLevel": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-comments": {
+                "AlarmLevelBlue": "蓝色",
+                "AlarmLevelOrange": "橙色",
+                "AlarmLevelRed": "红色",
+                "AlarmLevelYellow": "黄色"
+            },
+            "x-enum-descriptions": [
+                "",
+                "蓝色",
+                "黄色",
+                "橙色",
+                "红色"
+            ],
+            "x-enum-varnames": [
+                "AlarmLevelNone",
+                "AlarmLevelBlue",
+                "AlarmLevelYellow",
+                "AlarmLevelOrange",
+                "AlarmLevelRed"
+            ]
+        },
+        "models.AlarmPoint": {
+            "type": "object",
+            "properties": {
+                "alarmCheckType": {
+                    "description": "监测类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmCheckType"
+                        }
+                    ]
+                },
+                "alarmName": {
+                    "description": "判据名称",
+                    "type": "string"
+                },
+                "alarmType": {
+                    "description": "预警类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmType"
+                        }
+                    ]
+                },
+                "blueOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deptId": {
+                    "description": "机构ID",
+                    "type": "integer"
+                },
+                "duration": {
+                    "description": "形变值的查询事件跨度（h）",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "interval": {
+                    "description": "预警间隔时间（分）",
+                    "type": "integer"
+                },
+                "orangeOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                },
+                "radarId": {
+                    "description": "雷达Id",
+                    "type": "integer"
+                },
+                "radarPointId": {
+                    "description": "监测点ID (0=对机构全局生效)",
+                    "type": "integer"
+                },
+                "redOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "yellowOption": {
+                    "description": "预警条件",
+                    "type": "string"
+                }
+            }
+        },
+        "models.AlarmPointLogs": {
+            "type": "object",
+            "properties": {
+                "alarmLevel": {
+                    "description": "报警等级",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmLevel"
+                        }
+                    ]
+                },
+                "alarmType": {
+                    "description": "预警类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmType"
+                        }
+                    ]
+                },
+                "alarmValue": {
+                    "description": "预警值",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "currentValue": {
+                    "description": "实际值",
+                    "type": "string"
+                },
+                "deptId": {
+                    "description": "机构ID",
+                    "type": "integer"
+                },
+                "duration": {
+                    "description": "连续预警次数",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "interval": {
+                    "description": "预警间隔时间（分）",
+                    "type": "integer"
+                },
+                "operatorId": {
+                    "type": "integer"
+                },
+                "processRemark": {
+                    "type": "string"
+                },
+                "processed": {
+                    "type": "boolean"
+                },
+                "radarId": {
+                    "description": "雷达Id",
+                    "type": "integer"
+                },
+                "radarPointId": {
+                    "description": "监测点ID",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AlarmType": {
+            "type": "integer",
+            "enum": [
+                100,
+                101,
+                102
+            ],
+            "x-enum-comments": {
+                "AlarmTypeRadarPointAcceleration": "监测点-水平位移加速度预警阈值，单位： mm/h2",
+                "AlarmTypeRadarPointDeformation": "监测点-累计水平位移，单位 ： mm",
+                "AlarmTypeRadarPointVelocity": "监测点-水平位移速度（瞬时位移量）预警阈值，单位：mm/h"
+            },
+            "x-enum-descriptions": [
+                "监测点-累计水平位移，单位 ： mm",
+                "监测点-水平位移速度（瞬时位移量）预警阈值，单位：mm/h",
+                "监测点-水平位移加速度预警阈值，单位： mm/h2"
+            ],
+            "x-enum-varnames": [
+                "AlarmTypeRadarPointDeformation",
+                "AlarmTypeRadarPointVelocity",
+                "AlarmTypeRadarPointAcceleration"
+            ]
+        },
+        "models.Radar": {
             "type": "object",
             "properties": {
                 "alt": {
@@ -5771,13 +6493,14 @@ const docTemplateadmin = `{
                     "type": "string"
                 },
                 "dept": {
-                    "$ref": "#/definitions/go-admin_app_admin_models.SysDept"
+                    "description": "FromProject int64               ` + "`" + `json:\"fromProject\" gorm:\"column:from_project; size:4;\"` + "`" + ` //是否是自动创建，当来自项目时为1",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/go-admin_app_admin_models.SysDept"
+                        }
+                    ]
                 },
                 "deptId": {
-                    "type": "integer"
-                },
-                "fromProject": {
-                    "description": "是否是自动创建，当来自项目时为1",
                     "type": "integer"
                 },
                 "lat": {
@@ -5787,7 +6510,6 @@ const docTemplateadmin = `{
                     "type": "string"
                 },
                 "radarId": {
-                    "description": "models.Model",
                     "type": "integer"
                 },
                 "radarKey": {
@@ -5819,28 +6541,111 @@ const docTemplateadmin = `{
                 }
             }
         },
-        "handler.Login": {
+        "models.RadarPoint": {
             "type": "object",
-            "required": [
-                "code",
-                "password",
-                "username",
-                "uuid"
-            ],
             "properties": {
-                "code": {
+                "PhaseDepth": {
+                    "type": "integer"
+                },
+                "PoseDepth": {
+                    "type": "integer"
+                },
+                "aStatus": {
                     "type": "string"
                 },
-                "password": {
+                "alarmLevel": {
+                    "description": "告警等级",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AlarmLevel"
+                        }
+                    ]
+                },
+                "alt": {
+                    "description": "高度",
                     "type": "string"
                 },
-                "username": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "createdAt": {
                     "type": "string"
                 },
-                "uuid": {
+                "distance": {
+                    "description": "距离",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_time": {
+                    "description": "最近一次检测预警的时间",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sql.NullTime"
+                        }
+                    ]
+                },
+                "lat": {
+                    "description": "纬度",
+                    "type": "string"
+                },
+                "lng": {
+                    "description": "经度",
+                    "type": "string"
+                },
+                "mTypeId": {
+                    "description": "0=全局门限 1=独立门限",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.RadarPointMType"
+                        }
+                    ]
+                },
+                "pointIndex": {
+                    "type": "integer"
+                },
+                "pointKey": {
+                    "type": "string"
+                },
+                "pointName": {
+                    "type": "string"
+                },
+                "pointType": {
+                    "type": "string"
+                },
+                "radarId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
+        },
+        "models.RadarPointMType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1
+            ],
+            "x-enum-comments": {
+                "RadarPointMTypeAlone": "预警-检测点",
+                "RadarPointMTypeGlobal": "预警-检测点"
+            },
+            "x-enum-descriptions": [
+                "预警-检测点",
+                "预警-检测点"
+            ],
+            "x-enum-varnames": [
+                "RadarPointMTypeGlobal",
+                "RadarPointMTypeAlone"
+            ]
         },
         "mongodto.CommandDataDto": {
             "type": "object",
@@ -5854,62 +6659,6 @@ const docTemplateadmin = `{
                 "parameters": {
                     "type": "object",
                     "additionalProperties": true
-                }
-            }
-        },
-        "mongosvr.AlarmData": {
-            "type": "object",
-            "properties": {
-                "battery": {
-                    "type": "integer"
-                },
-                "radarData": {
-                    "type": "integer"
-                },
-                "radarId": {
-                    "type": "integer"
-                },
-                "solarPanel": {
-                    "type": "integer"
-                },
-                "svrTime": {
-                    "type": "string"
-                },
-                "temperature": {
-                    "type": "integer"
-                },
-                "timeStamp": {
-                    "type": "integer"
-                },
-                "voltage": {
-                    "type": "integer"
-                }
-            }
-        },
-        "mongosvr.DeformationPointData": {
-            "type": "object",
-            "properties": {
-                "deformation": {
-                    "description": "形变值(毫米)",
-                    "type": "number"
-                },
-                "distance": {
-                    "description": "距离值(毫米)",
-                    "type": "number"
-                },
-                "index": {
-                    "description": "下标",
-                    "type": "integer"
-                },
-                "radarID": {
-                    "type": "integer"
-                },
-                "svrTime": {
-                    "type": "string"
-                },
-                "timeStamp": {
-                    "description": "时间戳",
-                    "type": "string"
                 }
             }
         },
@@ -5929,7 +6678,8 @@ const docTemplateadmin = `{
                     "type": "string"
                 },
                 "radarId": {
-                    "type": "integer"
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "radarkey": {
                     "type": "string"
@@ -5981,49 +6731,62 @@ const docTemplateadmin = `{
             "type": "object",
             "properties": {
                 "battery": {
+                    "description": "电池状态 0 充电中 1 放电中",
                     "type": "integer"
                 },
                 "command_code": {
+                    "description": "命令码",
                     "type": "integer"
                 },
                 "current": {
-                    "type": "number"
+                    "description": "供电电流：    {\\\"12V\\\":0.888750}\"  {电流名：电流值(单位安)}",
+                    "type": "string"
                 },
                 "disk_free": {
+                    "description": "磁盘剩余容量",
                     "type": "integer"
                 },
                 "disk_total": {
+                    "description": "磁盘总容量",
                     "type": "integer"
                 },
                 "radarId": {
-                    "type": "integer"
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "radarkey": {
                     "type": "string"
                 },
                 "ram_free": {
+                    "description": "内存剩余容量",
                     "type": "integer"
                 },
                 "ram_total": {
+                    "description": "内存总容量",
                     "type": "integer"
                 },
                 "sim_RSSI": {
+                    "description": "SIM接收信号强度 单位（dBm）",
                     "type": "integer"
                 },
                 "sim_state": {
+                    "description": "SIM卡状态 :0=正常 1异常",
                     "type": "integer"
                 },
                 "svrTime": {
                     "type": "string"
                 },
                 "temperature": {
-                    "type": "number"
+                    "description": "设备温度：    {\\\"local\\\":44.625000,\\\"PCB\\\":44.375000,\\\"ZYNQ\\\":49.500000}\" //设备温度，可有多个值 键 温度名 值 温度值(单位摄氏度)",
+                    "type": "string"
                 },
                 "timestamp": {
+                    "description": "时间戳",
                     "type": "integer"
                 },
                 "voltage": {
-                    "type": "number"
+                    "description": "电压：   {\"12V\":11.686076, \"5V3\":5.285750, \"2V1\":2.123250}V",
+                    "type": "string"
                 }
             }
         },
@@ -6031,43 +6794,55 @@ const docTemplateadmin = `{
             "type": "object",
             "properties": {
                 "battery": {
+                    "description": "电池状态 0 充电中 1 放电中",
                     "type": "integer"
                 },
                 "command_code": {
+                    "description": "命令码",
                     "type": "integer"
                 },
                 "current": {
-                    "type": "number"
+                    "description": "供电电流：    {\\\"12V\\\":0.888750}\"  {电流名：电流值(单位安)}",
+                    "type": "string"
                 },
                 "disk_free": {
+                    "description": "磁盘剩余容量",
                     "type": "integer"
                 },
                 "disk_total": {
+                    "description": "磁盘总容量",
                     "type": "integer"
                 },
                 "radarkey": {
                     "type": "string"
                 },
                 "ram_free": {
+                    "description": "内存剩余容量",
                     "type": "integer"
                 },
                 "ram_total": {
+                    "description": "内存总容量",
                     "type": "integer"
                 },
                 "sim_RSSI": {
+                    "description": "SIM接收信号强度 单位（dBm）",
                     "type": "integer"
                 },
                 "sim_state": {
+                    "description": "SIM卡状态 :0=正常 1异常",
                     "type": "integer"
                 },
                 "temperature": {
-                    "type": "number"
+                    "description": "设备温度：    {\\\"local\\\":44.625000,\\\"PCB\\\":44.375000,\\\"ZYNQ\\\":49.500000}\" //设备温度，可有多个值 键 温度名 值 温度值(单位摄氏度)",
+                    "type": "string"
                 },
                 "timestamp": {
+                    "description": "时间戳",
                     "type": "integer"
                 },
                 "voltage": {
-                    "type": "number"
+                    "description": "电压：   {\"12V\":11.686076, \"5V3\":5.285750, \"2V1\":2.123250}V",
+                    "type": "string"
                 }
             }
         },
@@ -6100,6 +6875,18 @@ const docTemplateadmin = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "sql.NullTime": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         },
@@ -6378,7 +7165,7 @@ var SwaggerInfoadmin = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "go-admin API",
-	Description:      "基于Gin + Vue + Element UI的前后端分离权限管理系统的接口文档\nradar api",
+	Description:      "接口文档\nradar api",
 	InfoInstanceName: "admin",
 	SwaggerTemplate:  docTemplateadmin,
 	LeftDelim:        "{{",

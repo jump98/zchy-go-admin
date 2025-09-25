@@ -65,16 +65,15 @@ func (e RadarPoint) GetRadarPointList(c *gin.Context) {
 // GetRadarPointListDeptId 获取某个部门下的所有监测点列表
 // @Summary 获取某个部门下的所有监测点列表
 // @Description 获取某个部门下的所有监测点列表
-// @Tags 获取某个部门下的所有监测点列表
-// @Param id query int false "PointID"
+// @Tags 监测点管理
+// @Param deptId query int true "机构ID"
 // @Param pointName query string false "监测点名称"
 // @Param pointKey query string false "监测点编号"
 // @Param radarId query int64 false "雷达ID"
-// @Param aStatus query string false "激活状态"
 // @Param pageSize query int false "页条数"
 // @Param pageIndex query int false "页码"
 // @Success 200 {object} response.Response{data=response.Page{list=[]models.RadarPoint}} "{"code": 200, "data": [...]}"
-// @Router /api/v1/radar_point/dept [get]
+// @Router /api/v1/radar_point/getPointListByDeptId [get]
 // @Security Bearer
 func (e RadarPoint) GetRadarPointListDeptId(c *gin.Context) {
 	req := dto.GetRadarPointListDeptIdReq{}
@@ -168,7 +167,7 @@ func (e RadarPoint) GetRadarPointById(c *gin.Context) {
 // @Tags 监测点管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.InsertRadarPoint true "data"
+// @Param data body dto.InsertRadarPointReq true "data"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "添加成功"}"
 // @Router /api/v1/radar_point [post]
 // @Security Bearer
@@ -328,7 +327,7 @@ func (e RadarPoint) getRadarIDandPoints(ids []int, s *service.RadarPoint, p *act
 // @Accept application/json
 // @Product application/json
 // @Param data body dto.GetDeformationDataReq true "形变点数据查询参数"
-// @Success 200 {object} response.Response{data=[]dto.GetDeformationDataResp} "成功"
+// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/radar_point/deformation_data [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationData(c *gin.Context) {
@@ -368,9 +367,9 @@ func (e RadarPoint) GetDeformationData(c *gin.Context) {
 // @Tags 监测点管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.GetDeformationVelocityReq true "形变点数据查询参数"
-// @Success 200 {object} response.Response{data=[]mongosvr.DeformationPointData} "成功"
-// @Router /api/v1/radar_point/deformation_data [post]
+// @Param data body dto.GetDeformationDataReq true "形变点数据查询参数"
+// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
+// @Router /api/v1/radar_point/getDeformationVelocity [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
 	defer func() {
@@ -409,9 +408,9 @@ func (e RadarPoint) GetDeformationVelocity(c *gin.Context) {
 // @Tags 监测点管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.GetDeformationVelocityReq true "形变点数据查询参数"
-// @Success 200 {object} response.Response{data=[]mongosvr.DeformationPointData} "成功"
-// @Router /api/v1/radar_point/deformation_data [post]
+// @Param data body dto.GetDeformationDataReq true "形变点数据查询参数"
+// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
+// @Router /api/v1/radar_point/getDeformationAcceleration [post]
 // @Security Bearer
 func (e RadarPoint) GetDeformationAcceleration(c *gin.Context) {
 	defer func() {
@@ -444,6 +443,15 @@ func (e RadarPoint) GetDeformationAcceleration(c *gin.Context) {
 }
 
 // GetDeformCurveList 获得形变曲线数据（形变曲线、速度、加速度）
+// @Summary 获取形变加速度数据
+// @Description 根据设备ID、索引和时间范围获取采样后的形变点加速度数据
+// @Tags 监测点管理
+// @Accept application/json
+// @Product application/json
+// @Param data body dto.GetDeformCurveListReq true "形变点数据查询参数"
+// @Success 200 {object} dto.GetDeformCurveListResp "成功"
+// @Router /api/v1/radar_point/getDeformCurveList [post]
+// @Security Bearer
 func (e RadarPoint) GetDeformCurveList(c *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {

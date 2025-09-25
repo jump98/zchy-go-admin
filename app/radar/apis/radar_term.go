@@ -583,7 +583,7 @@ func (e Radar) PutDevInfo(c *gin.Context) {
 // @Tags 雷达管理-终端接口
 // @Accept application/json
 // @Product application/json
-// @Param data body  true "设备信息数据"
+// @Param data body GetRadarPointsResp true "body"
 // @Success 200 {object} GetRadarPointsResp "{\"code\": 0, \"message\": \"设备信息接收成功\"}"
 // @Router /api/v1/radar/get_radar_points [get]
 // @Security Bearer
@@ -618,7 +618,7 @@ func (e Radar) GetRadarPoints(c *gin.Context) {
 // @Tags 雷达管理-终端接口
 // @Accept application/json
 // @Product application/json
-// @Param data body  true "设备信息数据"
+// @Param data body PutCommandsReq true "设备信息数据"
 // @Success 200 {object} response.Response "{\"code\": 0, \"message\": \"succesd\"}"
 // @Router /api/v1/radar/put_commands [post]
 // @Security Bearer
