@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go-admin/app/monsvr/mongosvr"
 	"go-admin/app/monsvr/mongosvr/collections"
 	"go-admin/app/radar/service/dto"
@@ -45,7 +46,7 @@ func (s DeformationPointV2) GetDeformCurveList(ctx context.Context, req dto.GetD
 	for _, v := range data {
 		item := dto.DeformCurveItem{
 			T: v.Time,
-			V: v.Deformation,
+			V: float64(v.Deformation),
 		}
 		indexMap[v.PointIndex] = append(indexMap[v.PointIndex], item)
 	}
@@ -89,20 +90,22 @@ func (s DeformationPointV2) calcDeformVelocity(indexMap map[int64][]dto.DeformCu
 
 		var velocityList []dto.DeformCurveItem
 		for i := 1; i < len(items); i++ {
-			dt := items[i].T.Sub(items[i-1].T).Seconds()
+			dt := items[i].T.Sub(items[i-1].T).Minutes()
 			if dt <= 0 {
 				continue
 			}
 
-			dv := float64(items[i].V-items[i-1].V) / 100.0 // 转成 mm
-			velocityMM := dv / dt                          // mm/s
+			dv := items[i].V - items[i-1].V // 转成 mm
+			velocityMM := dv / dt           // mm/s
+			fmt.Printf("dt:%f,dv:%f,形变值Up:%f ,形变值:%f ,速度:%f, \n", dt, dv, items[i-1].V, items[i].V, velocityMM)
 
 			velocityList = append(velocityList, dto.DeformCurveItem{
 				T: items[i].T,
-				V: int64(velocityMM), // 保存成整数（mm/h * 100 可以自己决定）
+				V: velocityMM,
 			})
 		}
 
+		fmt.Printf("velocityList:%+v", velocityList)
 		stats[pointID] = velocityList
 	}
 
@@ -132,17 +135,17 @@ func (s DeformationPointV2) calcDeformAcceleration(indexMap map[int64][]dto.Defo
 
 		var accelList []dto.DeformCurveItem
 		for i := 1; i < len(velocityItems); i++ {
-			dt := velocityItems[i].T.Sub(velocityItems[i-1].T).Seconds()
+			dt := velocityItems[i].T.Sub(velocityItems[i-1].T).Minutes()
 			if dt <= 0 {
 				continue
 			}
 
-			dv := float64(velocityItems[i].V-velocityItems[i-1].V) / 100.0 // 速度差 mm/h
-			accel := dv / dt                                               // mm/h/s
+			dv := velocityItems[i].V - velocityItems[i-1].V // 速度差 mm/h
+			accel := dv / dt                                // mm/h/s
 
 			accelList = append(accelList, dto.DeformCurveItem{
 				T: velocityItems[i].T,
-				V: int64(accel * 100),
+				V: accel,
 			})
 		}
 

@@ -212,3 +212,45 @@ func (e *Radar) GetListByDeptId(deptId int64) ([]*models.Radar, error) {
 	}
 	return radarList, nil
 }
+
+// GetSideInfo 获取边坡信息
+func (e *Radar) GetSideInfo(deptId int64) (*models.RadarSideInfo, error) {
+	if deptId == 0 {
+		return nil, errors.New("deptId IS NULL")
+	}
+	var err error
+	radarSideInfoItem := &models.RadarSideInfo{
+		DeptId: deptId,
+	}
+	if err = e.Orm.Model(&models.RadarSideInfo{}).FirstOrCreate(&radarSideInfoItem).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
+		return radarSideInfoItem, err
+	}
+	return radarSideInfoItem, nil
+}
+
+// CreateOrUpdateSideInfo 创建或更新边坡信息
+func (e *Radar) CreateOrUpdateSideInfo(req dto.UpdateSideInfoReq) error {
+	deptId := req.DeptId
+	var err error
+	radarSideInfoItem := &models.RadarSideInfo{
+		DeptId:   deptId,
+		SideType: req.SideType,
+		SideName: req.SideName,
+		Address:  req.Address,
+	}
+	err = e.Orm.Model(&models.RadarSideInfo{}).Where("dept_id = ?", deptId).First(&radarSideInfoItem).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return e.Orm.Create(&radarSideInfoItem).Error
+		}
+		return err
+	}
+	radarSideInfoItem.DeptId = deptId
+	radarSideInfoItem.SideName = req.SideName
+	radarSideInfoItem.SideType = req.SideType
+	radarSideInfoItem.Address = req.Address
+	return e.Orm.Save(radarSideInfoItem).Error
+}

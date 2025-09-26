@@ -5,7 +5,7 @@ cp ../go.mod ./go.mod
 cp ../go.sum ./go.sum
 
 #设置镜像版本
-export IMAGE_NAME="zchy-go-admin:v1.0.6"
+export IMAGE_NAME="zchy-go-admin:v1.0.8"
 
 # 设置镜像名称和版本
 

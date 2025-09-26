@@ -48,7 +48,6 @@ type RadarPointOrder struct {
 	UpdateBy   string `form:"updateByOrder"  search:"type:order;column:update_by;table:radar_point"`
 	CreatedAt  string `form:"createdAtOrder"  search:"type:order;column:created_at;table:radar_point"`
 	UpdatedAt  string `form:"updatedAtOrder"  search:"type:order;column:updated_at;table:radar_point"`
-	DeletedAt  string `form:"deletedAtOrder"  search:"type:order;column:deleted_at;table:radar_point"`
 }
 
 func (m *GetRadarPointListDeptIdReq) GetNeedSearch() interface{} {

@@ -105,5 +105,5 @@ type GetDeformCurveListResp struct {
 }
 type DeformCurveItem struct {
 	T time.Time `json:"t"` //时间
-	V int64     `json:"v"` //值  （已乘100）
+	V float64   `json:"v"` //值
 }

@@ -36,7 +36,6 @@ type RadarOrder struct {
 	UpdateBy   string `form:"updateByOrder"  search:"type:order;column:update_by;table:radar"`
 	CreatedAt  string `form:"createdAtOrder"  search:"type:order;column:created_at;table:radar"`
 	UpdatedAt  string `form:"updatedAtOrder"  search:"type:order;column:updated_at;table:radar"`
-	DeletedAt  string `form:"deletedAtOrder"  search:"type:order;column:deleted_at;table:radar"`
 }
 
 func (m *RadarGetPageReq) GetNeedSearch() interface{} {
@@ -193,6 +192,15 @@ type GetRadarListByDeptIdResp struct {
 	List models.Radar `json:"list"` // RadarID
 }
 
-// func (s *RadarConfirmReq) GetId() interface{} {
-// 	return s.RadarId
-// }
+// GetSideInfoReq 获取边坡信息
+type GetSideInfoReq struct {
+	DeptId int64 `form:"deptId"` // DeptId
+}
+
+// UpdateSideInfoReq 获取边坡信息
+type UpdateSideInfoReq struct {
+	DeptId   int64  `json:"deptId"   binding:"required"` // DeptId
+	SideName string `json:"SideName"`                    //隐患点名称
+	SideType string `json:"sideType"`                    //隐患点类型
+	Address  string `json:"address"`                     //地址
+}

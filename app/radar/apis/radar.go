@@ -516,3 +516,57 @@ func (e Radar) GetRadarListByDeptId(c *gin.Context) {
 	}
 	e.OK(radarList, "查询成功")
 }
+
+// GetSideInfo 获取边坡信息
+// @Summary 获取边坡信息
+// @Description 获取边坡信息
+// @Tags 雷达管理 - 边坡
+// @Param deptId query int64 true "部门"
+// @Success 200 {object} response.Response{data=models.RadarSideInfo} "{"code": 200, "data": [...]}"
+// @Router /api/v1/radar_info/getSideInfo [get]
+// @Security Bearer
+func (e Radar) GetSideInfo(c *gin.Context) {
+	req := dto.GetSideInfoReq{}
+	s := service.Radar{}
+	err := e.MakeContext(c).MakeOrm().Bind(&req, binding.Form).MakeService(&s.Service).Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	deptId := req.DeptId
+	fmt.Println("查询deptId：", deptId)
+	radarSideInfo := &models.RadarSideInfo{DeptId: req.DeptId}
+	if radarSideInfo, err = s.GetSideInfo(deptId); err != nil {
+		e.Error(500, err, err.Error())
+		return
+	}
+	e.OK(radarSideInfo, "查询成功")
+}
+
+// UpdateSideInfo 更新边坡信息
+// @Summary 更新边坡信息
+// @Description 更新边坡信息
+// @Tags 雷达管理 - 边坡
+// @Param req body dto.UpdateSideInfoReq true "请求参数"
+// @Success 200 {object} response.Response{data=string} "{"code": 200, "data": [...]}"
+// @Router /api/v1/radar_info/updateSideInfo [post]
+// @Security Bearer
+func (e Radar) UpdateSideInfo(c *gin.Context) {
+	req := dto.UpdateSideInfoReq{}
+	s := service.Radar{}
+	err := e.MakeContext(c).MakeOrm().Bind(&req, binding.JSON).MakeService(&s.Service).Errors
+	fmt.Printf("req:%+v", req)
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	fmt.Printf("req:%+v", req)
+
+	if err = s.CreateOrUpdateSideInfo(req); err != nil {
+		e.Error(500, err, err.Error())
+		return
+	}
+	e.OK("success", "修改信息成功")
+}

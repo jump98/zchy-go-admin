@@ -4,6 +4,7 @@ import (
 	adminModel "go-admin/app/admin/models"
 	"go-admin/common/models"
 	"strconv"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -23,8 +24,9 @@ type Radar struct {
 	Vender     string `json:"vender"      gorm:"column:vender;       size:100;          comment:设备厂家名"`
 	Secret     string `json:"secret"      gorm:"column:secret;       size:100;          comment:密钥"`
 	// FromProject int64               `json:"fromProject" gorm:"column:from_project; size:4;"` //是否是自动创建，当来自项目时为1
-	Dept *adminModel.SysDept `json:"dept"`
-	models.ModelTime
+	Dept      *adminModel.SysDept `json:"dept"`
+	CreatedAt time.Time           `json:"createdAt" gorm:"comment:创建时间"`
+	UpdatedAt time.Time           `json:"updatedAt" gorm:"comment:最后更新时间"`
 	models.ControlBy
 }
 

@@ -2142,6 +2142,50 @@ const docTemplateadmin = `{
                 }
             }
         },
+        "/api/v1/radar_info/getSideInfo": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取边坡信息",
+                "tags": [
+                    "雷达管理 - 边坡"
+                ],
+                "summary": "获取边坡信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "部门",
+                        "name": "deptId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.RadarSideInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/radar_info/get_dev_info": {
             "post": {
                 "security": [
@@ -2271,6 +2315,51 @@ const docTemplateadmin = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/models.Radar"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/radar_info/updateSideInfo": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新边坡信息",
+                "tags": [
+                    "雷达管理 - 边坡"
+                ],
+                "summary": "更新边坡信息",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateSideInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -5983,6 +6072,30 @@ const docTemplateadmin = `{
                 }
             }
         },
+        "dto.UpdateSideInfoReq": {
+            "type": "object",
+            "required": [
+                "deptId"
+            ],
+            "properties": {
+                "SideName": {
+                    "description": "隐患点名称",
+                    "type": "string"
+                },
+                "address": {
+                    "description": "地址",
+                    "type": "string"
+                },
+                "deptId": {
+                    "description": "DeptId",
+                    "type": "integer"
+                },
+                "sideType": {
+                    "description": "隐患点类型",
+                    "type": "string"
+                }
+            }
+        },
         "dto.UpdateStatusReq": {
             "type": "object",
             "properties": {
@@ -6442,7 +6555,7 @@ const docTemplateadmin = `{
                     "type": "string"
                 },
                 "processed": {
-                    "type": "boolean"
+                    "type": "integer"
                 },
                 "radarId": {
                     "description": "雷达Id",
@@ -6646,6 +6759,33 @@ const docTemplateadmin = `{
                 "RadarPointMTypeGlobal",
                 "RadarPointMTypeAlone"
             ]
+        },
+        "models.RadarSideInfo": {
+            "type": "object",
+            "properties": {
+                "SideName": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deptId": {
+                    "description": "机构ID",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "sideType": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
         },
         "mongodto.CommandDataDto": {
             "type": "object",

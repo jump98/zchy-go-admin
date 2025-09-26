@@ -1111,6 +1111,23 @@ definitions:
       updateBy:
         type: integer
     type: object
+  dto.UpdateSideInfoReq:
+    properties:
+      SideName:
+        description: 隐患点名称
+        type: string
+      address:
+        description: 地址
+        type: string
+      deptId:
+        description: DeptId
+        type: integer
+      sideType:
+        description: 隐患点类型
+        type: string
+    required:
+    - deptId
+    type: object
   dto.UpdateStatusReq:
     properties:
       createBy:
@@ -1424,7 +1441,7 @@ definitions:
       processRemark:
         type: string
       processed:
-        type: boolean
+        type: integer
       radarId:
         description: 雷达Id
         type: integer
@@ -1561,6 +1578,24 @@ definitions:
     x-enum-varnames:
     - RadarPointMTypeGlobal
     - RadarPointMTypeAlone
+  models.RadarSideInfo:
+    properties:
+      SideName:
+        type: string
+      address:
+        type: string
+      createdAt:
+        type: string
+      deptId:
+        description: 机构ID
+        type: integer
+      id:
+        type: integer
+      sideType:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   mongodto.CommandDataDto:
     properties:
       command_code:
@@ -3323,6 +3358,31 @@ paths:
       summary: 根据部门ID获取雷达列表
       tags:
       - 雷达管理
+  /api/v1/radar_info/getSideInfo:
+    get:
+      description: 获取边坡信息
+      parameters:
+      - description: 部门
+        format: int64
+        in: query
+        name: deptId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RadarSideInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取边坡信息
+      tags:
+      - 雷达管理 - 边坡
   /api/v1/radar_info/radarimage/{id}:
     get:
       description: 获取雷达影像
@@ -3346,6 +3406,31 @@ paths:
       summary: 获取雷达影像
       tags:
       - 雷达管理
+  /api/v1/radar_info/updateSideInfo:
+    post:
+      description: 更新边坡信息
+      parameters:
+      - description: 请求参数
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSideInfoReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - Bearer: []
+      summary: 更新边坡信息
+      tags:
+      - 雷达管理 - 边坡
   /api/v1/radar_point:
     delete:
       description: 删除监测点管理

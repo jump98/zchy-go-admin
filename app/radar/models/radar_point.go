@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"go-admin/common/models"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -34,7 +35,8 @@ type RadarPoint struct {
 	AlarmLevel    AlarmLevel      `json:"alarmLevel"  gorm:"type:tinyint; DEFAULT:0;  comment:预警状态"` //告警等级
 	MTypeId       RadarPointMType `json:"mTypeId"     gorm:"type:tinyint; DEFAULT:0;  comment:门限类型"` //0=全局门限 1=独立门限
 	LastAlarmTime sql.NullTime    `json:"last_time"   gorm:"comment:最近一次检测预警的时间"`                    //最近一次检测预警的时间
-	models.ModelTime
+	CreatedAt     time.Time       `json:"createdAt" gorm:"comment:创建时间"`
+	UpdatedAt     time.Time       `json:"updatedAt" gorm:"comment:最后更新时间"`
 	models.ControlBy
 }
 

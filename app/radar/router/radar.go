@@ -27,12 +27,11 @@ func registerRadarRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewa
 		r.DELETE("", api.Delete)
 		r.POST("/getRadarListByDeptId", api.GetRadarListByDeptId)
 
-		//TODO:需要删除
-		//r.POST("/get_alarms", api.GetAlarms)
-		//r.POST("/get_alarmsofids", api.GetAlarmsOfIds)
 		r.POST("/get_dev_info", api.GetDevInfo)
 		r.POST("/get_state_info", api.GetStateInfo)
-		//r.POST("/get_alarms_before", api.GetAlarmsBefore)
+
+		r.GET("/getSideInfo", api.GetSideInfo)        //获取边坡信息
+		r.POST("/updateSideInfo", api.UpdateSideInfo) //修改边坡信息
 	}
 }
 
